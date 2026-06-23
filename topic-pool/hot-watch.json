@@ -1,0 +1,93 @@
+{
+  "_meta": {
+    "updated": "2026-06-23",
+    "strategy": "对标发现 → 热点信号 → 72h内产出 → 与常青选题形成互链",
+    "scan_schedule": {
+      "full_scan": "daily 09:00",
+      "pillar_scan": "every 4 hours (轮流)",
+      "cross_platform": "every 2 hours",
+      "consumption": "scan之后立即"
+    }
+  },
+  "active_signals": [
+    {
+      "id": "sig-001",
+      "event": "31位人大代表联名提交《新就业形态劳动者权益保障法》议案",
+      "date": "2026-03",
+      "status": "covered",
+      "article": "7小时工作制 + 数字泰勒主义 + 新就业形态耗材"
+    },
+    {
+      "id": "sig-002",
+      "event": "四部门印发《平台劳动规则和算法协商指引（试行）》",
+      "date": "2026-03-20",
+      "status": "covered",
+      "article": "数字泰勒主义"
+    },
+    {
+      "id": "sig-003",
+      "event": "ILO通过全球首部平台工作公约(Convention 193)",
+      "date": "2026-06-12",
+      "status": "covered",
+      "article": "数字泰勒主义 + 新就业形态耗材"
+    }
+  ],
+  "watch_list": [
+    {
+      "id": "watch-001",
+      "keyword": "新就业形态劳动者权益保障法 立法进展",
+      "pillar": "劳动与阶级",
+      "expected_event": "草案公布 / 征求意见 / 表决通过",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-002",
+      "keyword": "最低工资标准 调整 2026",
+      "pillar": "劳动与阶级",
+      "expected_event": "各省年度调整公告",
+      "frequency": "monthly"
+    },
+    {
+      "id": "watch-003",
+      "keyword": "平台劳动者 劳动关系 认定 判例",
+      "pillar": "劳动与阶级",
+      "expected_event": "最高法指导性案例 / 地方首例判决",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-004",
+      "keyword": "高考改革 双减 职业教育法",
+      "pillar": "教育与阶层",
+      "expected_event": "政策发布 / 实施效果评估",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-005",
+      "keyword": "人脸识别 数据安全 个人信息保护法 执法",
+      "pillar": "技术与权力",
+      "expected_event": "处罚案例 / 新规 / 诉讼",
+      "frequency": "monthly"
+    },
+    {
+      "id": "watch-006",
+      "keyword": "AI数据标注 产业 工人条件",
+      "pillar": "技术与权力",
+      "expected_event": "调查报告 / 媒体报道 / 劳资纠纷",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-007",
+      "keyword": "楼市政策 房贷利率 保障房",
+      "pillar": "城市与生存",
+      "expected_event": "政策调整 / 市场波动",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-008",
+      "keyword": "抑郁症 青少年心理 心理健康教育",
+      "pillar": "心理与规训",
+      "expected_event": "政策 / 流行病学报告 / 重大事件",
+      "frequency": "monthly"
+    }
+  ]
+}

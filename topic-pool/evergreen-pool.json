@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "updated": "2026-06-23",
+    "total": 12,
+    "selection_formula": "选题优先级 = 受众痛点 × 信息差程度 × 人格匹配度 × 时效窗口"
+  },
+  "topics": [
+    {
+      "id": "hot-001",
+      "title": "AI数据标注工人：训练人工智能的人，自己被当成了机器",
+      "pillar": "技术与权力",
+      "priority_score": 8.5,
+      "urgency": "热点+常青",
+      "angle": "河南/贵州AI标注产业园的真实劳动条件——时薪、工伤、心理负担",
+      "status": "ready"
+    },
+    {
+      "id": "hot-002",
+      "title": "拼多多上的中国：消费降级不是生活方式，是数学",
+      "pillar": "城市与生存",
+      "priority_score": 8.0,
+      "urgency": "常青",
+      "angle": "从临期食品到二手经济——消费降级的阶级分析",
+      "status": "ready"
+    },
+    {
+      "id": "evg-001",
+      "title": "最低工资的数学：2080元是怎么算出来的",
+      "pillar": "劳动与阶级",
+      "priority_score": 9.0,
+      "urgency": "常青·基石",
+      "angle": "追踪最低工资制定机制——谁在参与、谁被排除、数字背后的博弈",
+      "status": "ready"
+    },
+    {
+      "id": "evg-002",
+      "title": "高考：一千万人的分类机",
+      "pillar": "教育与阶层",
+      "priority_score": 9.5,
+      "urgency": "常青·基石",
+      "angle": "高考作为阶层分流器的系统分析——它到底在筛选什么",
+      "status": "ready"
+    },
+    {
+      "id": "evg-003",
+      "title": "你的脸值多少钱——中国人脸识别的商业链条",
+      "pillar": "技术与权力",
+      "priority_score": 8.5,
+      "urgency": "常青",
+      "angle": "从小区门禁到支付宝刷脸支付到公安天网——你的生物数据在谁手里",
+      "status": "ready"
+    },
+    {
+      "id": "evg-004",
+      "title": "社保：年轻人交的钱，养了谁",
+      "pillar": "劳动与阶级",
+      "priority_score": 9.0,
+      "urgency": "常青·基石",
+      "angle": "养老金代际转移的数学 + 灵活就业者被排除在外的困境",
+      "status": "ready"
+    },
+    {
+      "id": "evg-005",
+      "title": "房租：每个月的第一笔税",
+      "pillar": "城市与生存",
+      "priority_score": 9.0,
+      "urgency": "常青·基石",
+      "angle": "租金收入比、房东-租客权力不对等、租房市场的结构性不公",
+      "status": "ready"
+    },
+    {
+      "id": "evg-006",
+      "title": "ADHD：一个美国病怎么变成了中国病",
+      "pillar": "心理与规训",
+      "priority_score": 8.0,
+      "urgency": "常青",
+      "angle": "ADHD在中国的诊断爆炸——药企、学校、家长的共谋",
+      "status": "ready"
+    },
+    {
+      "id": "evg-007",
+      "title": "985/211：两个数字如何定义了三代人的命运",
+      "pillar": "教育与阶层",
+      "priority_score": 9.0,
+      "urgency": "常青·基石",
+      "angle": "学历歧视的经济学——HR筛选算法、工资溢价、社会流动的幻觉",
+      "status": "ready"
+    },
+    {
+      "id": "evg-008",
+      "title": "抑郁症的药物：谁在卖快乐给你",
+      "pillar": "心理与规训",
+      "priority_score": 8.0,
+      "urgency": "常青",
+      "angle": "SSRI药物市场、药企与诊断指南扩展的关系、中国抗抑郁药150亿市场",
+      "status": "ready"
+    },
+    {
+      "id": "evg-009",
+      "title": "买房：六个钱包和一个三十年的约定",
+      "pillar": "城市与生存",
+      "priority_score": 9.5,
+      "urgency": "常青·基石",
+      "angle": "首付、房贷利率、六个钱包的阶级分析——谁买得起，谁永远买不起",
+      "status": "ready"
+    },
+    {
+      "id": "evg-010",
+      "title": "职校生：被筛选掉的另一半人",
+      "pillar": "教育与阶层",
+      "priority_score": 8.5,
+      "urgency": "常青",
+      "angle": "中考分流后的一半人——职业教育污名化 vs 制造业2000万技术工人缺口",
+      "status": "ready"
+    }
+  ]
+}
