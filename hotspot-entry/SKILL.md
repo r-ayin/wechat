@@ -436,71 +436,28 @@ wechat/output/
 
 ---
 
-## 🔴 管线强制执行规则（v2.3 硬编码——不可跳过）
+## 🔴 管线强制执行（v2.3 — 脚本门禁）
 
-> 以下规则是固件级约束。主 LLM 只做调度和核查，不参与内容生产。
-> 每个阶段产出 checkpoint 文件，下一阶段**必须验证 checkpoint 存在且非空**才能启动。
-> 违反视为流程违规。
+> 每个阶段必须通过 `scripts/pipeline-gate.sh` 门禁。
+> 门禁是 shell 脚本——子 Agent 无法跳过，主 LLM 必须调用。
+> 
+> ```bash
+> bash scripts/pipeline-gate.sh check {phase}  # 进阶段前验证前置checkpoint
+> bash scripts/pipeline-gate.sh verify {phase}  # 出阶段后验证产出质量
+> bash scripts/pipeline-gate.sh status           # 查看管线状态
+> ```
+> 
+> 门禁不通过 = 阻断执行。这不是建议，是 exit 2/exit 3 硬阻断。
 
-### 阶段-子Agent-Checkpoint 映射
+### 竞品搜索规则
 
-| # | 阶段 | 执行者 | 必须产出 | 下一阶段验证 |
-|---|------|--------|---------|------------|
-| 0 | 竞品五维风格蒸馏 | 子 Agent (opus) | `output/research/{topic}_competitor-style_{date}.md` | Phase ① 启动前必须验证 |
-| 0 | 对标账号数据库查询 | 主 LLM 读 `benchmark/accounts_database.md` | 对标参考写入选题 brief | Phase ① |
-| ① | 热点选题 | 主 LLM (hot-scanner + WebSearch) | `output/research/{topic}_brief_{date}.md` | Phase ② |
-| ② | godtier 13层深度分析 | 子 Agent (opus) | `output/research/{topic}_analysis_{date}.md` | Phase ③ |
-| ③ | persona 人格化重写 | 子 Agent (opus) | `output/wechat_articles/{category}/{title}_{date}.md` | Phase ③.5 |
-| ③.5 | QA 四步门禁 | 子 Agent (opus) | `output/research/{topic}_QA_{date}.md` | Phase ④ |
-| ④ | 输出确认 | 主 LLM 核查 | 全部 checkpoint 验证通过 → 管线完成 | — |
+搜公众号文章**必须用搜狗微信搜索**，不用 Google/Bing/WebSearch：
 
-### 主 LLM 核查清单（每个子 Agent 完成后强制执行）
+```
+https://weixin.sogou.com/weixin?type=2&query={关键词}
+```
 
-子 Agent 返回后，主 LLM 立即核查以下内容，**不通过则驳回重跑**：
-
-#### Phase 0 核查（竞品蒸馏）
-- [ ] `competitor-style_{date}.md` 文件存在且 > 2KB
-- [ ] 覆盖 ≥ 3 篇竞品文章
-- [ ] 五维每维都有具体分析（不能是"略"或"同上"）
-- [ ] 横向对比表完整
-- [ ] 输出了「我们的风格策略」
-
-#### Phase ② 核查（godtier 分析）
-- [ ] `analysis_{date}.md` 文件存在且 > 3KB
-- [ ] 13 层每层都有内容
-- [ ] 每层至少锚定 ≥ 1 个具体数据
-- [ ] 核心洞察总结 ≥ 5 条
-
-#### Phase ③ 核查（persona 重写）
-- [ ] 文章文件存在且 > 10KB（约 4000+ 字）
-- [ ] 元数据头包含 `SOUL+STYLE+PERSONA 全量注入`
-- [ ] 开头是场景化（具体人物+具体时刻），不是抽象概念
-- [ ] 结尾不给个体行动清单（检查是否出现"你只需要""只要我们还""取决于XX"等反模式）
-- [ ] 情感温度冷峻（检查感叹号密度 < 2个/段）
-- [ ] 无脏话粗口
-
-#### Phase ③.5 核查（QA）
-- [ ] `QA_{date}.md` 文件存在
-- [ ] FALSIFIED = 0（如果 >0，文章必须修复后重跑 QA）
-- [ ] 高风险 UNVERIFIABLE = 0
-- [ ] 逻辑一致性审查通过（无"结构问题→个体方案"矛盾）
-
-### 硬停止规则
-
-1. **上一阶段 checkpoint 不存在 → 禁止启动下一阶段**
-2. **主 LLM 核查不通过 → 驳回子 Agent 重跑（最多 3 次）**
-3. **3 次重跑仍不通过 → 标记选题为"管线失败·放弃"，记录原因到 decision-log**
-4. **禁止主 LLM 直接生产内容**——主 LLM 只做调度、核查、commit。任何超过 200 字的内容产出都是违规
-
-### 主 LLM 职责边界
-
-| ✅ 可以做 | 🚫 不可以做 |
-|----------|-----------|
-| 读文件、写 brief | 写文章正文 |
-| 启动子 Agent | 替代 godtier 做分析 |
-| 核查子 Agent 输出 | 替代 persona 做重写 |
-| git commit/push | 替代 QA 做验证 |
-| 输出调度面板 | 跳过任何阶段 |
+Google/Bing 对 `mp.weixin.qq.com` 收录极差。搜狗是微信生态内搜索引擎，直接索引公众号内容。
 
 ```
 发布微信长文 → 阅读量/在看/分享/留言

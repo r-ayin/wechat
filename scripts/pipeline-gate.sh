@@ -1,0 +1,176 @@
+#!/bin/bash
+# pipeline-gate.sh — 微信管线强制执行门禁 v1.0
+# 用法: bash pipeline-gate.sh {check|verify|status} {phase} {topic} {date}
+# 每个阶段启动前必须先过门禁。不过门禁 = 管线拒绝执行。
+# 这不是建议，是硬编码阻断。
+
+set -euo pipefail
+
+TOPIC="${3:-}"
+DATE="${4:-$(date +%Y-%m-%d)}"
+RESEARCH_DIR="output/research"
+ARTICLE_DIR="output/wechat_articles"
+WECHAT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# === checkpoint 文件解析（用 find 匹配，容忍日期和标题差异） ===
+resolve_checkpoint() {
+    local key="$1"
+    local found=""
+
+    case "$key" in
+        "0-competitor")
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_competitor-style_*.md" 2>/dev/null | head -1)
+            ;;
+        "0-brief")
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_brief_*.md" 2>/dev/null | head -1)
+            ;;
+        "2-analysis")
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_analysis_*.md" 2>/dev/null | head -1)
+            ;;
+        "3-article")
+            found=$(find "$WECHAT_ROOT/$ARTICLE_DIR" -maxdepth 3 -name "*.md" -path "*20[0-9][0-9]*" 2>/dev/null | head -1)
+            ;;
+        "3.5-qa")
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_QA_*.md" 2>/dev/null | head -1)
+            ;;
+    esac
+    echo "$found"
+}
+
+# === 门禁函数 ===
+
+gate_check() {
+    local phase="$1"
+    local missing=()
+    local f=""
+
+    case "$phase" in
+        "0") ;; # 无前置
+        "1")
+            f=$(resolve_checkpoint "0-competitor")
+            [ -n "$f" ] && [ -s "$f" ] || missing+=("competitor-style (竞品五维蒸馏)")
+            ;;
+        "2")
+            f=$(resolve_checkpoint "0-brief")
+            [ -n "$f" ] && [ -s "$f" ] || missing+=("brief (研究简报)")
+            ;;
+        "3")
+            f=$(resolve_checkpoint "2-analysis")
+            [ -n "$f" ] && [ -s "$f" ] || missing+=("analysis (godtier 13层分析)")
+            ;;
+        "3.5")
+            f=$(resolve_checkpoint "3-article")
+            [ -n "$f" ] && [ -s "$f" ] || missing+=("persona文章")
+            ;;
+        "4")
+            f=$(resolve_checkpoint "3.5-qa")
+            [ -n "$f" ] && [ -s "$f" ] || missing+=("QA报告")
+            ;;
+        *)
+            echo "❌ 未知阶段: $phase (有效: 0 1 2 3 3.5 4)"
+            exit 1
+            ;;
+    esac
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        echo "🚫 门禁阻断 — 前置 checkpoint 缺失:"
+        for m in "${missing[@]}"; do echo "   ❌ $m"; done
+        echo "   这是硬阻断——不可跳过。请先完成前一阶段。"
+        exit 2
+    fi
+    echo "✅ 门禁通过"
+}
+
+gate_verify() {
+    local phase="$1"
+    local f=""
+
+    case "$phase" in
+        "0")
+            f=$(resolve_checkpoint "0-competitor")
+            [ -z "$f" ] && { echo "❌ competitor-style 文件缺失"; exit 3; }
+            local size=$(wc -c < "$f")
+            [ "$size" -lt 2000 ] && { echo "❌ < 2KB ($size bytes)"; exit 3; }
+            grep -qE "维度1|维度2|维度3|维度4|维度5|五维" "$f" || { echo "❌ 五维不完整"; exit 3; }
+            echo "✅ Phase 0 验证通过 (${size} bytes)"
+            ;;
+        "2")
+            f=$(resolve_checkpoint "2-analysis")
+            [ -z "$f" ] && { echo "❌ analysis 文件缺失"; exit 3; }
+            local size=$(wc -c < "$f")
+            [ "$size" -lt 3000 ] && { echo "❌ < 3KB ($size bytes)"; exit 3; }
+            local layers=$(grep -c "^## L" "$f" || true)
+            [ "$layers" -lt 10 ] && { echo "❌ 仅${layers}层(需≥10)"; exit 3; }
+            echo "✅ Phase ② 验证通过 (${size} bytes, ${layers}层)"
+            ;;
+        "3")
+            f=$(resolve_checkpoint "3-article")
+            [ -z "$f" ] && { echo "❌ 文章文件缺失"; exit 3; }
+            local size=$(wc -c < "$f")
+            [ "$size" -lt 10000 ] && { echo "❌ < 10KB (可能不足4000字)"; exit 3; }
+            grep -q "SOUL+STYLE+PERSONA" "$f" || { echo "❌ 缺persona注入标记"; exit 3; }
+            grep -qE "你只需要|只要我们还" "$f" && echo "⚠️  检测到可能反模式结尾"
+            echo "✅ Phase ③ 验证通过 (${size} bytes)"
+            ;;
+        "3.5")
+            f=$(resolve_checkpoint "3.5-qa")
+            [ -z "$f" ] && { echo "❌ QA报告缺失"; exit 3; }
+            [ "$(grep -c '修复后.*PASS\|FALSIFIED.*=.*0\|全部通过\|✅.*通过' "$f" || true)" -gt 0 ] 2>/dev/null || { echo "❌ QA未通过(有未修复FALSIFIED)"; exit 3; }
+            echo "✅ Phase ③.5 验证通过 (FALSIFIED=0)"
+            ;;
+        *)
+            echo "❌ 未知阶段: $phase"
+            exit 1
+            ;;
+    esac
+}
+
+gate_status() {
+    echo ""
+    echo "═══════════════════════════════════════════════"
+    echo "  微信管线状态"
+    echo "═══════════════════════════════════════════════"
+    echo ""
+    local keys=("0-competitor:Phase 0 竞品蒸馏" "0-brief:Phase ① 研究简报" "2-analysis:Phase ② godtier分析" "3-article:Phase ③ persona重写" "3.5-qa:Phase ③.5 QA门禁")
+    for entry in "${keys[@]}"; do
+        local key="${entry%%:*}"
+        local label="${entry##*:}"
+        f=$(resolve_checkpoint "$key")
+        if [ -n "$f" ] && [ -s "$f" ]; then
+            local size=$(wc -c < "$f" 2>/dev/null || echo 0)
+            echo "  ✅ $label ($(echo $size | tr -d ' ')B)"
+        else
+            echo "  ⬜ $label"
+        fi
+    done
+    echo ""
+}
+
+# === 主入口 ===
+
+case "${1:-}" in
+    "check")
+        gate_check "${2:-}"
+        ;;
+    "verify")
+        gate_verify "${2:-}"
+        ;;
+    "status")
+        gate_status
+        ;;
+    *)
+        echo "用法: pipeline-gate.sh {check|verify|status} {phase} {topic} {date}"
+        echo ""
+        echo "  check {phase}  — 检查前置 checkpoint，不通过则阻断"
+        echo "  verify {phase} — 验证当前阶段产出质量"
+        echo "  status         — 显示管线状态面板"
+        echo ""
+        echo "  阶段: 0(竞品) 1(选题) 2(godtier) 3(persona) 3.5(QA) 4(输出)"
+        echo ""
+        echo "  示例:"
+        echo "    bash pipeline-gate.sh check 2 gaokao-major-choice 2026-06-24"
+        echo "    bash pipeline-gate.sh verify 3 gaokao-major-choice 2026-06-24"
+        echo "    bash pipeline-gate.sh status"
+        exit 0
+        ;;
+esac
