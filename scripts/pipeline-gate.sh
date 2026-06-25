@@ -109,6 +109,10 @@ gate_verify() {
             local size=$(wc -c < "$f")
             [ "$size" -lt 10000 ] && { echo "❌ < 10KB (可能不足4000字)"; exit 3; }
             grep -q "SOUL+STYLE+PERSONA" "$f" || { echo "❌ 缺persona注入标记"; exit 3; }
+            grep -qE "摘要:" "$f" || { echo "❌ 缺摘要(公众号显示必需)"; exit 3; }
+            local title_len=$(head -1 "$f" | sed 's/^# //' | wc -m)
+            [ "$title_len" -lt 8 ] && { echo "❌ 标题过短(<8字)"; exit 3; }
+            [ "$title_len" -gt 35 ] && echo "⚠️  标题过长(>35字, 可能影响传播)"
             grep -qE "你只需要|只要我们还" "$f" && echo "⚠️  检测到可能反模式结尾"
             echo "✅ Phase ③ 验证通过 (${size} bytes)"
             ;;
