@@ -12,6 +12,9 @@ RESEARCH_DIR="output/research"
 ARTICLE_DIR="output/wechat_articles"
 WECHAT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+# 确保输出目录存在
+mkdir -p "$WECHAT_ROOT/$RESEARCH_DIR" "$WECHAT_ROOT/$ARTICLE_DIR/hot" "$WECHAT_ROOT/$ARTICLE_DIR/evergreen"
+
 # === checkpoint 文件解析（用 find 匹配，容忍日期和标题差异） ===
 resolve_checkpoint() {
     local key="$1"
@@ -19,19 +22,24 @@ resolve_checkpoint() {
 
     case "$key" in
         "0-competitor")
-            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_competitor-style_*.md" 2>/dev/null | head -1)
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "${TOPIC}_competitor-style_*.md" 2>/dev/null | sort -r | head -1)
+            [ -z "$found" ] && found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_competitor-style_*.md" 2>/dev/null | head -1)
             ;;
-        "0-brief")
-            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_brief_*.md" 2>/dev/null | head -1)
+        "1-brief")
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "${TOPIC}_brief_*.md" 2>/dev/null | sort -r | head -1)
+            [ -z "$found" ] && found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_brief_*.md" 2>/dev/null | head -1)
             ;;
         "2-analysis")
-            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_analysis_*.md" 2>/dev/null | head -1)
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "${TOPIC}_analysis_*.md" 2>/dev/null | sort -r | head -1)
+            [ -z "$found" ] && found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_analysis_*.md" 2>/dev/null | head -1)
             ;;
         "3-article")
-            found=$(find "$WECHAT_ROOT/$ARTICLE_DIR" -maxdepth 3 -name "*.md" -path "*20[0-9][0-9]*" 2>/dev/null | head -1)
+            found=$(find "$WECHAT_ROOT/$ARTICLE_DIR" -maxdepth 3 -name "${TOPIC}_*.md" 2>/dev/null | sort -r | head -1)
+            [ -z "$found" ] && found=$(find "$WECHAT_ROOT/$ARTICLE_DIR" -maxdepth 3 -name "*.md" -path "*20[0-9][0-9]*" 2>/dev/null | head -1)
             ;;
         "3.5-qa")
-            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_QA_*.md" 2>/dev/null | head -1)
+            found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "${TOPIC}_QA_*.md" 2>/dev/null | sort -r | head -1)
+            [ -z "$found" ] && found=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "*_QA_*.md" 2>/dev/null | head -1)
             ;;
     esac
     echo "$found"
@@ -51,7 +59,7 @@ gate_check() {
             [ -n "$f" ] && [ -s "$f" ] || missing+=("competitor-style (竞品五维蒸馏)")
             ;;
         "2")
-            f=$(resolve_checkpoint "0-brief")
+            f=$(resolve_checkpoint "1-brief")
             [ -n "$f" ] && [ -s "$f" ] || missing+=("brief (研究简报)")
             ;;
         "3")
@@ -94,36 +102,46 @@ gate_verify() {
             grep -qE "维度1|维度2|维度3|维度4|维度5|五维" "$f" || { echo "❌ 五维不完整"; exit 3; }
             echo "✅ Phase 0 验证通过 (${size} bytes)"
             ;;
+        "1")
+            f=$(resolve_checkpoint "1-brief")
+            [ -z "$f" ] && { echo "❌ brief 文件缺失"; exit 3; }
+            local size=$(wc -c < "$f")
+            [ "$size" -lt 1500 ] && { echo "❌ < 1.5KB ($size bytes)"; exit 3; }
+            echo "✅ Phase 1 验证通过 (${size} bytes)"
+            ;;
         "2")
             f=$(resolve_checkpoint "2-analysis")
             [ -z "$f" ] && { echo "❌ analysis 文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
-            [ "$size" -lt 3000 ] && { echo "❌ < 3KB ($size bytes)"; exit 3; }
+            [ "$size" -lt 10000 ] && { echo "❌ < 10KB ($size bytes)"; exit 3; }
             local layers=$(grep -c "^## L" "$f" || true)
             [ "$layers" -lt 10 ] && { echo "❌ 仅${layers}层(需≥10)"; exit 3; }
-            echo "✅ Phase ② 验证通过 (${size} bytes, ${layers}层)"
+            echo "✅ Phase 2 验证通过 (${size} bytes, ${layers}层)"
             ;;
         "3")
             f=$(resolve_checkpoint "3-article")
             [ -z "$f" ] && { echo "❌ 文章文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
             [ "$size" -lt 10000 ] && { echo "❌ < 10KB (可能不足4000字)"; exit 3; }
-            grep -q "SOUL+STYLE+PERSONA" "$f" || { echo "❌ 缺persona注入标记"; exit 3; }
+            grep -q "SOUL+STYLE+PERSONA" "$f" || { echo "❌ 缺persona注入标记(metadata)；需在文章frontmatter中包含"; exit 3; }
             grep -qE "摘要:" "$f" || { echo "❌ 缺摘要(公众号显示必需)"; exit 3; }
             local title_len=$(head -1 "$f" | sed 's/^# //' | wc -m)
             [ "$title_len" -lt 8 ] && { echo "❌ 标题过短(<8字)"; exit 3; }
             [ "$title_len" -gt 35 ] && echo "⚠️  标题过长(>35字, 可能影响传播)"
             grep -qE "你只需要|只要我们还" "$f" && echo "⚠️  检测到可能反模式结尾"
-            echo "✅ Phase ③ 验证通过 (${size} bytes)"
+            echo "✅ Phase 3 验证通过 (${size} bytes)"
             ;;
         "3.5")
             f=$(resolve_checkpoint "3.5-qa")
             [ -z "$f" ] && { echo "❌ QA报告缺失"; exit 3; }
-            [ "$(grep -c '修复后.*PASS\|FALSIFIED.*=.*0\|全部通过\|✅.*通过' "$f" || true)" -gt 0 ] 2>/dev/null || { echo "❌ QA未通过(有未修复FALSIFIED)"; exit 3; }
-            echo "✅ Phase ③.5 验证通过 (FALSIFIED=0)"
+            [ "$(grep -cE 'FALSIFIED:\s*0\b' "$f" || true)" -gt 0 ] 2>/dev/null || { echo "❌ QA未通过(有未修复FALSIFIED)"; exit 3; }
+            echo "✅ Phase 3.5 验证通过 (FALSIFIED=0)"
+            ;;
+        "4")
+            echo "✅ Phase 4 验证通过 (git commit + push 需手动确认)"
             ;;
         *)
-            echo "❌ 未知阶段: $phase"
+            echo "❌ 未知阶段: $phase (有效: 0 1 2 3 3.5 4)"
             exit 1
             ;;
     esac
@@ -135,7 +153,7 @@ gate_status() {
     echo "  微信管线状态"
     echo "═══════════════════════════════════════════════"
     echo ""
-    local keys=("0-competitor:Phase 0 竞品蒸馏" "0-brief:Phase ① 研究简报" "2-analysis:Phase ② godtier分析" "3-article:Phase ③ persona重写" "3.5-qa:Phase ③.5 QA门禁")
+    local keys=("0-competitor:Phase 0 竞品蒸馏" "1-brief:Phase 1 研究简报" "2-analysis:Phase 2 godtier分析" "3-article:Phase 3 persona重写" "3.5-qa:Phase 3.5 QA门禁")
     for entry in "${keys[@]}"; do
         local key="${entry%%:*}"
         local label="${entry##*:}"

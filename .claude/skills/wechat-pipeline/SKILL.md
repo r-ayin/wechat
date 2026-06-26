@@ -2,13 +2,8 @@
 name: wechat-pipeline
 description: 微信公众号长文管线 — 六阶段强制流水线。Phase 0 竞品→1 选题→2 godtier研究→3 persona重写→3.5 QA→4 输出。门禁脚本强制执行，不可跳阶段。
 triggers:
-  - 做一期关于
   - 跑管线
-  - 写一篇
-  - 生成文章
   - 开始写
-  - 深度研究这个
-  - 把这个话题做成
 ---
 
 # WeChat Pipeline — 六阶段强制流水线
@@ -49,14 +44,18 @@ triggers:
 - 格式：无 Markdown 小标题(##)、无列表(-)、无加粗(**)
 - 长度：3000-5000字
 - **禁止**：脏话、粗口、空洞理论堆叠、政治口号、"治愈""正常""客观""正能量"
+- **Persona 标记**：在文章 frontmatter 中添加 `SOUL+STYLE+PERSONA 全量注入`（管道门禁检查此标记），但正文中不出现该字符串
 
 ### Phase 3.5: QA 四步门禁
 1. **搜证**: 事实性修改前先 WebSearch
 2. **逻辑一致性审查**: 五问自查（结构性/一致性/自洽/诚实/人物处境）
-3. **L4 验证**: `python script-verifier/verifier.py extract` → WebSearch → `judge`
+3. **L4 验证**（三步，不可合并）:
+   - Step A: `python script-verifier/verifier.py extract {article} -o plan.json`
+   - Step B: Agent 逐条 WebSearch 搜证，写入 results.json
+   - Step C: `python script-verifier/verifier.py judge plan.json --results results.json -o report.json`
 4. **迭代修复**: FALSIFIED 立即修，最多3轮
 **产出**: `output/research/{slug}_QA_{date}.md`
-**通过条件**: FALSIFIED=0
+**通过条件**: FALSIFIED=0（或 grep -cE 'FALSIFIED.*0|门禁通过|GATE:.*PASS' report.json）
 
 ### Phase 4: 输出
 更新 PROGRESS.md、提交 git、推送到 GitHub

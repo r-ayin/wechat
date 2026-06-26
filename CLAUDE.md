@@ -45,11 +45,16 @@
    - FALSIFIED=0 才算通过
    - 最多 3 轮迭代修复
 
-7. **Persona 同步** — 每次写作前：
+7. **Persona 同步** — 每次写作前（如果在 x-tool 工作区中）：
    ```bash
-   python ../persona/adapters/wechat_bridge.py sync
+   # x-tool 工作区模式：从 persona 引擎同步最新文件
+   python ../persona/adapters/wechat_bridge.py sync 2>/dev/null || echo "跳过: 独立克隆模式，使用 wechat/persona/ 内置文件"
    ```
-   确保 persona 文件与引擎最新版一致
+   确保 persona 文件与引擎最新版一致。独立克隆时 wechat/persona/ 自包含。
+
+8. **Git 策略** — Phase 4 提交后自动 push：
+   - Remote: `origin` | Branch: `main`
+   - `git add output/wechat_articles/ && git commit -m "feat: ..." && git push origin main`
 
 ## 🔀 模式路由
 
