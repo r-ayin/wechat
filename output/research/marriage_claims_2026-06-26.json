@@ -1,0 +1,525 @@
+{
+  "script": "output/wechat_articles/hot/婚姻正在被拆解_2026-06-26.md",
+  "script_name": "婚姻正在被拆解_2026-06-26.md",
+  "total_words": 3007,
+  "extracted_at": "2026-06-26T05:17:31.797397+00:00",
+  "claims": [
+    {
+      "id": "C-001",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "# 婚姻正在被拆解——不是人们抛弃了婚姻，是婚姻的每一个功能都找到了替代品\n\n> SOUL+STYLE+PERSONA 全量注入 | 情感温度 2/10 | 2026-06-26\n\n**摘要**：结婚登记十年近乎腰斩",
+      "position": 26,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-002",
+      "type": "DATA",
+      "text": "2.4亿",
+      "data_type": "quantity",
+      "context": "全量注入 | 情感温度 2/10 | 2026-06-26\n\n**摘要**：结婚登记十年近乎腰斩。2.4亿单身人口。一人户超四分之一。主流解释是\"经济压力太大结不起\"或者\"年轻人太自私不想负责\"。这两套说法都不对。婚姻的衰落不是因为人们不想结了——是因为婚姻曾经垄断",
+      "position": 109,
+      "has_source_in_text": false,
+      "is_precise": true,
+      "is_approximate": false,
+      "risk": "high",
+      "verification_hint": "搜索确认「2.4亿」的数据来源（精确数字无来源，高风险）"
+    },
+    {
+      "id": "C-003",
+      "type": "DATA",
+      "text": "一人",
+      "data_type": "quantity_cn",
+      "context": "感温度 2/10 | 2026-06-26\n\n**摘要**：结婚登记十年近乎腰斩。2.4亿单身人口。一人户超四分之一。主流解释是\"经济压力太大结不起\"或者\"年轻人太自私不想负责\"。这两套说法都不对。婚姻的衰落不是因为人们不想结了——是因为婚姻曾经垄断的每一项功能，",
+      "position": 118,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一人」的数据来源"
+    },
+    {
+      "id": "C-004",
+      "type": "DATA",
+      "text": "一家",
+      "data_type": "quantity_cn",
+      "context": "的\"去捆绑\"。焦虑的不是年轻人——是需要家庭来分担治理成本的国家。\n\n---\n\n林琳三十五岁，在深圳一家律所做合伙人。她有自己的房子，一只猫，每周三次普拉提。她有一个交往三年的男友，两个人周末住在一起，周一各回各家。\n\n\"我不是不结婚，\"她说。\"我是不知道结婚能给",
+      "position": 283,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一家」的数据来源"
+    },
+    {
+      "id": "C-005",
+      "type": "DATA",
+      "text": "两个",
+      "data_type": "quantity_cn",
+      "context": "琳三十五岁，在深圳一家律所做合伙人。她有自己的房子，一只猫，每周三次普拉提。她有一个交往三年的男友，两个人周末住在一起，周一各回各家。\n\n\"我不是不结婚，\"她说。\"我是不知道结婚能给我什么我现在没有的东西。\"\n\n她说这句话的时候很平静。不是愤怒，不是失望，是算过一",
+      "position": 324,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「两个」的数据来源"
+    },
+    {
+      "id": "C-006",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "不结婚的代价太大了。在计划经济时代，不结婚意味着分不到房、没有合法的性、老了没人管、甚至不被社会当成一个完整的成年人。单位分房看结婚证。户口迁移看结婚证。医院签字看结婚证。婚姻不是选择——是基础设施。你不走这条路，别的路全是断头路。\n\n我草。一个人一生中最私密的决",
+      "position": 514,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-007",
+      "type": "DATA",
+      "text": "占比50.76%",
+      "data_type": "percentage",
+      "context": "一个一个拆掉了。\n\n先说经济安全。女性大规模进入劳动市场是过去四十年中国最被低估的社会变革。高校女生占比50.76%，女性劳动参与率63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活得不错。林琳的收入是她男友的1.5倍。婚姻作为\"经济保障\"的功能，对她来",
+      "position": 679,
+      "has_source_in_text": false,
+      "is_precise": true,
+      "is_approximate": false,
+      "risk": "high",
+      "verification_hint": "搜索确认「占比50.76%」的数据来源（精确数字无来源，高风险）"
+    },
+    {
+      "id": "C-008",
+      "type": "DATA",
+      "text": "50.76%",
+      "data_type": "quantity",
+      "context": "一个拆掉了。\n\n先说经济安全。女性大规模进入劳动市场是过去四十年中国最被低估的社会变革。高校女生占比50.76%，女性劳动参与率63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活得不错。林琳的收入是她男友的1.5倍。婚姻作为\"经济保障\"的功能，对她来",
+      "position": 681,
+      "has_source_in_text": false,
+      "is_precise": true,
+      "is_approximate": false,
+      "risk": "high",
+      "verification_hint": "搜索确认「50.76%」的数据来源（精确数字无来源，高风险）"
+    },
+    {
+      "id": "C-009",
+      "type": "DATA",
+      "text": "63.7%",
+      "data_type": "quantity",
+      "context": "。女性大规模进入劳动市场是过去四十年中国最被低估的社会变革。高校女生占比50.76%，女性劳动参与率63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活得不错。林琳的收入是她男友的1.5倍。婚姻作为\"经济保障\"的功能，对她来说已经不成立了。不是她不需",
+      "position": 695,
+      "has_source_in_text": false,
+      "is_precise": true,
+      "is_approximate": false,
+      "risk": "high",
+      "verification_hint": "搜索确认「63.7%」的数据来源（精确数字无来源，高风险）"
+    },
+    {
+      "id": "C-010",
+      "type": "DATA",
+      "text": "1.5倍",
+      "data_type": "quantity",
+      "context": "63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活得不错。林琳的收入是她男友的1.5倍。婚姻作为\"经济保障\"的功能，对她来说已经不成立了。不是她不需要钱——是她自己能挣。\n\n再说性。婚前性行为在数据上早已是绝对多数。同居不再被警察查。dating",
+      "position": 745,
+      "has_source_in_text": true,
+      "is_precise": true,
+      "is_approximate": true,
+      "risk": "medium",
+      "verification_hint": "搜索确认「1.5倍」的数据来源"
+    },
+    {
+      "id": "C-011",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "绝对多数。同居不再被警察查。dating app让认识陌生人不需要介绍人。性从婚姻中被拆出来，变成了一个独立的市场。\n\n居住。全国租房人口超过2亿。长租公寓、单身公寓、共有产权房——住房不再绑定于\"家庭户\"这个单位。一个单身的人可以合法地住在自己租的房子里，不需要",
+      "position": 859,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": true,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-012",
+      "type": "DATA",
+      "text": "2亿",
+      "data_type": "quantity",
+      "context": "app让认识陌生人不需要介绍人。性从婚姻中被拆出来，变成了一个独立的市场。\n\n居住。全国租房人口超过2亿。长租公寓、单身公寓、共有产权房——住房不再绑定于\"家庭户\"这个单位。一个单身的人可以合法地住在自己租的房子里，不需要任何人的批准。\n\n生育。这是一块最难拆的零",
+      "position": 880,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「2亿」的数据来源"
+    },
+    {
+      "id": "C-013",
+      "type": "DATA",
+      "text": "一块",
+      "data_type": "quantity_cn",
+      "context": "定于\"家庭户\"这个单位。一个单身的人可以合法地住在自己租的房子里，不需要任何人的批准。\n\n生育。这是一块最难拆的零件——但裂缝已经出现了。吉林、广东、陕西已取消社会抚养费与婚姻状况的挂钩。辅助生殖技术正在让\"生育\"和\"婚姻\"变成两个可以独立操作的程序。林琳在三十五",
+      "position": 955,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一块」的数据来源"
+    },
+    {
+      "id": "C-014",
+      "type": "DATA",
+      "text": "两个",
+      "data_type": "quantity_cn",
+      "context": "经出现了。吉林、广东、陕西已取消社会抚养费与婚姻状况的挂钩。辅助生殖技术正在让\"生育\"和\"婚姻\"变成两个可以独立操作的程序。林琳在三十五岁这一年冻了卵。她说这是她花过最值的一笔钱。\"我不是不想要孩子。我只是不确定要不要为了孩子搭上一个我不想结的婚。\"\n\n养老。社保",
+      "position": 1019,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「两个」的数据来源"
+    },
+    {
+      "id": "C-015",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "更不一定要靠配偶。\n\n情感支持。朋友、搭子、心理咨询、宠物、短视频、AI伴侣。你可以说这些都不能替代一个真正的伴侣——你是对的。但它们替代了婚姻曾经垄断的\"唯一情感出口\"这个位置。过去的人结婚，不是因为婚姻能提供最好的情感支持——是因为不结婚的话，连找人说话都难。",
+      "position": 1238,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-016",
+      "type": "DATA",
+      "text": "两个",
+      "data_type": "quantity_cn",
+      "context": "一种失败。一个人的社会身份，不再由他的婚姻状态来定义。\n\n这么多功能被拆掉之后，婚姻还剩下什么？\n\n两个人共享一份财产、共同抚养一个孩子、在同一个地址接收快递。对一些人来说，这三样东西是值得的。对林琳来说，她发现财产她已经有了，孩子她可以自己生，快递她自己收。婚姻",
+      "position": 1441,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": true,
+      "risk": "medium",
+      "verification_hint": "搜索确认「两个」的数据来源"
+    },
+    {
+      "id": "C-017",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "对称的。林琳——经济独立、受过高等教育、生活在超一线城市——她确实从婚姻的功能外包中获得了退出权。但一个在县城工厂流水线上的三十五岁女性，住在父母家里，月薪四千，她的婚姻退路在哪里？一个在河南农村的四十岁男性，没有房子、没有彩礼钱、没有大学学历——他从这场\"解放\"",
+      "position": 1650,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-018",
+      "type": "DATA",
+      "text": "四千",
+      "data_type": "quantity_cn",
+      "context": "——她确实从婚姻的功能外包中获得了退出权。但一个在县城工厂流水线上的三十五岁女性，住在父母家里，月薪四千，她的婚姻退路在哪里？一个在河南农村的四十岁男性，没有房子、没有彩礼钱、没有大学学历——他从这场\"解放\"中得到了什么？\n\n女性的经济独立给了她们对婚姻说\"不\"的",
+      "position": 1678,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「四千」的数据来源"
+    },
+    {
+      "id": "C-019",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "元。家庭分担养老成本。家庭生产劳动力。家庭维持社会控制——有房子的人不会造反，有孩子的人不敢冒险。当一个社会从\"家庭人\"变成\"个体人\"，治理成本会飙升。\n\n资本也很焦虑。家庭是最稳定的消费单元。单身的人消费更分散，更难被预测，更难被收割。\n\n父母很焦虑。他们那一代",
+      "position": 2091,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-020",
+      "type": "DATA",
+      "text": "2.4亿",
+      "data_type": "quantity",
+      "context": "度上。当孩子说\"我不结婚\"，他们听到的不是一个选择，是他们整个人生的否定。\n\n但年轻人没有焦虑。\n\n2.4亿单身人口。一人户超四分之一。每三对结婚就有一对离婚。这些不是\"危机\"的数字——是一个新社会形态的早期信号。人们正在学习如何在家庭之外生活。这个过程笨拙、痛苦、充",
+      "position": 2253,
+      "has_source_in_text": false,
+      "is_precise": true,
+      "is_approximate": false,
+      "risk": "high",
+      "verification_hint": "搜索确认「2.4亿」的数据来源（精确数字无来源，高风险）"
+    },
+    {
+      "id": "C-021",
+      "type": "DATA",
+      "text": "一人",
+      "data_type": "quantity_cn",
+      "context": "不结婚\"，他们听到的不是一个选择，是他们整个人生的否定。\n\n但年轻人没有焦虑。\n\n2.4亿单身人口。一人户超四分之一。每三对结婚就有一对离婚。这些不是\"危机\"的数字——是一个新社会形态的早期信号。人们正在学习如何在家庭之外生活。这个过程笨拙、痛苦、充满不确定性，但",
+      "position": 2262,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一人」的数据来源"
+    },
+    {
+      "id": "C-022",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "年人的独居孤独——是真实的。但不要把过渡成本归咎于正在经历过渡的人。他们不是\"不负责\"——他们是在为一个还没有建好的社会形态当探路者。\n\n林琳今年冻了卵。她说她不排斥爱情。她说她可能在某一天还是会结婚——但不是因为\"必须结\"，是因为她在婚姻之外已经建好自己的生活，",
+      "position": 2471,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-023",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "app、辅助生殖技术、社保体系、宠物经济和\"单身不丢人\"这一整套现代社会装置一起拆的。你不可能把每一个零件都市场化，然后指望人们继续为那个已经不存在的功能捆綁包买单。\n\n这不是婚姻的终结。这是婚姻必须重新回答一个问题：当所有曾经只能通过婚姻获得的东西都有了替代品",
+      "position": 2807,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-024",
+      "type": "EVENT",
+      "text": "来源：库写作规则 | 学术研究",
+      "context": "+PERSONA 三件套注入 | 对标数据库写作规则 | 学术研究交叉验证*\n*2026-06-26 | 选题 hot-015 · 管线 Phase 0-4*",
+      "position": 2947,
+      "verification_hint": "搜索确认「库写作规则 | 学术研究」是否真实存在"
+    }
+  ],
+  "extraction_summary": {
+    "total": 24,
+    "by_type": {
+      "PERSON": 0,
+      "EVENT": 1,
+      "DATA": 40,
+      "QUOTE": 0
+    },
+    "high_risk_count": 5,
+    "pseudonym_count": 0,
+    "extracted_at": "2026-06-26T05:17:31.797397+00:00",
+    "script": "output/wechat_articles/hot/婚姻正在被拆解_2026-06-26.md"
+  },
+  "search_plan": {
+    "total_queries": 24,
+    "queries": [
+      {
+        "claim_id": "C-002",
+        "claim_type": "DATA",
+        "claim_text": "2.4亿",
+        "query": "2.4亿 全量注入 情感温度 2 10 2026 06 数据 统计 来源",
+        "priority": "high",
+        "context": "全量注入 | 情感温度 2/10 | 2026-06-26\n\n**摘要**：结婚登记十年近乎腰斩。2.4亿单身人口。一人户超四分之一。主流解释是\"经济压力太大结不起\"或者\"年轻人太自私不想负责\"。这两"
+      },
+      {
+        "claim_id": "C-007",
+        "claim_type": "DATA",
+        "claim_text": "占比50.76%",
+        "query": "占比50.76% 一个一个拆掉了 先说经济安全 女性大规模进入劳动市场是过去四十年中国最被低估的社会变革 高校女生占比50 76 女性劳动参与率63 数据 统计 来源",
+        "priority": "high",
+        "context": "一个一个拆掉了。\n\n先说经济安全。女性大规模进入劳动市场是过去四十年中国最被低估的社会变革。高校女生占比50.76%，女性劳动参与率63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而"
+      },
+      {
+        "claim_id": "C-008",
+        "claim_type": "DATA",
+        "claim_text": "50.76%",
+        "query": "50.76% 一个拆掉了 先说经济安全 女性大规模进入劳动市场是过去四十年中国最被低估的社会变革 高校女生占比50 76 女性劳动参与率63 数据 统计 来源",
+        "priority": "high",
+        "context": "一个拆掉了。\n\n先说经济安全。女性大规模进入劳动市场是过去四十年中国最被低估的社会变革。高校女生占比50.76%，女性劳动参与率63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活"
+      },
+      {
+        "claim_id": "C-009",
+        "claim_type": "DATA",
+        "claim_text": "63.7%",
+        "query": "63.7% 女性大规模进入劳动市场是过去四十年中国最被低估的社会变革 高校女生占比50 76 女性劳动参与率63 7 远超全球平均水平 数据 统计 来源",
+        "priority": "high",
+        "context": "。女性大规模进入劳动市场是过去四十年中国最被低估的社会变革。高校女生占比50.76%，女性劳动参与率63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活得不错。林琳的收入是她男友的"
+      },
+      {
+        "claim_id": "C-020",
+        "claim_type": "DATA",
+        "claim_text": "2.4亿",
+        "query": "2.4亿 度上 当孩子说 我不结婚 他们听到的不是一个选择 是他们整个人生的否定 但年轻人没有焦虑 数据 统计 来源",
+        "priority": "high",
+        "context": "度上。当孩子说\"我不结婚\"，他们听到的不是一个选择，是他们整个人生的否定。\n\n但年轻人没有焦虑。\n\n2.4亿单身人口。一人户超四分之一。每三对结婚就有一对离婚。这些不是\"危机\"的数字——是一个新社会形"
+      },
+      {
+        "claim_id": "C-001",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 婚姻正在被拆解 不是人们抛弃了婚姻 是婚姻的每功能都找到了替代品 SOUL STYLE PERSONA 数据 统计 来源",
+        "priority": "low",
+        "context": "# 婚姻正在被拆解——不是人们抛弃了婚姻，是婚姻的每一个功能都找到了替代品\n\n> SOUL+STYLE+PERSONA 全量注入 | 情感温度 2/10 | 2026-06-26\n\n**摘要**：结婚"
+      },
+      {
+        "claim_id": "C-003",
+        "claim_type": "DATA",
+        "claim_text": "一人",
+        "query": "一人 感温度 2 10 2026 06 26 数据 统计 来源",
+        "priority": "low",
+        "context": "感温度 2/10 | 2026-06-26\n\n**摘要**：结婚登记十年近乎腰斩。2.4亿单身人口。一人户超四分之一。主流解释是\"经济压力太大结不起\"或者\"年轻人太自私不想负责\"。这两套说法都不对。婚"
+      },
+      {
+        "claim_id": "C-004",
+        "claim_type": "DATA",
+        "claim_text": "一家",
+        "query": "一家 的 去捆绑 焦虑的不是年轻人 是需要家庭来分担治理成本的国家 林琳三十五岁 在深圳律所做合伙人 数据 统计 来源",
+        "priority": "low",
+        "context": "的\"去捆绑\"。焦虑的不是年轻人——是需要家庭来分担治理成本的国家。\n\n---\n\n林琳三十五岁，在深圳一家律所做合伙人。她有自己的房子，一只猫，每周三次普拉提。她有一个交往三年的男友，两个人周末住在一起"
+      },
+      {
+        "claim_id": "C-005",
+        "claim_type": "DATA",
+        "claim_text": "两个",
+        "query": "两个 琳三十五岁 在深圳一家律所做合伙人 她有自己的房子 一只猫 每周三次普拉提 她有一个交往三年的男友 数据 统计 来源",
+        "priority": "low",
+        "context": "琳三十五岁，在深圳一家律所做合伙人。她有自己的房子，一只猫，每周三次普拉提。她有一个交往三年的男友，两个人周末住在一起，周一各回各家。\n\n\"我不是不结婚，\"她说。\"我是不知道结婚能给我什么我现在没有的"
+      },
+      {
+        "claim_id": "C-006",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 不结婚的代价太大了 在计划经济时代 不结婚意味着分不到房 没有合法的性 老了没人管 甚至不被社会当成完整的成年人 数据 统计 来源",
+        "priority": "low",
+        "context": "不结婚的代价太大了。在计划经济时代，不结婚意味着分不到房、没有合法的性、老了没人管、甚至不被社会当成一个完整的成年人。单位分房看结婚证。户口迁移看结婚证。医院签字看结婚证。婚姻不是选择——是基础设施。"
+      },
+      {
+        "claim_id": "C-010",
+        "claim_type": "DATA",
+        "claim_text": "1.5倍",
+        "query": "1.5倍 63 7 远超全球平均水平 一个女人不需要丈夫的工资也能活 而且活得不错 林琳的收入是她男友的1 数据 统计 来源",
+        "priority": "low",
+        "context": "63.7%——远超全球平均水平。一个女人不需要丈夫的工资也能活——而且活得不错。林琳的收入是她男友的1.5倍。婚姻作为\"经济保障\"的功能，对她来说已经不成立了。不是她不需要钱——是她自己能挣。\n\n再说"
+      },
+      {
+        "claim_id": "C-011",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 绝对多数 同居不再被警察查 dating app让认识陌生人不需要介绍人 性从婚姻中被拆出来 变成了独立的市场 数据 统计 来源",
+        "priority": "low",
+        "context": "绝对多数。同居不再被警察查。dating app让认识陌生人不需要介绍人。性从婚姻中被拆出来，变成了一个独立的市场。\n\n居住。全国租房人口超过2亿。长租公寓、单身公寓、共有产权房——住房不再绑定于\"家"
+      },
+      {
+        "claim_id": "C-012",
+        "claim_type": "DATA",
+        "claim_text": "2亿",
+        "query": "2亿 app让认识陌生人不需要介绍人 性从婚姻中被拆出来 变成了一个独立的市场 居住 全国租房人口超过 长租公寓 数据 统计 来源",
+        "priority": "low",
+        "context": "app让认识陌生人不需要介绍人。性从婚姻中被拆出来，变成了一个独立的市场。\n\n居住。全国租房人口超过2亿。长租公寓、单身公寓、共有产权房——住房不再绑定于\"家庭户\"这个单位。一个单身的人可以合法地住在"
+      },
+      {
+        "claim_id": "C-013",
+        "claim_type": "DATA",
+        "claim_text": "一块",
+        "query": "一块 定于 家庭户 这个单位 一个单身的人可以合法地住在自己租的房子里 不需要任何人的批准 生育 数据 统计 来源",
+        "priority": "low",
+        "context": "定于\"家庭户\"这个单位。一个单身的人可以合法地住在自己租的房子里，不需要任何人的批准。\n\n生育。这是一块最难拆的零件——但裂缝已经出现了。吉林、广东、陕西已取消社会抚养费与婚姻状况的挂钩。辅助生殖技术"
+      },
+      {
+        "claim_id": "C-014",
+        "claim_type": "DATA",
+        "claim_text": "两个",
+        "query": "两个 经出现了 吉林 广东 陕西已取消社会抚养费与婚姻状况的挂钩 辅助生殖技术正在让 生育 数据 统计 来源",
+        "priority": "low",
+        "context": "经出现了。吉林、广东、陕西已取消社会抚养费与婚姻状况的挂钩。辅助生殖技术正在让\"生育\"和\"婚姻\"变成两个可以独立操作的程序。林琳在三十五岁这一年冻了卵。她说这是她花过最值的一笔钱。\"我不是不想要孩子。"
+      },
+      {
+        "claim_id": "C-015",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 更不一定要靠配偶 情感支持 朋友 搭子 心理咨询 宠物 数据 统计 来源",
+        "priority": "low",
+        "context": "更不一定要靠配偶。\n\n情感支持。朋友、搭子、心理咨询、宠物、短视频、AI伴侣。你可以说这些都不能替代一个真正的伴侣——你是对的。但它们替代了婚姻曾经垄断的\"唯一情感出口\"这个位置。过去的人结婚，不是因"
+      },
+      {
+        "claim_id": "C-016",
+        "claim_type": "DATA",
+        "claim_text": "两个",
+        "query": "两个 一种失败 一个人的社会身份 不再由他的婚姻状态来定义 这么多功能被拆掉之后 婚姻还剩下什么 人共享一份财产 数据 统计 来源",
+        "priority": "low",
+        "context": "一种失败。一个人的社会身份，不再由他的婚姻状态来定义。\n\n这么多功能被拆掉之后，婚姻还剩下什么？\n\n两个人共享一份财产、共同抚养一个孩子、在同一个地址接收快递。对一些人来说，这三样东西是值得的。对林琳"
+      },
+      {
+        "claim_id": "C-017",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 对称的 林琳 经济独立 受过高等教育 生活在超一线城市 她确实从婚姻的功能外包中获得了退出权 数据 统计 来源",
+        "priority": "low",
+        "context": "对称的。林琳——经济独立、受过高等教育、生活在超一线城市——她确实从婚姻的功能外包中获得了退出权。但一个在县城工厂流水线上的三十五岁女性，住在父母家里，月薪四千，她的婚姻退路在哪里？一个在河南农村的四"
+      },
+      {
+        "claim_id": "C-018",
+        "claim_type": "DATA",
+        "claim_text": "四千",
+        "query": "四千 她确实从婚姻的功能外包中获得了退出权 但一个在县城工厂流水线上的三十五岁女性 住在父母家里 月薪 她的婚姻退路在哪里 一个在河南农村的四十岁男性 数据 统计 来源",
+        "priority": "low",
+        "context": "——她确实从婚姻的功能外包中获得了退出权。但一个在县城工厂流水线上的三十五岁女性，住在父母家里，月薪四千，她的婚姻退路在哪里？一个在河南农村的四十岁男性，没有房子、没有彩礼钱、没有大学学历——他从这场"
+      },
+      {
+        "claim_id": "C-019",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 元 家庭分担养老成本 家庭生产劳动力 家庭维持社会控制 有房子的人不会造反 有孩子的人不敢冒险 数据 统计 来源",
+        "priority": "low",
+        "context": "元。家庭分担养老成本。家庭生产劳动力。家庭维持社会控制——有房子的人不会造反，有孩子的人不敢冒险。当一个社会从\"家庭人\"变成\"个体人\"，治理成本会飙升。\n\n资本也很焦虑。家庭是最稳定的消费单元。单身的"
+      },
+      {
+        "claim_id": "C-021",
+        "claim_type": "DATA",
+        "claim_text": "一人",
+        "query": "一人 不结婚 他们听到的不是一个选择 是他们整个人生的否定 但年轻人没有焦虑 2 4亿单身人口 数据 统计 来源",
+        "priority": "low",
+        "context": "不结婚\"，他们听到的不是一个选择，是他们整个人生的否定。\n\n但年轻人没有焦虑。\n\n2.4亿单身人口。一人户超四分之一。每三对结婚就有一对离婚。这些不是\"危机\"的数字——是一个新社会形态的早期信号。人们"
+      },
+      {
+        "claim_id": "C-022",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 年人的独居孤独 是真实的 但不要把过渡成本归咎于正在经历过渡的人 他们不是 不负责 他们是在为还没有建好的社会形态当探路者 数据 统计 来源",
+        "priority": "low",
+        "context": "年人的独居孤独——是真实的。但不要把过渡成本归咎于正在经历过渡的人。他们不是\"不负责\"——他们是在为一个还没有建好的社会形态当探路者。\n\n林琳今年冻了卵。她说她不排斥爱情。她说她可能在某一天还是会结婚"
+      },
+      {
+        "claim_id": "C-023",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 app 辅助生殖技术 社保体系 宠物经济和 单身不丢人 这一整套现代社会装置一起拆的 数据 统计 来源",
+        "priority": "low",
+        "context": "app、辅助生殖技术、社保体系、宠物经济和\"单身不丢人\"这一整套现代社会装置一起拆的。你不可能把每一个零件都市场化，然后指望人们继续为那个已经不存在的功能捆綁包买单。\n\n这不是婚姻的终结。这是婚姻必须"
+      },
+      {
+        "claim_id": "C-024",
+        "claim_type": "EVENT",
+        "claim_text": "来源：库写作规则 | 学术研究",
+        "query": "来源：库写作规则 | 学术研究",
+        "priority": "low",
+        "context": "+PERSONA 三件套注入 | 对标数据库写作规则 | 学术研究交叉验证*\n*2026-06-26 | 选题 hot-015 · 管线 Phase 0-4*"
+      }
+    ]
+  }
+}

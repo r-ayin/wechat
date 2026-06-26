@@ -1,0 +1,404 @@
+{
+  "script": "output/wechat_articles/hot/三个新词与习得性无助_2026-06-26.md",
+  "script_name": "三个新词与习得性无助_2026-06-26.md",
+  "total_words": 2517,
+  "extracted_at": "2026-06-26T05:20:14.624032+00:00",
+  "claims": [
+    {
+      "id": "C-001",
+      "type": "DATA",
+      "text": "三个",
+      "data_type": "quantity_cn",
+      "context": "# 全职儿女、老鼠人、烂尾娃——三个新词背后，是一代人的习得性无助\n\n> SOUL+STYLE+PERSONA 全量注入 | 情感温度 2/10 | 2026-06-26\n\n**摘要**：2025",
+      "position": 16,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「三个」的数据来源"
+    },
+    {
+      "id": "C-002",
+      "type": "DATA",
+      "text": "一家",
+      "data_type": "quantity_cn",
+      "context": "病因。\n\n---\n\n李然是\"全职儿女\"这个词还没有被发明的时候，就已经在做了。\n\n2024年她从上海一家互联网公司被裁掉。投了六个月简历，面了七家公司。第七家面试的HR问她：\"你能接受996吗？\"她说可以。HR又问：\"你今年29岁，有结婚计划吗？\"她说暂时没有。\"",
+      "position": 323,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一家」的数据来源"
+    },
+    {
+      "id": "C-003",
+      "type": "DATA",
+      "text": "六个",
+      "data_type": "quantity_cn",
+      "context": "\"全职儿女\"这个词还没有被发明的时候，就已经在做了。\n\n2024年她从上海一家互联网公司被裁掉。投了六个月简历，面了七家公司。第七家面试的HR问她：\"你能接受996吗？\"她说可以。HR又问：\"你今年29岁，有结婚计划吗？\"她说暂时没有。\"那生育计划呢？\"\n\n她没拿",
+      "position": 336,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「六个」的数据来源"
+    },
+    {
+      "id": "C-004",
+      "type": "DATA",
+      "text": "七家",
+      "data_type": "quantity_cn",
+      "context": "词还没有被发明的时候，就已经在做了。\n\n2024年她从上海一家互联网公司被裁掉。投了六个月简历，面了七家公司。第七家面试的HR问她：\"你能接受996吗？\"她说可以。HR又问：\"你今年29岁，有结婚计划吗？\"她说暂时没有。\"那生育计划呢？\"\n\n她没拿到那份工作。",
+      "position": 344,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「七家」的数据来源"
+    },
+    {
+      "id": "C-005",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "有回音。\"不是我不想工作，\"她说。\"是工作不要我。那你让我怎么办？\"\n\n她这句话不是在问我。她是在问一个不会回答的系统。\n\n\"全职儿女\"这个词被造出来的时候，网上吵得很厉害。有人说这是\"新型啃老\"——对父母不孝。有人说这是\"制度性失业\"——社会欠他们一份工作。两边",
+      "position": 610,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-006",
+      "type": "DATA",
+      "text": "两千",
+      "data_type": "quantity_cn",
+      "context": "脆弱\"。是环境教会了它一个精确的、理性的结论：你的行动没有用。\n\n现在把笼子换成招聘市场。把电击换成两千份简历没有回音。换成\"你29岁有结婚计划吗\"。换成985硕士月薪六千。换成\"你的第一学历不是一本\"。\n\n狗不跑了。然后我们骂狗：你为什么不跑？\n\n老鼠人。\n\n这",
+      "position": 937,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「两千」的数据来源"
+    },
+    {
+      "id": "C-007",
+      "type": "DATA",
+      "text": "六千",
+      "data_type": "quantity_cn",
+      "context": "在把笼子换成招聘市场。把电击换成两千份简历没有回音。换成\"你29岁有结婚计划吗\"。换成985硕士月薪六千。换成\"你的第一学历不是一本\"。\n\n狗不跑了。然后我们骂狗：你为什么不跑？\n\n老鼠人。\n\n这是第二个词。它指的是那些低社交、低欲望、宅在家里不出门的年轻人。这个",
+      "position": 971,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「六千」的数据来源"
+    },
+    {
+      "id": "C-008",
+      "type": "DATA",
+      "text": "二个",
+      "data_type": "quantity_cn",
+      "context": "六千。换成\"你的第一学历不是一本\"。\n\n狗不跑了。然后我们骂狗：你为什么不跑？\n\n老鼠人。\n\n这是第二个词。它指的是那些低社交、低欲望、宅在家里不出门的年轻人。这个词粗鲁、刻薄、带羞辱性。但造出它的人——通常就是被它描述的人——用这个词的时候，往往有一种奇怪的自我",
+      "position": 1021,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「二个」的数据来源"
+    },
+    {
+      "id": "C-009",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "描述的人——用这个词的时候，往往有一种奇怪的自我嘲讽的轻松。\n\n\"我是老鼠人，所以不用管我了。\"\n\n一个在网上自称\"老鼠人\"的男生告诉我，他大学毕业两年，现在在一家便利店做夜班理货。晚上十点到早上六点。白天睡觉。周末不出门。没有朋友。不谈恋爱。不看电影。不打游戏—",
+      "position": 1129,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-010",
+      "type": "DATA",
+      "text": "一家",
+      "data_type": "quantity_cn",
+      "context": "\"我是老鼠人，所以不用管我了。\"\n\n一个在网上自称\"老鼠人\"的男生告诉我，他大学毕业两年，现在在一家便利店做夜班理货。晚上十点到早上六点。白天睡觉。周末不出门。没有朋友。不谈恋爱。不看电影。不打游戏——\"打游戏都累。\"\n\n我问他：你是从什么时候开始觉得什么都不",
+      "position": 1159,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一家」的数据来源"
+    },
+    {
+      "id": "C-011",
+      "type": "DATA",
+      "text": "三个",
+      "data_type": "quantity_cn",
+      "context": "家要有心理准备。台下有人问:'那我们该怎么办？'老师说:'降低期望。'\"\n\n\"降低期望。\"他说，把这三个字重复了一遍，像在嚼一个嚼了很久还没有味道的口香糖。\n\n\"我听了四年'努力就有回报'。毕业那年听到的第一句实话是'降低期望'。那你之前四年说的话是什么意思？\"",
+      "position": 1345,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「三个」的数据来源"
+    },
+    {
+      "id": "C-012",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "利格曼实验里那个打不开的笼门。不是门真的打不开——是门被打开了，但狗已经被教会了相信：门永远打不开。一个人被教育了四年\"努力就有回报\"，然后一毕业听到\"降低期望\"——这不是在告诉他现实很残酷，是在告诉他：你之前相信的那套规则，是假的。\n\n当一代人同时发现他们相信了",
+      "position": 1491,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-013",
+      "type": "DATA",
+      "text": "三个",
+      "data_type": "quantity_cn",
+      "context": "清醒的一种。全职儿女还在期待有人来修楼。老鼠人已经放弃期待了。烂尾娃说：我他妈知道楼是谁建的了。\n\n三个词。三种应对策略。一个共同的逻辑：当努力不再有回报，停止努力不是懒惰——是理性的自我保护。这不是心理学问题。这是结构问题。\n\n但这套结构问题落在具体的身体上是会",
+      "position": 1840,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「三个」的数据来源"
+    },
+    {
+      "id": "C-014",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "在期待有人来修楼。老鼠人已经放弃期待了。烂尾娃说：我他妈知道楼是谁建的了。\n\n三个词。三种应对策略。一个共同的逻辑：当努力不再有回报，停止努力不是懒惰——是理性的自我保护。这不是心理学问题。这是结构问题。\n\n但这套结构问题落在具体的身体上是会疼的。李然每天夜里两点",
+      "position": 1851,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-015",
+      "type": "DATA",
+      "text": "一个",
+      "data_type": "quantity_cn",
+      "context": "分配政策，效率极高。它把结构性的失败精准地转成个体的羞愧，然后让失败者自己买单。\n\n这篇东西我不想给一个\"振作起来\"的结尾。说\"门已经开了你们快跑吧\"的人，是站在笼子外面的人。狗为什么不跑——这个问题应该由关狗进笼子的人来回答，不是由狗来回答。\n\n李然前天给我发了",
+      "position": 2186,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": false,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一个」的数据来源"
+    },
+    {
+      "id": "C-016",
+      "type": "DATA",
+      "text": "一家",
+      "data_type": "quantity_cn",
+      "context": "题应该由关狗进笼子的人来回答，不是由狗来回答。\n\n李然前天给我发了条消息。她说她找到了一个兼职——帮一家小公司做远程数据标注，一个月两千多。\"至少不用问我有没有结婚计划，\"她说。\"因为它根本不知道我是男是女。\"\n\n我回了她两个字：会好。\n\n我没说\"会好的\"。我只说",
+      "position": 2285,
+      "has_source_in_text": true,
+      "is_precise": false,
+      "is_approximate": true,
+      "risk": "medium",
+      "verification_hint": "搜索确认「一家」的数据来源"
+    },
+    {
+      "id": "C-017",
+      "type": "DATA",
+      "text": "两千",
+      "data_type": "quantity_cn",
+      "context": "是由狗来回答。\n\n李然前天给我发了条消息。她说她找到了一个兼职——帮一家小公司做远程数据标注，一个月两千多。\"至少不用问我有没有结婚计划，\"她说。\"因为它根本不知道我是男是女。\"\n\n我回了她两个字：会好。\n\n我没说\"会好的\"。我只说\"会好\"。不是承诺。是……\n\n我",
+      "position": 2301,
+      "has_source_in_text": true,
+      "is_precise": false,
+      "is_approximate": true,
+      "risk": "medium",
+      "verification_hint": "搜索确认「两千」的数据来源"
+    },
+    {
+      "id": "C-018",
+      "type": "DATA",
+      "text": "两个",
+      "data_type": "quantity_cn",
+      "context": "注，一个月两千多。\"至少不用问我有没有结婚计划，\"她说。\"因为它根本不知道我是男是女。\"\n\n我回了她两个字：会好。\n\n我没说\"会好的\"。我只说\"会好\"。不是承诺。是……\n\n我也不知道是什么。是一个人跟另一个人之间能说的最诚实的话。\n\n\n---\n\n*SOUL+STY",
+      "position": 2346,
+      "has_source_in_text": false,
+      "is_precise": false,
+      "is_approximate": true,
+      "risk": "medium",
+      "verification_hint": "搜索确认「两个」的数据来源"
+    }
+  ],
+  "extraction_summary": {
+    "total": 18,
+    "by_type": {
+      "PERSON": 0,
+      "EVENT": 0,
+      "DATA": 33,
+      "QUOTE": 0
+    },
+    "high_risk_count": 0,
+    "pseudonym_count": 0,
+    "extracted_at": "2026-06-26T05:20:14.624032+00:00",
+    "script": "output/wechat_articles/hot/三个新词与习得性无助_2026-06-26.md"
+  },
+  "search_plan": {
+    "total_queries": 18,
+    "queries": [
+      {
+        "claim_id": "C-001",
+        "claim_type": "DATA",
+        "claim_text": "三个",
+        "query": "三个 全职儿女 老鼠人 烂尾娃 新词背后 是一代人的习得性无助 SOUL 数据 统计 来源",
+        "priority": "low",
+        "context": "# 全职儿女、老鼠人、烂尾娃——三个新词背后，是一代人的习得性无助\n\n> SOUL+STYLE+PERSONA 全量注入 | 情感温度 2/10 | 2026-06-26\n\n**摘要**：2025"
+      },
+      {
+        "claim_id": "C-002",
+        "claim_type": "DATA",
+        "claim_text": "一家",
+        "query": "一家 病因 李然是 全职儿女 这个词还没有被发明的时候 就已经在做了 2024年她从上海互联网公司被裁掉 数据 统计 来源",
+        "priority": "low",
+        "context": "病因。\n\n---\n\n李然是\"全职儿女\"这个词还没有被发明的时候，就已经在做了。\n\n2024年她从上海一家互联网公司被裁掉。投了六个月简历，面了七家公司。第七家面试的HR问她：\"你能接受996吗？\"她说"
+      },
+      {
+        "claim_id": "C-003",
+        "claim_type": "DATA",
+        "claim_text": "六个",
+        "query": "六个 全职儿女 这个词还没有被发明的时候 就已经在做了 2024年她从上海一家互联网公司被裁掉 投了月简历 面了七家公司 数据 统计 来源",
+        "priority": "low",
+        "context": "\"全职儿女\"这个词还没有被发明的时候，就已经在做了。\n\n2024年她从上海一家互联网公司被裁掉。投了六个月简历，面了七家公司。第七家面试的HR问她：\"你能接受996吗？\"她说可以。HR又问：\"你今年2"
+      },
+      {
+        "claim_id": "C-004",
+        "claim_type": "DATA",
+        "claim_text": "七家",
+        "query": "七家 词还没有被发明的时候 就已经在做了 2024年她从上海一家互联网公司被裁掉 投了六个月简历 面了公司 第面试的HR问她 数据 统计 来源",
+        "priority": "low",
+        "context": "词还没有被发明的时候，就已经在做了。\n\n2024年她从上海一家互联网公司被裁掉。投了六个月简历，面了七家公司。第七家面试的HR问她：\"你能接受996吗？\"她说可以。HR又问：\"你今年29岁，有结婚计划"
+      },
+      {
+        "claim_id": "C-005",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 有回音 不是我不想工作 她说 是工作不要我 那你让我怎么办 她这句话不是在问我 数据 统计 来源",
+        "priority": "low",
+        "context": "有回音。\"不是我不想工作，\"她说。\"是工作不要我。那你让我怎么办？\"\n\n她这句话不是在问我。她是在问一个不会回答的系统。\n\n\"全职儿女\"这个词被造出来的时候，网上吵得很厉害。有人说这是\"新型啃老\"——"
+      },
+      {
+        "claim_id": "C-006",
+        "claim_type": "DATA",
+        "claim_text": "两千",
+        "query": "两千 脆弱 是环境教会了它一个精确的 理性的结论 你的行动没有用 现在把笼子换成招聘市场 把电击换成份简历没有回音 数据 统计 来源",
+        "priority": "low",
+        "context": "脆弱\"。是环境教会了它一个精确的、理性的结论：你的行动没有用。\n\n现在把笼子换成招聘市场。把电击换成两千份简历没有回音。换成\"你29岁有结婚计划吗\"。换成985硕士月薪六千。换成\"你的第一学历不是一本"
+      },
+      {
+        "claim_id": "C-007",
+        "claim_type": "DATA",
+        "claim_text": "六千",
+        "query": "六千 在把笼子换成招聘市场 把电击换成两千份简历没有回音 换成 你29岁有结婚计划吗 换成985硕士月薪 换成 数据 统计 来源",
+        "priority": "low",
+        "context": "在把笼子换成招聘市场。把电击换成两千份简历没有回音。换成\"你29岁有结婚计划吗\"。换成985硕士月薪六千。换成\"你的第一学历不是一本\"。\n\n狗不跑了。然后我们骂狗：你为什么不跑？\n\n老鼠人。\n\n这是第"
+      },
+      {
+        "claim_id": "C-008",
+        "claim_type": "DATA",
+        "claim_text": "二个",
+        "query": "二个 六千 换成 你的第一学历不是一本 狗不跑了 然后我们骂狗 你为什么不跑 数据 统计 来源",
+        "priority": "low",
+        "context": "六千。换成\"你的第一学历不是一本\"。\n\n狗不跑了。然后我们骂狗：你为什么不跑？\n\n老鼠人。\n\n这是第二个词。它指的是那些低社交、低欲望、宅在家里不出门的年轻人。这个词粗鲁、刻薄、带羞辱性。但造出它的人"
+      },
+      {
+        "claim_id": "C-009",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 描述的人 用这个词的时候 往往有一种奇怪的自我嘲讽的轻松 我是老鼠人 所以不用管我了 在网上自称 数据 统计 来源",
+        "priority": "low",
+        "context": "描述的人——用这个词的时候，往往有一种奇怪的自我嘲讽的轻松。\n\n\"我是老鼠人，所以不用管我了。\"\n\n一个在网上自称\"老鼠人\"的男生告诉我，他大学毕业两年，现在在一家便利店做夜班理货。晚上十点到早上六点"
+      },
+      {
+        "claim_id": "C-010",
+        "claim_type": "DATA",
+        "claim_text": "一家",
+        "query": "一家 我是老鼠人 所以不用管我了 一个在网上自称 老鼠人 的男生告诉我 他大学毕业两年 数据 统计 来源",
+        "priority": "low",
+        "context": "\"我是老鼠人，所以不用管我了。\"\n\n一个在网上自称\"老鼠人\"的男生告诉我，他大学毕业两年，现在在一家便利店做夜班理货。晚上十点到早上六点。白天睡觉。周末不出门。没有朋友。不谈恋爱。不看电影。不打游戏—"
+      },
+      {
+        "claim_id": "C-011",
+        "claim_type": "DATA",
+        "claim_text": "三个",
+        "query": "三个 家要有心理准备 台下有人问 那我们该怎么办 老师说 降低期望 降低期望 数据 统计 来源",
+        "priority": "low",
+        "context": "家要有心理准备。台下有人问:'那我们该怎么办？'老师说:'降低期望。'\"\n\n\"降低期望。\"他说，把这三个字重复了一遍，像在嚼一个嚼了很久还没有味道的口香糖。\n\n\"我听了四年'努力就有回报'。毕业那年听"
+      },
+      {
+        "claim_id": "C-012",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 利格曼实验里那个打不开的笼门 不是门真的打不开 是门被打开了 但狗已经被教会了相信 门永远打不开 人被教育了四年 数据 统计 来源",
+        "priority": "low",
+        "context": "利格曼实验里那个打不开的笼门。不是门真的打不开——是门被打开了，但狗已经被教会了相信：门永远打不开。一个人被教育了四年\"努力就有回报\"，然后一毕业听到\"降低期望\"——这不是在告诉他现实很残酷，是在告诉"
+      },
+      {
+        "claim_id": "C-013",
+        "claim_type": "DATA",
+        "claim_text": "三个",
+        "query": "三个 清醒的一种 全职儿女还在期待有人来修楼 老鼠人已经放弃期待了 烂尾娃说 我他妈知道楼是谁建的了 词 数据 统计 来源",
+        "priority": "low",
+        "context": "清醒的一种。全职儿女还在期待有人来修楼。老鼠人已经放弃期待了。烂尾娃说：我他妈知道楼是谁建的了。\n\n三个词。三种应对策略。一个共同的逻辑：当努力不再有回报，停止努力不是懒惰——是理性的自我保护。这不是"
+      },
+      {
+        "claim_id": "C-014",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 在期待有人来修楼 老鼠人已经放弃期待了 烂尾娃说 我他妈知道楼是谁建的了 三个词 三种应对策略 数据 统计 来源",
+        "priority": "low",
+        "context": "在期待有人来修楼。老鼠人已经放弃期待了。烂尾娃说：我他妈知道楼是谁建的了。\n\n三个词。三种应对策略。一个共同的逻辑：当努力不再有回报，停止努力不是懒惰——是理性的自我保护。这不是心理学问题。这是结构问"
+      },
+      {
+        "claim_id": "C-015",
+        "claim_type": "DATA",
+        "claim_text": "一个",
+        "query": "一个 分配政策 效率极高 它把结构性的失败精准地转成个体的羞愧 然后让失败者自己买单 这篇东西我不想给 振作起来 数据 统计 来源",
+        "priority": "low",
+        "context": "分配政策，效率极高。它把结构性的失败精准地转成个体的羞愧，然后让失败者自己买单。\n\n这篇东西我不想给一个\"振作起来\"的结尾。说\"门已经开了你们快跑吧\"的人，是站在笼子外面的人。狗为什么不跑——这个问题"
+      },
+      {
+        "claim_id": "C-016",
+        "claim_type": "DATA",
+        "claim_text": "一家",
+        "query": "一家 题应该由关狗进笼子的人来回答 不是由狗来回答 李然前天给我发了条消息 她说她找到了一个兼职 帮小公司做远程数据标注 一个月两千多 数据 统计 来源",
+        "priority": "low",
+        "context": "题应该由关狗进笼子的人来回答，不是由狗来回答。\n\n李然前天给我发了条消息。她说她找到了一个兼职——帮一家小公司做远程数据标注，一个月两千多。\"至少不用问我有没有结婚计划，\"她说。\"因为它根本不知道我是"
+      },
+      {
+        "claim_id": "C-017",
+        "claim_type": "DATA",
+        "claim_text": "两千",
+        "query": "两千 是由狗来回答 李然前天给我发了条消息 她说她找到了一个兼职 帮一家小公司做远程数据标注 一个月多 至少不用问我有没有结婚计划 数据 统计 来源",
+        "priority": "low",
+        "context": "是由狗来回答。\n\n李然前天给我发了条消息。她说她找到了一个兼职——帮一家小公司做远程数据标注，一个月两千多。\"至少不用问我有没有结婚计划，\"她说。\"因为它根本不知道我是男是女。\"\n\n我回了她两个字：会"
+      },
+      {
+        "claim_id": "C-018",
+        "claim_type": "DATA",
+        "claim_text": "两个",
+        "query": "两个 注 一个月两千多 至少不用问我有没有结婚计划 她说 因为它根本不知道我是男是女 我回了她字 数据 统计 来源",
+        "priority": "low",
+        "context": "注，一个月两千多。\"至少不用问我有没有结婚计划，\"她说。\"因为它根本不知道我是男是女。\"\n\n我回了她两个字：会好。\n\n我没说\"会好的\"。我只说\"会好\"。不是承诺。是……\n\n我也不知道是什么。是一个人跟"
+      }
+    ]
+  }
+}
