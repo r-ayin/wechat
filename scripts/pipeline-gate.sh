@@ -107,6 +107,7 @@ gate_verify() {
             # 基于历史竞品文件最低 2859B，设置 2000B 为安全下限
             [ "$size" -lt 2000 ] && { echo "❌ < 2KB ($size bytes)"; exit 3; }
             grep -qE "维度1|维度2|维度3|维度4|维度5|五维" "$f" || { echo "❌ 五维不完整"; exit 3; }
+            grep -qE "[0-9]+\s*/\s*10" "$f" || { echo "❌ 缺少竞对情感温度评估 (X/10)"; exit 3; }
             echo "✅ Phase 0 验证通过 (${size} bytes)"
             ;;
         "1")

@@ -20,8 +20,16 @@ triggers:
 
 ### Phase 0: 竞品风格蒸馏
 **产出**: `output/research/{slug}_competitor-style_{date}.md`
-**内容**: 搜竞品文章（数量取决于竞品格局密度，默认≥5篇）→ 五维拆解（切口/论点/人物/证据/差异化）→ 提取对标写法
-**门禁**: 文件 ≥2000 bytes && 包含五维标签
+**内容**: 搜竞品文章（数量取决于竞品格局密度，默认≥5篇）→ 五维拆解（切口/论点/人物/证据/差异化）→ 提取对标写法 → **必须包含竞对情感温度评估（0-10）**
+**门禁**: 文件 ≥2000 bytes && 包含五维标签 && 包含情感温度数字
+
+**Phase 0 完成后，运行情感温度计算**:
+```bash
+python ../persona/adapters/emotion_calculator.py \
+  --personal-file persona/STYLE.md \
+  --competitor-file output/research/{slug}_competitor-style_{date}.md
+```
+结果（三向加权：差距≤1→加成 / ≤3→保持个人 / >3→加权平均 个人×0.6+竞对×0.4）写入 Phase 3 写作参数。禁止再使用硬编码的 2/10。
 
 ### Phase 1: 研究简报
 **产出**: `output/research/{slug}_brief_{date}.md`
