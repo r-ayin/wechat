@@ -436,7 +436,7 @@ wechat/output/
 - 正文：场景化开头 → 数据/论证 → 结构性分析 → 开放式结尾
 - 情感温度：2/10（冷峻克制）
 
-📄 如需将微信长文拆分为抖音/B站脚本 → 交给 [douyin 项目](../../douyin/CLAUDE.md)
+📄 如需将微信长文拆分为抖音/B站脚本 → 交给 [douyin 项目](https://github.com/r-ayin/douyin)（独立仓库）
 
 ---
 
@@ -505,6 +505,6 @@ Google/Bing 对 `mp.weixin.qq.com` 收录极差。搜狗是微信生态内搜索
 
 ---
 
-> 📄 方法论来源: [两轮研究整合报告](../godtier-deep-research/output/两轮研究整合报告_2026-06-23.md)
+> 📄 方法论来源: 两轮研究整合报告（godtier-deep-research 产出）
 > 🔬 DeepResearch Workflow: 104 Agent/22信源/25声明验证/10确认15杀死
 > 🧠 persona引擎: SOUL.md + STYLE.md + PERSONA.md 三件套就位

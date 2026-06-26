@@ -171,12 +171,11 @@
 ### 选题池文件
 
 ```
-douyin/
-├── topic-pool/
-│   ├── hot-pool.json       ← 热点选题池 (按UCB+对标+人格排序)
-│   ├── evergreen-pool.json ← 常青选题池 (按重要性+完成度排序)
-│   ├── series-plan.json    ← 系列规划 (季度主线+每篇进度)
-│   └── published-log.json  ← 已发布记录 (日期/类型/数据)
+topic-pool/
+├── hot-watch.json          ← 热点监控关键词
+├── evergreen-pool.json     ← 常青选题池 (按重要性+完成度排序)
+├── scan-results.json       ← 扫描结果
+└── hot-scanner.py          ← 热点扫描器
 ```
 
 ### 选题优先级公式

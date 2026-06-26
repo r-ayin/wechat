@@ -139,7 +139,7 @@
 
 ## Pipeline Brief 模板
 
-采访结束后，保存到 `douyin/output/briefs/{topic_slug}_brief_{YYYY-MM-DD}.md`：
+采访结束后，保存到 `output/briefs/{topic_slug}_brief_{YYYY-MM-DD}.md`：
 
 ```markdown
 # 管线简报：{选题标题}

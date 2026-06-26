@@ -1,0 +1,553 @@
+#!/usr/bin/env python3
+"""
+L4 事实验证器 — 双模式：plan（生成搜索计划）+ verify（判定逐条结论）
+
+plan 模式:  claims JSON → 搜索查询列表（供 Claude 执行 WebSearch）
+verify 模式: claims + search_results → 逐条 VERIFIED / UNVERIFIABLE / FALSIFIED
+
+搜索执行在 Claude 会话中完成（WebSearch tool），本模块负责查询生成 + 结论判定。
+"""
+
+import json
+import re
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+
+# =========================================================================
+# 模式 1: 搜索计划生成
+# =========================================================================
+
+def generate_search_queries(claims: list[dict], max_queries: int = 30) -> list[dict]:
+    """为每条声明生成优化的搜索查询
+
+    按优先级排序：
+      1. FALSIFIED 风险最高（精确数字无来源）
+      2. 政策/报告名称（需精确匹配）
+      3. 人物+事件组合
+      4. 普通数据
+
+    Args:
+        claims: claim_extractor 输出的 claims 列表
+        max_queries: 最大查询数（避免 API 成本爆炸）
+
+    Returns:
+        搜索计划列表
+    """
+    queries = []
+
+    for claim in claims:
+        query = _build_query(claim)
+        if not query:
+            continue
+
+        queries.append({
+            "claim_id": claim["id"],
+            "claim_type": claim["type"],
+            "claim_text": claim["text"][:80],
+            "query": query,
+            "priority": _get_priority(claim),
+            "context": claim.get("context", "")[:100],
+        })
+
+    # 按优先级排序：high > medium > low
+    priority_order = {"high": 0, "medium": 1, "low": 2}
+    queries.sort(key=lambda q: (priority_order.get(q["priority"], 2), q["claim_id"]))
+
+    # 截断到最大查询数
+    if len(queries) > max_queries:
+        queries = queries[:max_queries]
+
+    return queries
+
+
+def _build_query(claim: dict) -> str | None:
+    """为单条声明构建搜索查询"""
+    claim_type = claim["type"]
+    text = claim["text"].strip()
+
+    if claim_type == "PERSON":
+        # 人物查询：姓名 + 身份提示
+        role = claim.get("role_hint", "")
+        age = claim.get("age", "")
+        if claim.get("is_full_name"):
+            # 全名 → 直接搜
+            parts = [text]
+            if role:
+                parts.append(role)
+            if age:
+                parts.append(f"{age}岁")
+            return " ".join(parts)
+        elif claim.get("is_pseudonym"):
+            # 化名 → 搜索描述的行业事件而非人名
+            if role:
+                return f"{role} {text} 骑手 网约车司机 外卖"
+            return None  # 纯化名无法搜索
+
+    elif claim_type == "EVENT":
+        # 事件查询：日期 + 核心关键词
+        date = claim.get("date", "")
+        policy = claim.get("policy_name", "")
+
+        if policy:
+            return f"{date} 《{policy}》 出台 发布"
+        elif date:
+            # 提取上下文关键词（去掉日期部分）
+            ctx = claim.get("context", "")
+            keywords = _extract_keywords(ctx, exclude=[date, "出台", "发布", "报道"])
+            return f"{date} {keywords}"[:200]
+        else:
+            return text[:200]
+
+    elif claim_type == "DATA":
+        # 数据查询：数据 + 主题关键词
+        ctx = claim.get("context", "")
+        # 从上下文中提取主题词
+        topic_keywords = _extract_keywords(ctx, exclude=[text])
+        return f"{text} {topic_keywords} 数据 统计 来源"[:200]
+
+    elif claim_type == "QUOTE":
+        if claim.get("ref_type") == "policy":
+            return f"{text} 全文 原文"
+        elif claim.get("ref_type") == "report":
+            return f"{text} 报告 发布"
+        elif claim.get("ref_type") == "attribution":
+            return f"{text} 采访 报道"
+        else:
+            return text[:200]
+
+    return text[:200]
+
+
+def _extract_keywords(context: str, exclude: list[str] = None, max_chars: int = 80) -> str:
+    """从上下文中提取关键词（简易版，去掉标点和排除词）"""
+    exclude = exclude or []
+    # 去掉所有非中文非字母数字的字符
+    cleaned = re.sub(r'[^一-鿿A-Za-z0-9]', ' ', context)
+    # 去掉排除词
+    for ex in exclude:
+        cleaned = cleaned.replace(ex, '')
+    # 取前几个词
+    words = cleaned.strip().split()
+    return ' '.join(words[:6])[:max_chars]
+
+
+def _get_priority(claim: dict) -> str:
+    """确定声明验证的优先级"""
+    # 精确数字无来源 → high
+    if claim.get("risk") == "high":
+        return "high"
+    # 政策/报告名称 → high
+    if claim.get("ref_type") in ("policy", "report"):
+        return "high"
+    # 有日期的事件 → medium
+    if claim.get("date"):
+        return "medium"
+    # 全名人物 → medium
+    if claim.get("is_full_name"):
+        return "medium"
+    # 其余 → low
+    return "low"
+
+
+# =========================================================================
+# 模式 2: 事实验证判定
+# =========================================================================
+
+def verify_claims(
+    claims: list[dict],
+    search_results: dict[str, str],
+    strictness: str = "standard",
+) -> list[dict]:
+    """根据搜索结果判定每条声明的真实性
+
+    判定规则：
+      VERIFIED      — ≥2 独立信源确认，或 1 个官方/权威信源
+      UNVERIFIABLE  — 找不到信源但不可证伪
+      FALSIFIED     — 与信源矛盾 / 人物事件不存在 / 数据严重偏差
+
+    Args:
+        claims: 声明列表
+        search_results: {claim_id: "搜索摘要文本"} 映射
+        strictness: "strict"(发布前) / "standard"(常规) / "lenient"(草稿)
+
+    Returns:
+        带 verdict / confidence / needs_claude_review 的 claims 列表
+    """
+    verified_claims = []
+
+    for claim in claims:
+        result_text = search_results.get(claim["id"], "")
+
+        verdict = _judge_claim(claim, result_text, strictness)
+        claim["verdict"] = verdict["verdict"]
+        claim["verdict_reason"] = verdict["reason"]
+        claim["search_result_snippet"] = result_text[:300] if result_text else None
+        claim["verified_at"] = datetime.now(timezone.utc).isoformat()
+
+        # 后处理：置信度评分 + Claude 审核标记
+        confidence = verdict.get("confidence")
+        if confidence is None:
+            confidence = _compute_confidence(claim, claim["verdict"], result_text)
+        claim["confidence"] = confidence
+        claim["needs_claude_review"] = (
+            verdict.get("needs_claude_review", False)
+            or confidence < 0.7
+            or claim.get("risk") == "high"
+        )
+
+        verified_claims.append(claim)
+
+    return verified_claims
+
+
+def _compute_confidence(claim: dict, verdict: str, search_result: str) -> float:
+    """根据可用信号估算判定置信度 (0.0-1.0)
+
+    信号加权:
+      - 多信源确认: +0.3
+      - 精确匹配: +0.2
+      - 搜索结果非空: +0.2
+      - 官方/权威信源: +0.2
+      - 基线: 0.1
+    """
+    score = 0.1
+
+    if not search_result or len(search_result.strip()) < 20:
+        return 0.05 if verdict == "UNVERIFIABLE" else 0.1
+
+    # 信源数量
+    source_count = _estimate_source_count(search_result)
+    if source_count >= 3:
+        score += 0.3
+    elif source_count >= 1:
+        score += 0.2
+
+    # 精确匹配
+    has_corroboration = _check_corroboration(claim.get("text", ""), search_result)
+    if has_corroboration:
+        score += 0.2
+
+    # 权威信源
+    authoritative_domains = (
+        "gov.cn", "people.com.cn", "xinhuanet.com", "who.int", "ilo.org",
+        "europa.eu", "un.org", "cdc.gov", "chinacdc.cn", "acftu.org",
+    )
+    if any(d in search_result for d in authoritative_domains):
+        score += 0.2
+
+    # 与判定一致性调整
+    if verdict == "FALSIFIED":
+        score = min(score, 0.5)  # FALSIFIED 需要 Claude 确认
+    elif verdict == "VERIFIED":
+        score = min(score + 0.1, 1.0)
+
+    return round(score, 2)
+
+
+def _judge_claim(claim: dict, search_result: str, strictness: str) -> dict:
+    """判定单条声明
+
+    返回 {"verdict": "VERIFIED|UNVERIFIABLE|FALSIFIED", "reason": "...", "confidence": 0.0-1.0}
+    """
+    claim_type = claim["type"]
+    text = claim["text"]
+
+    # WebSearch 执行失败 vs 空结果
+    if search_result and search_result.startswith("ERROR:"):
+        return {
+            "verdict": "UNVERIFIABLE",
+            "reason": f"搜索执行失败，无法验证: {search_result[6:]}",
+            "confidence": 0.0,
+            "needs_claude_review": True,
+        }
+
+    # 无搜索结果
+    if not search_result or len(search_result.strip()) < 20:
+        # 化名人物 → 默认 UNVERIFIABLE（但不阻断）
+        if claim.get("is_pseudonym"):
+            return {
+                "verdict": "UNVERIFIABLE",
+                "reason": "化名人物，无法直接验证。身份背景需交叉验证行业常态数据。"
+            }
+        # 精确数字无来源 → FALSIFIED 风险
+        if claim.get("risk") == "high":
+            return {
+                "verdict": "FALSIFIED",
+                "reason": f"精确数据「{text}」无搜索结果支持，标记为虚假。"
+            }
+        return {
+            "verdict": "UNVERIFIABLE",
+            "reason": f"搜索「{text}」未找到相关信源。"
+        }
+
+    # 有搜索结果 → 分析结果
+    has_corroboration = _check_corroboration(text, search_result)
+    has_contradiction = _check_contradiction(text, search_result)
+    source_count = _estimate_source_count(search_result)
+
+    if claim_type == "PERSON" and claim.get("is_full_name"):
+        # 全名人物：搜到相关信息 → VERIFIED
+        if has_corroboration and source_count >= 1:
+            return {
+                "verdict": "VERIFIED",
+                "reason": f"人物在搜索结果中出现，身份可交叉验证（信源数≈{source_count}）。"
+            }
+        elif has_corroboration:
+            return {
+                "verdict": "VERIFIED",
+                "reason": "人物在搜索结果中有相关记载。"
+            }
+        else:
+            return {
+                "verdict": "UNVERIFIABLE",
+                "reason": f"人物「{text}」在搜索结果中未找到明确记载，可能为化名或虚构。"
+            }
+
+    elif claim_type == "EVENT":
+        if has_corroboration and source_count >= (1 if strictness == "lenient" else 2):
+            return {
+                "verdict": "VERIFIED",
+                "reason": f"事件在≥{source_count}个信源中得到确认。"
+            }
+        elif has_contradiction:
+            return {
+                "verdict": "FALSIFIED",
+                "reason": f"搜索结果与声明描述矛盾。"
+            }
+        elif has_corroboration:
+            return {
+                "verdict": "UNVERIFIABLE",
+                "reason": f"事件有相关记载但信源不足（仅{source_count}个，需≥2）。"
+            }
+        else:
+            return {
+                "verdict": "UNVERIFIABLE",
+                "reason": "搜索结果中未找到该事件的确切记载。"
+            }
+
+    elif claim_type == "DATA":
+        if has_corroboration and source_count >= 1:
+            # 额外检查：数值范围是否合理
+            if _check_value_range(text, search_result):
+                return {
+                    "verdict": "VERIFIED",
+                    "reason": f"数据在搜索结果中得到确认。"
+                }
+            else:
+                return {
+                    "verdict": "FALSIFIED",
+                    "reason": f"数据「{text}」与搜索结果中的实际数值不符。"
+                }
+        elif claim.get("is_approximate"):
+            return {
+                "verdict": "UNVERIFIABLE",
+                "reason": "约数无法精确验证，但方向描述与行业趋势一致则可接受。"
+            }
+        else:
+            return {
+                "verdict": "UNVERIFIABLE",
+                "reason": f"数据「{text}」在搜索结果中未找到直接来源。"
+            }
+
+    elif claim_type == "QUOTE":
+        if claim.get("ref_type") == "policy":
+            if has_contradiction:
+                return {
+                    "verdict": "FALSIFIED",
+                    "reason": f"搜索结果中存在辟谣/否定信息，政策「{text}」的引用关联声明可能虚假。"
+                }
+            if has_corroboration:
+                return {
+                    "verdict": "VERIFIED",
+                    "reason": f"政策文件在搜索结果中被确认存在。"
+                }
+            else:
+                return {
+                    "verdict": "FALSIFIED",
+                    "reason": f"政策「{text}」在搜索结果中未找到——政策名称必须一字不差。"
+                }
+        elif claim.get("ref_type") == "report":
+            if has_contradiction:
+                return {
+                    "verdict": "FALSIFIED",
+                    "reason": "搜索结果中存在辟谣/否定信息，该报告/报道的引用关联声明可能虚假。"
+                }
+            if has_corroboration:
+                return {
+                    "verdict": "VERIFIED",
+                    "reason": "报告/报道在搜索结果中被确认。"
+                }
+            else:
+                return {
+                    "verdict": "UNVERIFIABLE",
+                    "reason": "报告名称未在搜索结果中精确匹配，可能名称有偏差或为概括性引用。"
+                }
+        else:
+            if has_contradiction:
+                return {
+                    "verdict": "FALSIFIED",
+                    "reason": "搜索结果中存在辟谣/否定信息，该引用的关联声明可能虚假。"
+                }
+            if has_corroboration:
+                return {
+                    "verdict": "VERIFIED",
+                    "reason": "引述言论在搜索结果中有相关记载。"
+                }
+            else:
+                return {
+                    "verdict": "UNVERIFIABLE",
+                    "reason": "搜索结果中未找到该引用的直接来源。"
+                }
+
+    return {
+        "verdict": "UNVERIFIABLE",
+        "reason": "无法判定。"
+    }
+
+
+def _check_corroboration(claim_text: str, search_result: str) -> bool:
+    """检查搜索结果是否支持该声明"""
+    # 提取声明中的关键实体（数字、专有名词）
+    key_entities = re.findall(r'[\d,]+\.?\d*|[《〈][^》〉]+[》〉]|[A-Z一-鿿]{2,6}', claim_text)
+    key_entities = [e for e in key_entities if len(e) >= 2]
+
+    if not key_entities:
+        # 没提取到关键实体，检查语义重叠
+        words = claim_text[:30]
+        return words.lower() in search_result.lower()
+
+    # 至少半数关键实体在结果中出现
+    matches = sum(1 for e in key_entities if e in search_result)
+    return matches >= max(1, len(key_entities) // 2)
+
+
+def _check_contradiction(claim_text: str, search_result: str) -> bool:
+    """检查搜索结果是否与声明矛盾"""
+    # 简易检查：搜索否定模式
+    # 实际由 Claude 在会话中做更智能的判断
+    negation_patterns = [
+        r'(?:并非|不是|不存在|虚假|谣言|辟谣|不实|错误|误解|没有)',
+    ]
+    for pat in negation_patterns:
+        if re.search(pat, search_result):
+            # 有否定词，需要 Claude 进一步判断
+            return True
+    return False
+
+
+def _estimate_source_count(search_result: str) -> int:
+    """估算搜索结果中的独立信源数量"""
+    # 统计 URL 数量作为信源数的代理
+    urls = re.findall(r'https?://[^\s]+', search_result)
+    # 去重域名
+    domains = set()
+    for url in urls:
+        match = re.search(r'https?://([^/\s]+)', url)
+        if match:
+            domains.add(match.group(1))
+
+    # 至少 1 个（有搜索结果）
+    return max(1, len(domains))
+
+
+def _check_value_range(claim_text: str, search_result: str) -> bool:
+    """检查声明的数值是否在搜索结果的合理范围内"""
+    # 提取声明中的数字
+    claim_nums = re.findall(r'[\d,]+\.?\d*', claim_text)
+    if not claim_nums:
+        return True  # 无数值，无法比较，默认通过
+
+    # 提取搜索结果中的数字
+    result_nums = re.findall(r'[\d,]+\.?\d*', search_result)
+
+    # 简易检查：声明数字在搜索结果数字的 ±50% 范围内
+    for cn in claim_nums:
+        try:
+            cv = float(cn.replace(',', ''))
+            for rn in result_nums:
+                try:
+                    rv = float(rn.replace(',', ''))
+                    if rv == 0:
+                        continue
+                    ratio = cv / rv
+                    if 0.5 <= ratio <= 2.0:
+                        return True
+                except ValueError:
+                    continue
+        except ValueError:
+            continue
+
+    return len(result_nums) == 0  # 搜索结果无数值 → 无法比较 → 默认通过
+
+
+# =========================================================================
+# CLI
+# =========================================================================
+
+def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="L4 事实验证器")
+    sub = parser.add_subparsers(dest="mode", required=True)
+
+    # plan 模式
+    plan_parser = sub.add_parser("plan", help="生成搜索计划")
+    plan_parser.add_argument("claims_json", help="claim_extractor 输出的 JSON 文件")
+    plan_parser.add_argument("--max-queries", type=int, default=30, help="最大查询数")
+
+    # verify 模式
+    verify_parser = sub.add_parser("verify", help="验证声明")
+    verify_parser.add_argument("claims_json", help="claim_extractor 输出的 JSON 文件")
+    verify_parser.add_argument("results_json", help="搜索结果 JSON 文件 {claim_id: summary}")
+    verify_parser.add_argument("--strictness", default="standard",
+                               choices=["strict", "standard", "lenient"])
+
+    args = parser.parse_args()
+
+    if args.mode == "plan":
+        with open(args.claims_json, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+        claims = data.get("claims", data)  # 兼容两种输入格式
+        queries = generate_search_queries(claims, args.max_queries)
+
+        print(json.dumps({
+            "mode": "plan",
+            "total_queries": len(queries),
+            "queries": queries,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        }, ensure_ascii=False, indent=2))
+
+    elif args.mode == "verify":
+        with open(args.claims_json, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        claims = data.get("claims", data)
+
+        with open(args.results_json, 'r', encoding='utf-8') as f:
+            search_results = json.load(f)
+
+        verified = verify_claims(claims, search_results, args.strictness)
+
+        summary = {
+            "total": len(verified),
+            "verified": sum(1 for c in verified if c["verdict"] == "VERIFIED"),
+            "unverifiable": sum(1 for c in verified if c["verdict"] == "UNVERIFIABLE"),
+            "falsified": sum(1 for c in verified if c["verdict"] == "FALSIFIED"),
+        }
+
+        print(json.dumps({
+            "mode": "verify",
+            "summary": summary,
+            "overall": "PASS" if summary["falsified"] == 0 else "FAIL",
+            "claims": verified,
+            "verified_at": datetime.now(timezone.utc).isoformat(),
+        }, ensure_ascii=False, indent=2))
+
+        if summary["falsified"] > 0:
+            sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

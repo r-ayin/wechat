@@ -1,6 +1,6 @@
 # wechat — 微信公众号深度长文
 
-> 遵循工作区协议 [PROTOCOL.md](../PROTOCOL.md)
+> 遵循项目协议 [PROTOCOL.md](PROTOCOL.md)
 
 ## 项目身份
 - **名称**：被压迫者小组 — 信息差平权者
@@ -145,9 +145,9 @@ wechat/
 
 | 依赖 | 位置 | 用途 |
 |------|------|------|
-| godtier-deep-research | `.claude/skills/godtier-deep-research/` | 共享深度研究引擎 |
-| script-verifier (L4) | `../douyin/script-verifier/` | L4 防幻觉验证 |
-| PROTOCOL.md | `../PROTOCOL.md` | 工作区宪法 |
+| godtier-deep-research | `.claude/skills/godtier-deep-research/` | 深度研究引擎（已内化） |
+| script-verifier (L4) | `script-verifier/` | L4 防幻觉验证（已内化） |
+| PROTOCOL.md | `PROTOCOL.md` | 项目协议 |
 
 ## 关联项目
-- [抖音脚本项目](../douyin/CLAUDE.md) — 将微信长文拆分为口播脚本
+- [抖音脚本项目](https://github.com/r-ayin/douyin) — 将微信长文拆分为口播脚本（独立仓库）

@@ -1,0 +1,270 @@
+﻿skill:
+  name: godtier-deep-research
+  version: '2.0'
+  description: 双模式深度研究 — 13层分析架构(财经+通用)
+  author: 江江
+  created: '2026-03-13'
+  updated: '2026-06-18'
+  base_framework: deep-research v2.0 (dual-mode)
+models:
+  primary: inherit
+  backup: ollama/qwen3.5-opus-distilled
+  computation: script
+phases:
+  phase0_planning:
+    duration_minutes: 10
+    output_format: markdown
+    model: glm-5
+  phase1_collection:
+    duration_minutes: 40
+    max_agents: 8
+    min_agents: 5
+    parallel: true
+    output_format: json
+    url_required: true
+    model: bailian/qwen3.5-plus
+  phase2_analysis:
+    duration_minutes: 30
+    max_agents: 6
+    min_agents: 4
+    parallel: true
+    output_format: markdown
+    script_computation: true
+    models:
+      deep_analysis: glm-5
+      synthesis: bailian/kimi-k2.5
+  phase3_writing:
+    duration_minutes: 20
+    output_format: markdown
+  phase4_verification:
+    duration_minutes: 10
+    hallucination_detection: true
+    number_check: true
+    logic_check: true
+    source_check: true
+  phase5_output:
+    duration_minutes: 5
+    output_format:
+    - markdown
+    - html
+    - pdf
+data_sources:
+  L1_realtime:
+    financial:
+    - name: Bloomberg Terminal
+      url: https://www.bloomberg.com/professional/
+      health_weight: 0.3
+    - name: SEC EDGAR
+      url: https://www.sec.gov/edgar
+      api: https://efts.sec.gov/LATEST/search-index
+    - name: Yahoo Finance API
+      url: https://finance.yahoo.com/
+    news:
+    - name: Reuters
+      url: https://www.reuters.com/
+    - name: Financial Times
+      url: https://www.ft.com/
+    - name: WSJ
+      url: https://www.wsj.com/
+  L2_dynamic:
+    research:
+    - name: S&P Capital IQ
+      url: https://www.spglobal.com/marketintelligence/
+    - name: Morningstar
+      url: https://www.morningstar.com/
+    - name: 投行研报
+      sources:
+      - Morgan Stanley
+      - Goldman Sachs
+      - J.P. Morgan
+    policy:
+    - name: Federal Register
+      url: https://www.federalregister.gov/
+    - name: SEC Announcements
+      url: https://www.sec.gov/news
+  L3_structural:
+    academic:
+    - name: NBER Working Papers
+      url: https://www.nber.org/papers
+    - name: SSRN
+      url: https://www.ssrn.com/
+    - name: Google Scholar
+      url: https://scholar.google.com/
+    historical:
+    - name: FRED Economic Data
+      url: https://fred.stlouisfed.org/
+    - name: World Bank Data
+      url: https://data.worldbank.org/
+  L4_foundation:
+    textbooks:
+    - Corporate Finance (Brealey/Myers)
+    - Options/Futures/Other Derivatives (Hull)
+    - The Intelligent Investor (Graham)
+    theories:
+    - Modern Portfolio Theory
+    - Black-Scholes Model
+    - Efficient Market Hypothesis
+computation:
+  script_dir: scripts/computation/
+  math:
+  - basic.py
+  - percentage.py
+  - ratio.py
+  - sorting.py
+  - ranking.py
+  - filter.py
+  stats:
+  - descriptive.py
+  - correlation.py
+  - regression.py
+  - timeseries.py
+  finance:
+  - wacc.py
+  - dcf.py
+  - multiples.py
+  - scenario.py
+  - monte_carlo.py
+  - stress_test.py
+  data:
+  - fetcher.py
+  - validator.py
+  - cleaner.py
+  - cross_check.py
+  utils:
+  - hash_input.py
+  - format_output.py
+  - audit_log.py
+  audit_required: true
+  llm_computation_forbidden: true
+hallucination_detection:
+  detectors_dir: detectors/
+  layer1_number:
+    enabled: true
+    check_unsourced: true
+    check_uncomputed: true
+    check_unsorted: true
+    check_range: true
+    check_temporal: true
+  layer2_logic:
+    enabled: true
+    check_causality: true
+    check_generalization: true
+    check_survivorship: true
+    check_confirmation: true
+  layer3_full:
+    enabled: true
+    url_health_sample: 0.1
+    temporal_consistency: true
+    unit_consistency: true
+    falsifiability: true
+output:
+  base_dir: output/godtier-research/
+  filename_format: '{topic}_{date}_{version}'
+  keep_intermediate: true
+  auto_send:
+    enabled: true
+    channel: discord
+    target: '1475075103057514496'
+quality_thresholds:
+  min_score: 70
+  target_score: 85
+  residual_alpha: 10
+  cognitive_penetration: 14
+  logical_closure: 14
+  granularity: 10
+  macro_micro_folding: 10
+  actionability: 10
+monitoring:
+  check_interval: 5
+  timeout_multiplier: 1.5
+  auto_retry: true
+  max_retries: 1
+  proactive_reporting: true
+  critical_multiplier: 2.0
+templates:
+  skill: SKILL.md
+  agent_prompts: templates/agent-prompts.md
+  article: templates/article-template.md
+  source_registry: templates/source-registry.yaml
+logging:
+  level: info
+  file: memory/godtier-research.log
+  format: json
+orchestration:
+  scripts_dir: scripts/orchestration/
+  executor: scripts/orchestration/executor.py
+  state_manager: scripts/orchestration/state_manager.py
+  state_dir: output/godtier-research/states/
+  checkpoint_file: checkpoint.json
+
+# ── 双模式配置 (v2.0) ──────────────────────────────────
+modes:
+  finance:
+    label: 财经深度分析
+    description: 13层财经框架 — L-1残差Alpha + DCF/蒙特卡洛 + 105+金融信源
+    scoring_dimensions:
+      residual_alpha: { weight: 15, label: 残差Alpha识别 }
+      cognitive_penetration: { weight: 20, label: 认知穿透力 }
+      logical_closure: { weight: 20, label: 逻辑闭环 }
+      granularity: { weight: 15, label: 粒度 }
+      macro_micro_folding: { weight: 15, label: 宏微观折叠 }
+      actionability: { weight: 15, label: 可操作性 }
+    benchmarks:
+      - { score: 90, label: 投行顶级研究 (Goldman/Morgan Stanley) }
+      - { score: 80, label: 顶级对冲基金 (Citadel/DE Shaw) }
+      - { score: 70, label: Doomberg 级别 }
+      - { score: 60, label: 普通券商研报 }
+
+  general:
+    label: 通用热点分析
+    description: 13层通用框架 — 盲点检测 + 利益相关者 + 三情景推演 + 全网信源
+    scoring_dimensions:
+      source_diversity: { weight: 20, label: 信源多样性 }
+      logical_rigor: { weight: 20, label: 逻辑严谨性 }
+      cross_domain_coverage: { weight: 15, label: 跨领域覆盖 }
+      temporal_scope: { weight: 15, label: 时间广度 }
+      narrative_calibration: { weight: 15, label: 叙事校准 }
+      verifiability: { weight: 15, label: 可验证性 }
+    benchmarks:
+      - { score: 90, label: 顶级调查报道 (财新/南周深度) }
+      - { score: 80, label: 专业智库报告 (McKinsey/BCG) }
+      - { score: 70, label: 优质自媒体深度 (晚点/36氪深度) }
+      - { score: 60, label: 普通新闻分析 }
+    data_sources:
+      general_news:
+        - { name: 百度热搜, url: https://top.baidu.com/ }
+        - { name: 微博热搜, url: https://weibo.com/hot/search }
+        - { name: 知乎热榜, url: https://www.zhihu.com/hot }
+        - { name: B站热榜, url: https://www.bilibili.com/v/popular/rank/all }
+        - { name: 36氪, url: https://36kr.com/ }
+        - { name: 财新, url: https://www.caixin.com/ }
+      academic:
+        - { name: Google Scholar, url: https://scholar.google.com/ }
+        - { name: arXiv, url: https://arxiv.org/ }
+        - { name: CNKI, url: https://www.cnki.net/ }
+      public_data:
+        - { name: 国家统计局, url: https://www.stats.gov.cn/ }
+        - { name: 世界银行, url: https://data.worldbank.org/ }
+        - { name: Wikipedia, url: https://www.wikipedia.org/ }
+      international:
+        - { name: Reuters, url: https://www.reuters.com/ }
+        - { name: The Guardian, url: https://www.theguardian.com/ }
+        - { name: Bloomberg, url: https://www.bloomberg.com/ }
+    computation_scripts:
+      - basic.py
+      - percentage.py
+      - sorting.py
+      - ranking.py
+      - filter.py
+      - descriptive.py
+      - correlation.py
+      - regression.py
+      - timeseries.py
+      - scenario.py
+      - fetcher.py
+      - validator.py
+      - cleaner.py
+      - cross_check.py
+      - hash_input.py
+      - format_output.py
+      - audit_log.py

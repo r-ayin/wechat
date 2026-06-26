@@ -1,0 +1,7 @@
+output/wechat_articles/
+output/research/
+output/briefs/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

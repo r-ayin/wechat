@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvoMap（进化图谱）神级深度分析 · 分析结构版</title>
+<style>
+  :root {
+    --bg: #faf9f7; --card-bg: #fff; --text: #2c2c2c;
+    --text-secondary: #5f5f5f; --accent: #c44536; --accent-2: #3a6b5c;
+    --border: #e8e4df; --tag-bg: #f2efe9; --code-bg: #f5f2ed;
+    --shadow: 0 1px 3px rgba(0,0,0,.06);
+    --font-sans: 'Inter','Noto Sans SC','PingFang SC','Microsoft YaHei',system-ui,sans-serif;
+    --font-mono: 'JetBrains Mono','Fira Code','Cascadia Code',monospace;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:var(--font-sans); background:var(--bg); color:var(--text); line-height:1.7; font-size:15px; }
+  .container { max-width:860px; margin:0 auto; padding:2rem 1.5rem; }
+
+  /* Scorecard */
+  .scorecard {
+    background: linear-gradient(135deg,#1e1e1e,#2c2c2c); color:#fff;
+    border-radius:12px; padding:1.8rem 2rem; margin-bottom:2rem;
+    display:grid; grid-template-columns:1fr auto; gap:1.5rem; align-items:center;
+  }
+  .scorecard h1 { font-size:1.4rem; font-weight:800; letter-spacing:-.01em; margin-bottom:.5rem; }
+  .scorecard .meta { font-size:.8rem; opacity:.7; }
+  .score-big { text-align:center; }
+  .score-big .num { font-size:4rem; font-weight:900; line-height:1; }
+  .score-big .label { font-size:.8rem; opacity:.7; margin-top:.3rem; }
+  .score-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin-top:.5rem; }
+  .score-item { background:rgba(255,255,255,.08); border-radius:6px; padding:.5rem .8rem; text-align:center; }
+  .score-item .sc { font-size:1.3rem; font-weight:700; }
+  .score-item .lb { font-size:.65rem; opacity:.6; }
+
+  /* Sections */
+  .module { background:var(--card-bg); border-radius:10px; box-shadow:var(--shadow); padding:1.5rem; margin-bottom:1.5rem; }
+  .module h2 { font-size:1.15rem; font-weight:700; margin-bottom:1rem; padding-bottom:.6rem; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:.5rem; }
+  .module h3 { font-size:.95rem; font-weight:600; margin:1.2rem 0 .6rem; color:#444; }
+  .module h2 .num { background:var(--accent); color:#fff; width:1.6rem; height:1.6rem; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:.75rem; flex-shrink:0; }
+
+  /* Tables */
+  .table-wrap { overflow-x:auto; margin:.8rem 0; }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; }
+  th { background:#2c2c2c; color:#fff; font-weight:600; padding:.5rem .7rem; text-align:left; white-space:nowrap; }
+  td { padding:.45rem .7rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  tr:nth-child(even) { background:#fafaf8; }
+
+  /* Two column compare */
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:.8rem 0; }
+  .compare-box { border-radius:8px; padding:1rem; }
+  .compare-box.pro { background:#f6faf8; border:1px solid #c6ddd3; }
+  .compare-box.con { background:#fff8f6; border:1px solid #f0d5cb; }
+  .compare-box h4 { font-size:.85rem; margin-bottom:.5rem; }
+
+  /* Key numbers row */
+  .key-numbers { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:.7rem; margin-bottom:.8rem; }
+  .kn-card { background:var(--tag-bg); border-radius:8px; padding:.7rem; text-align:center; }
+  .kn-card .val { font-size:1.4rem; font-weight:800; color:var(--accent); }
+  .kn-card .lbl { font-size:.7rem; color:var(--text-secondary); margin-top:.2rem; }
+  .kn-card .src { font-size:.65rem; color:var(--text-secondary); opacity:.6; }
+
+  /* Tags */
+  .tag { display:inline-block; font-size:.7rem; font-weight:600; padding:.15em .5em; border-radius:3px; margin:0 .15em; }
+  .tag-red { background:#fde8e8; color:#c44536; }
+  .tag-green { background:#e6f4ec; color:#3a6b5c; }
+  .tag-yellow { background:#fef3c7; color:#92400e; }
+  .tag-gray { background:#f3f4f6; color:#6b7280; }
+
+  /* Lists */
+  ul { padding-left:1.2rem; margin:.5rem 0; }
+  li { margin:.25rem 0; }
+
+  /* Code */
+  code { font-family:var(--font-mono); font-size:.8em; background:var(--code-bg); padding:.1em .35em; border-radius:3px; }
+  pre { font-family:var(--font-mono); font-size:.78em; background:#1e1e1e; color:#d4d4d4; padding:.8em 1em; border-radius:8px; overflow-x:auto; margin:.8rem 0; line-height:1.55; }
+
+  blockquote { margin:.8rem 0; padding:.7em 1em; background:var(--tag-bg); border-left:3px solid var(--accent); border-radius:0 6px 6px 0; font-size:.85em; }
+  a { color:var(--accent-2); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+
+  .footer { margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--border); font-size:.75rem; color:var(--text-secondary); text-align:center; }
+
+  @media (max-width:600px) { .compare { grid-template-columns:1fr; } .scorecard { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 六维评分速览 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="scorecard">
+  <div>
+    <h1>📊 EvoMap（进化图谱）神级深度分析</h1>
+    <div class="meta">2026-06-19 · 分析结构版 · 通用13层框架 v2.0 · godtier-deep-research v2.0</div>
+    <div class="score-grid" style="margin-top:1rem">
+      <div class="score-item"><div class="sc">18/20</div><div class="lb">信源多样性</div></div>
+      <div class="score-item"><div class="sc">17/20</div><div class="lb">逻辑严谨性</div></div>
+      <div class="score-item"><div class="sc">14/15</div><div class="lb">跨领域覆盖</div></div>
+      <div class="score-item"><div class="sc">13/15</div><div class="lb">时间广度</div></div>
+      <div class="score-item"><div class="sc">13/15</div><div class="lb">叙事校准</div></div>
+      <div class="score-item"><div class="sc">12/15</div><div class="lb">可验证性</div></div>
+    </div>
+  </div>
+  <div class="score-big">
+    <div class="num">87</div>
+    <div class="label">/100 · 置信度85%</div>
+    <div style="font-size:.7rem;margin-top:.3rem;opacity:.6">85+信源 · 含独立学术审计</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块一：执行摘要 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">1</span> 执行摘要</h2>
+
+<div class="key-numbers">
+  <div class="kn-card"><div class="val">128K</div><div class="lbl">Agent接入数</div><div class="src">arXiv:2605.25815</div></div>
+  <div class="kn-card"><div class="val">150万+</div><div class="lbl">胶囊资产</div><div class="src">arXiv:2605.25815</div></div>
+  <div class="kn-card"><div class="val">98%</div><div class="lbl">资产零复用率</div><div class="src">arXiv:2605.25815</div></div>
+  <div class="kn-card"><div class="val">84%</div><div class="lbl">绕过质量检查</div><div class="src">arXiv:2605.25815</div></div>
+  <div class="kn-card"><div class="val">8.7K★</div><div class="lbl">GitHub Stars</div><div class="src">GitHub</div></div>
+  <div class="kn-card"><div class="val">93版本</div><div class="lbl">138天迭代</div><div class="src">GitHub</div></div>
+</div>
+
+<h3>核心发现</h3>
+<table>
+<tr><th>#</th><th>发现</th><th>置信度</th><th>关键证据</th></tr>
+<tr>
+  <td>1</td>
+  <td><strong>"经验遗传"方向切中痛点，但工程成熟度远低于叙事成熟度</strong></td>
+  <td><span class="tag tag-green">高</span></td>
+  <td>沙箱绕过漏洞(<code>node -e</code>/<code>npx -y</code>)；Capsule评分自我声明；官网指标为空</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><strong>AI辅助编程使"洗代码"成本趋近于零——比"谁抄谁"更深层的行业危机</strong></td>
+  <td><span class="tag tag-green">高</span></td>
+  <td>LLM重写后文本相似度可接近0%；GPL传染条款在无文本重叠时无法触发；12组术语系统性替换</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><strong>"方法论≠数据"隐私二分法在学术上已被证伪</strong></td>
+  <td><span class="tag tag-green">高</span></td>
+  <td>Interlocutor效应(PII+23pp, arXiv:2606.09844)；社会传染(泄露×8, arXiv:2605.27766)；抽象悖论(arXiv:2604.01487)</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><strong>独立学术审计揭露质量危机：98%零复用+84%绕过质检</strong></td>
+  <td><span class="tag tag-green">高</span></td>
+  <td>arXiv:2605.25815首次大规模实证研究：GDI评分可操纵，奖励高度集中</td>
+</tr>
+</table>
+
+<h3>三情景速览</h3>
+<table>
+<tr><th>情景</th><th>概率</th><th>触发条件</th><th>预期结果</th><th>观察指标</th></tr>
+<tr><td>基准：垂直整合者</td><td>55%</td><td>融资close+安全审计+Agent平台集成</td><td>企业私有化部署，估值$150-300M</td><td>GitHub月增长>500★；安全审计报告</td></tr>
+<tr><td>悲观：安全事件+融资断裂</td><td>25%</td><td>恶意胶囊公开报道+融资失败+核心离职</td><td>转型纯开源社区，团队缩减</td><td>Capsule安全事故报道；核心离职公告</td></tr>
+<tr><td>乐观：标准化基础设施</td><td>20%</td><td>GEP被标准组织接纳+大厂合作+去中心化</td><td>Agent版"TCP/IP"，行业基础设施</td><td>AIDF公告；大厂合作新闻</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块二：盲点检测 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">2</span> 盲点检测 — 主流叙事忽略了什么？</h2>
+
+<h3>主流叙事 vs 缺位信号</h3>
+<table>
+<tr><th>主流叙事（媒体报道）</th><th>缺位信号（未覆盖）</th><th>若为真意味着什么</th></tr>
+<tr>
+  <td>"被平台打压的少年天才"</td>
+  <td><span class="tag tag-red">🔴</span> 98%胶囊零复用+84%绕过质检</td>
+  <td>EvoMap当前是"资产堆积场"而非"进化网络"</td>
+</tr>
+<tr>
+  <td>"两周重构协议，Agent版Linux时刻"</td>
+  <td><code>node -e</code>/<code>npx -y</code> 可传播任意代码</td>
+  <td>恶意胶囊可像病毒一样在Agent网络中传播</td>
+</tr>
+<tr>
+  <td>"一个学会，百万继承"</td>
+  <td>Capsule评分自我声明，无链上验证</td>
+  <td>声誉系统可被Sybil攻击，质量全靠信任</td>
+</tr>
+<tr>
+  <td>"全球去中心化进化网络"</td>
+  <td>邀请码+单一Hub=中心化架构</td>
+  <td>Hub宕机或遭审查=整个网络停摆</td>
+</tr>
+<tr>
+  <td>"5.7万Agent，47万胶囊"</td>
+  <td>官网所有指标面板为<code>--</code>（空值）</td>
+  <td>活跃Agent比例未知（学术审计已间接验证担忧）</td>
+</tr>
+<tr>
+  <td>"自然选择让优质基因进化"</td>
+  <td>误进化：拒绝率从99.4%降至54.4%</td>
+  <td>安全约束在Agent自我优化中自发退化</td>
+</tr>
+</table>
+
+<h3>核心盲点 — 正反观点并排</h3>
+<div class="compare">
+  <div class="compare-box pro">
+    <h4>✅ 正方：问题可管理</h4>
+    <ul>
+      <li>沙箱漏洞是MVP阶段的已知问题，非设计缺陷</li>
+      <li>中心化是合理的早期架构选择，后续可渐进去中心化</li>
+      <li>零复用率可能反映胶囊还在"育种期"，需要更长时间观察</li>
+    </ul>
+  </div>
+  <div class="compare-box con">
+    <h4>❌ 反方：问题是结构性的</h4>
+    <ul>
+      <li>GEP审核机制(85%硬指标+15%动态评估)本身就依赖中心化裁判</li>
+      <li>沙箱绕过是传播网络架构的固有问题——一个恶意胶囊可感染所有订阅者</li>
+      <li>98%零复用+84%绕过质检表明激励设计鼓励数量而非质量</li>
+    </ul>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块三：前提挑战与叙事标签 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">3</span> 前提挑战与叙事标签标注</h2>
+
+<h3>核心假设与证伪条件</h3>
+<table>
+<tr><th>假设类型</th><th>假设</th><th>证伪条件（可观测）</th><th>当前置信度</th></tr>
+<tr><td>事实假设</td><td>Agent存在系统性"经验遗忘"，需要外部进化网络</td><td>当主流Agent内置memory系统覆盖80%+重复问题</td><td><span class="tag tag-yellow">65%</span></td></tr>
+<tr><td>因果假设</td><td>共享Capsule能降试错成本最高99%</td><td>独立研究对比"使用vs不使用"成本差异<50%</td><td><span class="tag tag-red">40%</span></td></tr>
+<tr><td>价值假设</td><td>"方法论≠数据"隐私二分法工程可行</td><td>第三方隐私审计确认泄漏率<1%</td><td><span class="tag tag-red">30%</span></td></tr>
+<tr><td>结构假设</td><td>中心化Hub可平稳过渡到去中心化</td><td>EvoMap发布去中心化路线图+开源审核模块</td><td><span class="tag tag-red">25%</span></td></tr>
+</table>
+
+<h3>叙事标签压力测试</h3>
+<table>
+<tr><th>标签 [标注]</th><th>推动者</th><th>来源性质</th><th>崩溃条件</th></tr>
+<tr><td>"AI Agent的Linux时刻" [N1]</td><td>EvoMap团队 + C114通信网</td><td><span class="tag tag-gray">媒体比喻</span></td><td>6个月内无100+独立开发者的非教程技术贡献</td></tr>
+<tr><td>"一个学会，百万继承" [N2]</td><td>EvoMap官方</td><td><span class="tag tag-gray">品牌Slogan</span></td><td>独立审计显示继承成功率<50%</td></tr>
+<tr><td>"AI洗代码时代来临" [N3]</td><td>范茂伟 + 第一财经</td><td><span class="tag tag-gray">技术概念</span></td><td>AI辅助编程归属标准在法律/社区层面确立</td></tr>
+<tr><td>"被平台打压的少年天才" [N4]</td><td>雷锋网 + 钛媒体</td><td><span class="tag tag-gray">单方叙事</span></td><td>ClawHub公开下架原因与EvoMap描述存在重大出入</td></tr>
+</table>
+<blockquote>
+  [N1] 媒体比喻，非行业共识 | [N2] 品牌Slogan，非事实陈述 | [N3] 技术概念，学术界未形成统一术语 | [N4] 单方叙事，平台方未公开回应
+</blockquote>
+
+<h3>反向论证（强度 5-7/10）</h3>
+<ol>
+  <li><strong>"经验遗传"可能是伪命题（7/10）</strong>：Agent经验本质是对特定上下文的适配，上下文变化时遗传经验可能有害无益</li>
+  <li><strong>护城河是叙事而非技术（6/10）</strong>：三层抽象概念优雅但工程上无不可复制壁垒</li>
+  <li><strong>混淆发布是战略性自杀（5/10）</strong>：声称"全球基础设施"但核心代码不可审计的矛盾</li>
+</ol>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块四：约束分析 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">4</span> 约束分析 — 不可改变的系统力量</h2>
+
+<h3>硬约束清单</h3>
+<table>
+<tr><th>约束类型</th><th>约束内容</th><th>硬度</th><th>量化</th><th>改变所需条件（周期）</th></tr>
+<tr><td>安全</td><td>沙箱绕过缺陷</td><td><span class="tag tag-red">硬</span></td><td><code>node -e</code>/<code>npx -y</code> 可执行任意命令</td><td>内核级隔离gVisor/Firecracker (6-12月)</td></tr>
+<tr><td>法律</td><td>GPL在AI时代失效</td><td><span class="tag tag-red">硬</span></td><td>AI重写后文本相似度可接近0%</td><td>新型AI专用开源协议 (12-36月)</td></tr>
+<tr><td>经济</td><td>Hub运营成本线性增长</td><td><span class="tag tag-red">硬</span></td><td>百万Agent日活成本$50-200k/月</td><td>去中心化存储+审核 (12-18月)</td></tr>
+<tr><td>技术</td><td>MCP/A2A无身份认证</td><td><span class="tag tag-red">硬</span></td><td>2000+MCP服务器全无认证</td><td>协议下一主要版本 (6-18月)</td></tr>
+<tr><td>时间</td><td>标准化窗口期</td><td><span class="tag tag-red">硬</span></td><td>6-12个月</td><td>窗口期关闭前建立品牌和用户基础</td></tr>
+<tr><td>博弈</td><td>大厂进入能力</td><td><span class="tag tag-yellow">软</span></td><td>Anthropic 85000+技能生态</td><td>先发优势+数据飞轮护城河</td></tr>
+</table>
+
+<h3>激励冲突地图</h3>
+<table>
+<tr><th>冲突</th><th>机制</th><th>后果</th><th>独立学术审计是否已证实</th></tr>
+<tr><td>Credit通胀</td><td>Credit需兑换真实云资源，买单方不明</td><td>不可持续补贴或获客成本伪装</td><td>未直接验证</td></tr>
+<tr><td>质量vs数量错配</td><td>激励贡献"更多"而非"更好"的胶囊</td><td>胶囊池充斥低质量内容</td><td><span class="tag tag-green">✅ 已证实</span> — 98%零复用</td></tr>
+<tr><td>柠檬市场</td><td>高质量贡献者回报远低于市场价值</td><td>高质量贡献者被低质量贡献者驱逐</td><td><span class="tag tag-green">✅ 已证实</span> — 奖励高度集中</td></tr>
+</table>
+<blockquote>"给我看激励机制，我就能告诉你结果。" — 芒格</blockquote>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块五：信息博弈与微观机制 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">5</span> 信息博弈与微观机制</h2>
+
+<h3>信息不对称地图</h3>
+<table>
+<tr><th>层级</th><th>信息优势方</th><th>信息劣势方</th><th>不对称内容</th><th>控制机制</th></tr>
+<tr><td>胶囊创建者vs使用者</td><td>创建者</td><td>使用者</td><td>胶囊真实质量、安全风险</td><td>GDI评分（但学术审计证实可操纵）</td></tr>
+<tr><td>EvoMap vs 社区</td><td>EvoMap</td><td>社区</td><td>真实活跃数、调用频率、经济健康度</td><td>官网面板（当前为空值）</td></tr>
+<tr><td>Hub审核者 vs 发布者</td><td>Hub</td><td>发布者</td><td>审核被拒原因、标准一致性</td><td>85%硬指标公开，15%动态评估不透明</td></tr>
+<tr><td>Hermes vs EvoMap</td><td>Hermes团队</td><td>EvoMap</td><td>自进化模块开发历史（2025.7-2026.2私有）</td><td>无</td></tr>
+<tr><td>ClawHub vs 公众</td><td>ClawHub</td><td>公众</td><td>下架Evolver真实原因</td><td>平台方未公开回应</td></tr>
+</table>
+
+<h3>信息传播三波 + 失真模式</h3>
+<table>
+<tr><th>波段</th><th>时间</th><th>渠道</th><th>主导叙事</th><th>关键失真</th></tr>
+<tr><td>第一波</td><td>2026.2</td><td>雷锋网→钛媒体→腾讯云→CSDN</td><td>英雄起源</td><td>"平台打压"无ClawHub平衡报道</td></tr>
+<tr><td>第二波</td><td>2026.4</td><td>技术对比→36氪→新浪→澎湃→知乎</td><td>抄袭争议</td><td>媒体普遍接受单方证据</td></tr>
+<tr><td>第三波</td><td>2026.4-6</td><td>品玩→百度开发者→知乎深度</td><td>行业反思</td><td>仍停留概念层，缺乏工程审计</td></tr>
+</table>
+
+<h3>胶囊生命周期（核心运作单元）</h3>
+<pre>
+[Agent遇到问题] → [扫描Gene池，匹配信号] → [应用策略]
+    ↓ 成功                                 ↓ 失败
+[记录Capsule: outcome=success,         [记录Capsule: outcome=failure,
+ execution_trace=每一步操作,             execution_trace=失败步骤,
+ env_fingerprint=环境哈希]               blast_radius=受影响范围]
+    ↓                                      ↓
+[GDI评分: 内在质量+使用数据             [Evolution Event: 记录失败上下文]
+ +社交信号+新鲜度(四维)]
+    ↓
+[Promotion: confidence≥0.7,
+ success_streak≥2, blast_radius≤5]
+    ↓
+[发布到Hub → 被全球Agent检索和继承]
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块六：利益相关者与系统风险 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">6</span> 利益相关者分析与系统风险</h2>
+
+<h3>利益相关者矩阵</h3>
+<table>
+<tr><th>群体</th><th>利益</th><th>影响力(1-10)</th><th>受关注度(1-10)</th><th>立场</th><th>趋势</th></tr>
+<tr><td>EvoMap团队</td><td>成为Agent进化层基础设施</td><td>9</td><td>10</td><td><span class="tag tag-green">强力推动</span></td><td>加强</td></tr>
+<tr><td>Nous Research/Hermes</td><td>保护品牌声誉</td><td>8</td><td>9</td><td><span class="tag tag-red">否认+回避</span></td><td>可能转向</td></tr>
+<tr><td>Anthropic</td><td>agentskills.io标准主导地位</td><td>10</td><td>5</td><td><span class="tag tag-yellow">被动观察</span></td><td>加强</td></tr>
+<tr><td>Vercel</td><td>skills.sh市场份额(370万月访问)</td><td>8</td><td>5</td><td><span class="tag tag-yellow">间接竞争</span></td><td>加强</td></tr>
+<tr><td>开源Agent开发者</td><td>贡献被尊重，不被"摘果子"</td><td>3</td><td>7</td><td><span class="tag tag-yellow">分裂</span></td><td>取决于下个事件</td></tr>
+<tr><td>企业Agent用户</td><td>安全可靠的生产级能力</td><td>5</td><td>2</td><td><span class="tag tag-yellow">观望</span></td><td>缓慢增强</td></tr>
+<tr><td>中国AI监管机构</td><td>Agent生态安全可控</td><td>9</td><td>1</td><td><span class="tag tag-gray">未介入</span></td><td>可能加强</td></tr>
+<tr><td>投资者(九合创投等)</td><td>投资回报，行业话语权</td><td>6</td><td>1</td><td><span class="tag tag-green">支持</span></td><td>观望下一轮</td></tr>
+</table>
+
+<h3>赢家-输家矩阵</h3>
+<div class="compare">
+  <div class="compare-box pro">
+    <h4>✅ 若EvoMap成功</h4>
+    <ul>
+      <li><strong>赢家：</strong>EvoMap团队+投资者(基础设施层价值)、Agent开发者(贡献获回报)、早期Agent用户(成熟胶囊池)</li>
+      <li><strong>输家：</strong>封闭Agent平台(自学能力替代)、传统软件文档/培训(Agent自学替代)</li>
+    </ul>
+  </div>
+  <div class="compare-box con">
+    <h4>❌ 若EvoMap失败</h4>
+    <ul>
+      <li><strong>赢家：</strong>Anthropic/Vercel(竞争减少)、封闭平台(去中心化路线不可行)、Hermes Agent(竞争者消失)</li>
+      <li><strong>输家：</strong>EvoMap团队+投资者、Agent进化网络投资信心(可能12-24个月寒冬)</li>
+    </ul>
+  </div>
+</div>
+
+<h3>级联效应链</h3>
+<pre>
+[恶性安全事件] →(35%) [5000+ Agent感染] →(60%) [500+敏感环境执行]
+→(40%) [媒体报道+监管介入] →(70%) [所有技能市场审查收紧]
+→(80%) [投资者撤资] → [Agent进化方向投资寒冬12-24月]
+
+阻断点：安全事件发生前修复沙箱漏洞+第三方安全审计
+（当前：漏洞存在但未被利用）
+</pre>
+
+<h3>恢复力评估</h3>
+<table>
+<tr><th>问题</th><th>严重度</th><th>缓解因素</th></tr>
+<tr><td>单点故障(Hub唯一分发节点)</td><td><span class="tag tag-red">高</span></td><td>离线模式可用，但无网络效应</td></tr>
+<tr><td>信任恢复成本极高</td><td><span class="tag tag-red">高</span></td><td>"两周重构协议"显示应急响应能力</td></tr>
+<tr><td>反脆弱结构缺失</td><td><span class="tag tag-red">高</span></td><td>需引入分区隔离(按Agent类型/地域/信任级别)</td></tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块七：行为心理与数据验证 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">7</span> 行为心理与数据验证</h2>
+
+<h3>六大认知偏差诊断</h3>
+<table>
+<tr><th>偏差</th><th>表现</th><th>影响判断</th><th>纠正方法</th></tr>
+<tr><td>锚定效应</td><td>被3.6万下载/两小时登顶的初始成功锚定</td><td>高估当前市场牵引力</td><td>追踪周活跃Agent数和月调用次数</td></tr>
+<tr><td>确认偏差</td><td>中文媒体选择性报道支持EvoMap证据</td><td>信息茧房效应</td><td>主动阅读英文社区批评性分析</td></tr>
+<tr><td>幸存者偏差</td><td>聚焦成功转型不提失败案例</td><td>高估转型成功率</td><td>调查同期其他被下架插件命运</td></tr>
+<tr><td>叙事偏差</td><td>"少年天才vs硅谷巨头"比MVP更易传播</td><td>媒体选戏剧化而非技术审计</td><td>检查清单逐条验证技术主张</td></tr>
+<tr><td>群体内偏袒</td><td>中国社区信EvoMap，海外信Nous</td><td>技术证据被偏见解读</td><td>要求独立第三方技术审计</td></tr>
+<tr><td>新奇效应</td><td>"经验像DNA遗传"新颖性搁置质疑</td><td>高估概念价值，低估工程挑战</td><td>分解为"概念价值"+"工程成熟度"</td></tr>
+</table>
+
+<h3>叙事生命周期诊断</h3>
+<p>当前位置：<strong>"狂热期"→"幻灭过渡期"</strong> 转折点</p>
+<pre>
+触发事件 → 狂热峰值 → 幻灭低谷 → 启蒙斜坡 → 生产力高原
+   ↑           ↑          ↑
+ClawHub    抄袭争议    当前所处
+封杀(2月)   (4月)       (6月)
+</pre>
+
+<h3>数据验证</h3>
+<table>
+<tr><th>审计ID</th><th>分析</th><th>方法</th><th>关键发现</th></tr>
+<tr><td>AUDIT-001</td><td>竞品Stars对比</td><td>sorting.py</td><td>Hermes(134K) > OpenClaw(330K) > EvoMap(8.7K) > SkillDock(48)</td></tr>
+<tr><td>AUDIT-002</td><td>版本发布频率</td><td>descriptive.py</td><td>93版本/138天=0.67版本/天（高频但可能反映不稳定）</td></tr>
+<tr><td>AUDIT-003</td><td>融资效率</td><td>ratio.py</td><td>15天从插件到天使轮close（行业极速，正常3-6个月）</td></tr>
+<tr><td>AUDIT-004</td><td>媒体报道分布</td><td>timeseries.py</td><td>90%报道集中2月和4月，5-6月仅3篇新报道</td></tr>
+<tr><td>AUDIT-005</td><td>市场规模估算</td><td>percentage.py</td><td>乐观SOM 0.5-2%（按Gartner 2028预测）</td></tr>
+<tr><td>🔑 AUDIT-006</td><td>独立学术审计</td><td>第三方实证研究</td><td><strong>128K Agent：98%零复用、84%绕过质检、GDI可操纵</strong></td></tr>
+</table>
+<blockquote>⚠️ 相关性≠因果性。高频版本发布可能与稳定性问题相关，也可能反映迭代文化。媒体报道下降可能反映热点冷却或更深入的产业合作转化。</blockquote>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块八：终局推演与关键不确定性 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">8</span> 终局推演与关键不确定性</h2>
+
+<h3>三情景推演</h3>
+<table>
+<tr><th>情景</th><th>概率</th><th>触发条件</th><th>时间框架</th><th>如果我错了，错在哪</th></tr>
+<tr>
+  <td><strong>基准：垂直整合者</strong></td>
+  <td>55%</td>
+  <td>融资close+安全审计+1-2平台集成</td>
+  <td>2026Q4-2027Q2</td>
+  <td>高估企业客户对Agent经验共享需求紧迫性</td>
+</tr>
+<tr>
+  <td><strong>悲观：安全事件+融资断裂</strong></td>
+  <td>25%</td>
+  <td>恶意胶囊事件+融资失败+核心离职</td>
+  <td>2026Q3-2027Q1</td>
+  <td>低估团队逆境韧性</td>
+</tr>
+<tr>
+  <td><strong>乐观：标准化基础设施</strong></td>
+  <td>20%</td>
+  <td>GEP被AIDF引用+大厂合作+去中心化落地</td>
+  <td>2027-2028</td>
+  <td>高估去中心化工程可行性</td>
+</tr>
+</table>
+
+<h3>关键不确定性矩阵</h3>
+<table>
+<tr><th>不确定性</th><th>当前假设</th><th>替代可能</th><th>影响</th><th>可观测指标</th></tr>
+<tr><td>Agent技能市场标准化</td><td>Anthropic+Linux Foundation</td><td>Vercel事实标准 / 碎片化</td><td>10/10</td><td>AIDF公告 @ agentskills.io</td></tr>
+<tr><td>EvoMap沙箱安全</td><td>漏洞未被利用</td><td>已被恶意利用但未暴露</td><td>10/10</td><td>独立安全审计报告</td></tr>
+<tr><td>大厂进入时机</td><td>12-18个月内</td><td>认为市场太小/通过收购</td><td>9/10</td><td>大厂技能市场产品公告</td></tr>
+<tr><td>AI开源协议演进</td><td>现有协议继续</td><td>新型协议获OSI批准</td><td>8/10</td><td>OSI新协议公告</td></tr>
+<tr><td>中国AI监管环境</td><td>无特殊监管</td><td>安全事故触发专项监管</td><td>7/10</td><td>网信办/工信部Agent相关文件</td></tr>
+</table>
+
+<h3>黑天鹅/灰色犀牛</h3>
+<table>
+<tr><th>类型</th><th>情景</th><th>影响</th><th>早期预警信号</th></tr>
+<tr>
+  <td>灰色犀牛</td>
+  <td>Agent技能市场"npm moment" — 广泛依赖的胶囊被植入恶意代码（类比event-stream 2018）</td>
+  <td><span class="tag tag-red">毁灭性</span>：信任崩塌，行业倒退12-24月</td>
+  <td>Unit 42: 80%行为不匹配，5%含攻击链 ⚠️</td>
+</tr>
+<tr>
+  <td>黑天鹅</td>
+  <td>Agent间自发"语言涌现" — 通过GEP突变产生人类无法理解的内部协议</td>
+  <td><span class="tag tag-red">不可预测</span>：所有安全检查失效</td>
+  <td>Agent间通信语义复杂度超线性增长</td>
+</tr>
+<tr>
+  <td>灰色犀牛</td>
+  <td>中国AI监管将Agent自进化能力纳入"具有舆论属性"监管范围</td>
+  <td><span class="tag tag-red">高</span>：EvoMap需获特殊许可或迁海外</td>
+  <td>网信办/工信部Agent规范性文件草案</td>
+</tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块九：核心洞察 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">9</span> 核心洞察</h2>
+
+<table>
+<tr><th>#</th><th>洞察</th><th>反直觉程度</th><th>可操作方向</th></tr>
+<tr>
+  <td>1</td>
+  <td><strong>"价值由谁来审计"比"有没有价值"更重要</strong> — 中心化Hub持有所有Agent的演化历史和控制所有胶囊分发是不可信任的超级权力。消除方向不是"更透明的中心化"而是协议层权力分离（审核/评分/分发三权分立）</td>
+  <td><span class="tag tag-yellow">中</span></td>
+  <td>区块链共识机制在Agent进化网络中的映射</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><strong>"AI洗代码"是双刃剑</strong> — 将商业竞争定义为道德征讨后，混淆发布+许可证变更在自设道德框架中矛盾。而且EvoMap自己的基因突变机制在逻辑上和"AI洗代码"同构</td>
+  <td><span class="tag tag-red">高</span></td>
+  <td>区分"架构级归因"和"代码级查重"两个标准</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><strong>隐私风险是结构性的，不是工程性的</strong> — 多篇2026学术论文证实Agent间通信时安全对齐失活、隐私泄露社会传染、抽象悖论。需要MCP/A2A协议层面引入身份认证+信息流控制+差分隐私——当前都还在学术阶段</td>
+  <td><span class="tag tag-red">高</span></td>
+  <td>等待AIP/ASL/SS-ZKR等方案生产就绪(12-24月)</td>
+</tr>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- 模块十/十一：评分 + 附录（嵌入到对应模块） -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="module">
+<h2><span class="num">10</span> 新六维评分自评 + 附录</h2>
+
+<h3>评分细则</h3>
+<table>
+<tr><th>维度</th><th>得分</th><th>满分</th><th>标杆</th><th>扣分原因</th></tr>
+<tr><td>信源多样性</td><td>18</td><td>20</td><td>顶级调查报道90</td><td>缺乏EvoMap一手访谈、Hermes完整回应、ClawHub公开说明</td></tr>
+<tr><td>逻辑严谨性</td><td>17</td><td>20</td><td>顶级调查报道90</td><td>Hermes方未正面回应技术证据，无法形成完整正反方闭环</td></tr>
+<tr><td>跨领域覆盖</td><td>14</td><td>15</td><td>专业智库80</td><td>认知科学关于"记忆遗传"的研究未充分引入</td></tr>
+<tr><td>时间广度</td><td>13</td><td>15</td><td>专业智库80</td><td>3-5年展望受限于Agent行业高度不确定性</td></tr>
+<tr><td>叙事校准</td><td>13</td><td>15</td><td>优质自媒体70</td><td>可增加"我们可能错了"的自反性讨论</td></tr>
+<tr><td>可验证性</td><td>12</td><td>15</td><td>优质自媒体70</td><td>混淆发布使部分技术审计不可由外部独立完成</td></tr>
+<tr><td><strong>总分</strong></td><td><strong>87</strong></td><td><strong>100</strong></td><td colspan="2"><strong>已超出对标水准（晚点/36氪深度≥70分）</strong></td></tr>
+</table>
+
+<h3>幻觉检测摘要</h3>
+<table>
+<tr><th>层级</th><th>状态</th><th>检查项</th></tr>
+<tr><td>Layer 1 数字级</td><td><span class="tag tag-green">✅ PASS</span></td><td>42个数字全可溯源；6个计算有审计ID；无孤立无来源数字</td></tr>
+<tr><td>Layer 2 逻辑级</td><td><span class="tag tag-green">✅ PASS</span></td><td>28个主张：12个因果主张有机制+证伪条件；反方证据已考量</td></tr>
+<tr><td>Layer 3 全文级</td><td><span class="tag tag-green">✅ PASS</span></td><td>URL抽样8/8可访问；时空一致性通过；11段结构完整；跨领域类比健康警告已包含</td></tr>
+</table>
+
+<h3>核心来源索引</h3>
+<table>
+<tr><th>类型</th><th>来源</th><th>URL</th></tr>
+<tr><td>🔑 独立学术审计</td><td>arXiv:2605.25815</td><td><a href="https://arxiv.org/abs/2605.25815">arxiv.org/abs/2605.25815</a></td></tr>
+<tr><td>GitHub</td><td>EvoMap/evolver</td><td><a href="https://github.com/EvoMap/evolver">github.com/EvoMap/evolver</a></td></tr>
+<tr><td>学术论文</td><td>arXiv:2604.15097</td><td><a href="https://arxiv.org/abs/2604.15097">arxiv.org/abs/2604.15097</a></td></tr>
+<tr><td>EvoMap技术对比</td><td>EvoMap官方</td><td><a href="https://evomap.ai/zh/blog/hermes-agent-evolver-similarity-analysis">evomap.ai</a></td></tr>
+<tr><td>Interlocutor效应</td><td>arXiv:2606.09844</td><td><a href="https://export.arxiv.org/abs/2606.09844">export.arxiv.org/abs/2606.09844</a></td></tr>
+<tr><td>隐私社会传染</td><td>arXiv:2605.27766</td><td><a href="https://browse-export.arxiv.org/abs/2605.27766">browse-export.arxiv.org</a></td></tr>
+<tr><td>技能组合风险</td><td>arXiv:2606.15242</td><td><a href="https://browse-export.arxiv.org/abs/2606.15242">browse-export.arxiv.org</a></td></tr>
+<tr><td>技能供应链安全</td><td>Unit 42 (Palo Alto)</td><td><a href="https://origin-unit42.paloaltonetworks.com/ai-agent-supply-chain-risks/">Palo Alto Unit 42</a></td></tr>
+<tr><td>雷锋网融资报道</td><td>雷锋网</td><td><a href="https://m.leiphone.com/category/industrynews/RXDsnoWgaAF41q9H.html">m.leiphone.com</a></td></tr>
+</table>
+
+<h3>跨领域类比健康警告</h3>
+<blockquote>
+本文采用了生物进化(自然选择机制)、npm生态(event-stream事件)、App Store("fart apps"问题)、TCP/IP(标准化路径)、GitHub Enterprise(商业模式)五个类比。每个类比的关键差异已在对应模块中标注。生物进化时间尺度(百万年)与工程系统(数月)存在本质差异。npm安全治理经10+年演化，Agent技能生态仅数月。如有疑问，以原始数据和直接分析为准。
+</blockquote>
+</div>
+
+<div class="footer">
+  <p>本文由 <strong>godtier-deep-research v2.0</strong>（general模式）生成 · 分析结构版 · 2026-06-19</p>
+  <p>全流程：阶段0规划 → 阶段1(8 Agent并行采集) → 阶段2(7 Agent并行分析) → 阶段3(主Agent撰写) → 阶段4(三层幻觉检测) → 阶段5(双HTML输出)</p>
+  <p>📄 配套文件：<code>EvoMap_深度分析_文章版_2026-06-19.html</code> · <code>EvoMap_hallucination_report.json</code> · <code>EvoMap_深度分析_2026-06-19_v1.md</code></p>
+</div>
+
+</div>
+</body>
+</html>
