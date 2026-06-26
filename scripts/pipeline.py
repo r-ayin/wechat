@@ -304,6 +304,23 @@ def cmd_plan(args) -> None:
 
 
 # =========================================================================
+# 命令：tool（统一包装独立优化工具）
+# =========================================================================
+
+def cmd_tool(args) -> None:
+    """运行 scripts/ 下的独立工具（metrics_panel/feedback_collector/style_evolution/...）。
+    用法: python scripts/pipeline.py tool <name> [args...]，等价于 python scripts/<name>.py [args...]
+    """
+    name = args.name
+    script = _ROOT / "scripts" / f"{name}.py"
+    if not script.exists():
+        raise SystemExit(f"❌ 未知工具: {name}（{script} 不存在）")
+    cmd = ["python3", str(script)] + args.rest
+    r = subprocess.run(cmd, cwd=str(_ROOT))
+    sys.exit(r.returncode)
+
+
+# =========================================================================
 # CLI
 # =========================================================================
 
@@ -347,6 +364,11 @@ def main():
     pl.add_argument("--from", dest="from_phase", default=None, choices=PHASE_ORDER)
     pl.add_argument("--to", default=None, choices=PHASE_ORDER)
     pl.set_defaults(func=cmd_plan)
+
+    t = sub.add_parser("tool", help="运行独立优化工具(metrics_panel/feedback_collector/style_evolution/...)")
+    t.add_argument("name", help="工具名（scripts/<name>.py）")
+    t.add_argument("rest", nargs=argparse.REMAINDER, help="透传给工具的参数")
+    t.set_defaults(func=cmd_tool)
 
     args = p.parse_args()
     args.func(args)

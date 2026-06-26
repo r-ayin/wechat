@@ -356,7 +356,33 @@ def build_search_queries(pillar: str = None, mode: str = "hybrid") -> list[dict]
             "category": cat,
         })
 
-    return queries
+    # HS-06：查询去重——分词 Jaccard 相似度 >0.6 合并（保留更长/更具体者），省查询槽
+    return _dedup_queries(queries)
+
+
+def _dedup_queries(queries: list[dict], threshold: float = 0.6) -> list[dict]:
+    """查询级去重：避免近义查询重复扫描。"""
+    def tok(s: str) -> set:
+        return set(s.split())
+    deduped: list[dict] = []
+    for q in queries:
+        qt = tok(q["query"])
+        is_dup = False
+        for i, kept in enumerate(deduped):
+            kt = tok(kept["query"])
+            if not qt or not kt:
+                continue
+            union = qt | kt
+            jaccard = len(qt & kt) / len(union) if union else 0
+            if jaccard >= threshold:
+                # 保留更长/更具体的查询
+                if len(q["query"]) > len(kept["query"]):
+                    deduped[i] = q
+                is_dup = True
+                break
+        if not is_dup:
+            deduped.append(q)
+    return deduped
 
 
 def build_event_query() -> list[dict]:

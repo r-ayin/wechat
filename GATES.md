@@ -20,10 +20,19 @@
 - [ ] 内容发布前有人工审核环节
 - [ ] 热点数据有去重机制
 - [ ] 人格盲测"这像你写的" > 70%
+- [ ] **风格指纹 advisory** — `style_fingerprint.py` 句长/括号/破折号密度对照 STYLE.md 基线（gate verify 3 自动跑，初值告警不阻断）
+- [ ] **结尾反模式 advisory** — `ending_detector.py` 检测"结构问题→个体方案"矛盾与简单答案
+- [ ] **逻辑一致性代码化 advisory** — `structural_consistency_checker.py` 论点维度 vs 结尾方案维度比对
+- [ ] **写作前 outline** — Phase 3 `3.outline` 产 section-level 大纲（节数≥5/总字数/论点齐全）再写
 
 ## 🟢 NICE（尽量满足）
 
-- [ ] 内容发布后有效果数据回传
-- [ ] 选题到发布的端到端耗时被记录
-- [ ] 竞品分析定期更新（每月至少一次）
+- [ ] 内容发布后有效果数据回传（`pipeline.py tool feedback_collector ingest ...`）
+- [ ] 选题到发布的端到端耗时被记录（`pipeline.py tool metrics_panel`）
+- [ ] 竞品分析定期更新（每月至少一次，`competitor_analyzer.py` 产出确定性 metrics）
 - [ ] QA 报告归档保存
+- [ ] 发布反馈驱动 STYLE.md 进化（`style_evolution.py evolve`，PD-01）
+- [ ] 跨文章 persona drift 监控（`persona_drift.py`，PD-02）
+- [ ] 预测性选题（`predictive_scanner.py`，HS-04）
+- [ ] 研究缓存/知识沉淀（`research_cache.py` / `knowledge_base.py`，A2/A4）
+- [ ] 多平台派生（`multi_platform.py`，A3）

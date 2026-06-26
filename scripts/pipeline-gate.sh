@@ -209,6 +209,23 @@ gate_verify() {
             [ "$title_len" -lt 8 ] && { echo "❌ 标题过短(<8字, 公众号列表页无辨识度)"; exit 3; }
             [ "$title_len" -gt 35 ] && echo "⚠️  标题过长(>35字, 公众号推送中被截断)"
             grep -qE "你只需要|只要我们还" "$f" && echo "⚠️  检测到可能反模式结尾"
+            # W-02/W-06/QAH-03：确定性风格/结尾/逻辑一致性 advisory 检查（只告警不阻断）
+            local full="$WECHAT_ROOT/$f"
+            for checker in style_fingerprint ending_detector structural_consistency_checker; do
+                local script="$WECHAT_ROOT/scripts/$checker.py"
+                if [ -f "$script" ]; then
+                    local out rc
+                    set +e
+                    out=$(python3 "$script" "$full" 2>&1)
+                    rc=$?
+                    set -e
+                    if [ $rc -eq 1 ]; then
+                        echo "⚠️  $checker: BLOCK（详见 --tool $checker）"
+                    elif [ $rc -eq 2 ]; then
+                        echo "⚠️  $checker: WARN"
+                    fi
+                fi
+            done
             echo "✅ Phase 3 验证通过 (${size} bytes)"
             ;;
         "3.5")

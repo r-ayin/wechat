@@ -387,6 +387,10 @@ def extract_data_claims(text: str) -> list[dict]:
             has_decimal = '.' in data_text or '．' in data_text
             is_approximate = bool(re.search(r'(?:约|大概|大约|左右|多|出头|以上|以下)', context))
 
+            # QAH-05：提取数据所属年份（上下文最近的年份标注），供时效性检测
+            year_match = re.search(r'(20[12]\d|19\d{2})', context)
+            data_year = year_match.group(1) if year_match else None
+
             claims.append({
                 "id": f"D-{len(claims)+1:03d}",
                 "type": "DATA",
@@ -397,6 +401,7 @@ def extract_data_claims(text: str) -> list[dict]:
                 "has_source_in_text": has_source_nearby,
                 "is_precise": has_decimal,
                 "is_approximate": is_approximate,
+                "data_year": data_year,
                 "risk": "high" if (has_decimal and not has_source_nearby and not is_approximate) else "medium",
                 "verification_hint": f"搜索确认「{data_text}」的数据来源" +
                                      ("（精确数字无来源，高风险）" if has_decimal and not has_source_nearby else ""),

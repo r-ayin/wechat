@@ -58,6 +58,24 @@ triggers:
 - `--draft`：min_bytes 降至 12000（≈4000 字），供草稿流通。pipeline.py 会把 `WECHAT_MIN_BYTES` 自动注入到每个 gate/code 步骤的 cmd 前缀，无需手动设 env。
 - 默认严格 45000 bytes（≈15000 汉字，CLAUDE.md 标准）。`--from N` 会传递式校验前置 phase 已通过 verify（draft 档对短文前置也放宽）。
 
+### 优化工具（统一入口）
+`python scripts/pipeline.py tool <name> [args]` 透传到 `scripts/<name>.py`：
+- `style_fingerprint <article>` — 风格指纹（句长/括号/破折号 vs STYLE.md 基线）
+- `competitor_analyzer <article>` — 竞品结构 NLP 五维确定性 metrics
+- `title_scorer --titles '[...]'` — 标题候选评分排序
+- `ending_detector <article>` — 反模式结尾检测
+- `structural_consistency_checker <article>` — 逻辑一致性代码化
+- `style_evolution record|evolve` — 发布反馈→STYLE.md 进化建议（PD-01）
+- `persona_drift <dir>` — 跨文章人格漂移检测（PD-02）
+- `predictive_scanner calendar|rising` — 预测性选题（HS-04）
+- `feedback_collector ingest|report` — post-publish 反馈回传（A1）
+- `research_cache get|put|diff` — 研究缓存增量（A2）
+- `knowledge_base add|query|stats` — 知识沉淀（A4）
+- `multi_platform <article> --platform douyin|xiaohongshu` — 多平台派生（A3）
+- `metrics_panel [topic]` — 可观测性面板（A5）
+
+gate verify 3 会自动跑 style_fingerprint/ending_detector/structural_consistency_checker 作为 advisory（只告警不阻断）。
+
 ## 阶段速览（细节在 steps.py，无需主 LLM 记忆）
 
 | Phase | kind | 产出 | 门禁 |

@@ -121,6 +121,33 @@ def _task_phase2(slug, date, min_bytes) -> str:
 """
 
 
+def _task_phase3_outline(slug, date, brief_path, min_bytes) -> str:
+    brief_line = f"消费 brief 的受众画像/情感锚点/行动导向字段。\n" if brief_path else ""
+    return f"""# Phase 3 子 agent 任务：section-level outline（W-01，写作前结构规划）
+
+选题: {slug} 日期: {date}
+
+## 输入
+- Phase 2 分析 {_research(slug, date, 'analysis')}
+- Phase 0 竞品 {_research(slug, date, 'competitor-style')}（标题规律/结构参考）
+- persona/SOUL.md、STYLE.md、PERSONA.md（风格约束）
+{brief_line}
+## 执行
+产出 section-level outline，写入 output/state/{slug}_outline.json，JSON 数组，每节含：
+- section：节标题（非正式小标题，仅规划用；正文不出现 ## ）
+- thesis：该节核心论点
+- key_persons / key_data：主要人物与数据
+- emotion_temperature：1-10（W-03 情感弧线；全文均值须在 STYLE.md 基线 ±2）
+- word_budget：字数预算（总和 ≥ {min_bytes}）
+- link_to_prev：与前节的逻辑衔接
+
+要求：节数 ≥ 5；总 word_budget ≥ {min_bytes}；每节有 thesis；情感曲线非单调（有起伏）。
+
+## 输出
+只写 output/state/{slug}_outline.json。后续 3.work 按此 outline 逐节展开（允许 ±20% 偏移）。
+"""
+
+
 def _task_phase3(slug, date, brief_path, min_bytes) -> str:
     brief_line = f"消费 brief：受众画像(语言复杂度)、情感锚点(温度参数)、个人关联(独特视角)、行动导向(CTA)。\n" if brief_path else ""
     return f"""# Phase 3 子 agent 任务：persona 人格化重写
@@ -135,10 +162,11 @@ def _task_phase3(slug, date, brief_path, min_bytes) -> str:
 - Phase 0 竞品 {_research(slug, date, 'competitor-style')}（标题规律参考）
 {brief_line}
 ## 执行（三步迁移法）
+0. 先读 output/state/{slug}_outline.json（3.outline 步骤产出），按其逐节展开（允许 ±20% 偏移）
 1. 提取 godtier 分析的纯结构骨架
 2. SOUL.md 作为世界观约束注入
 3. STYLE.md 15 维风格指纹控制文风
-4. 标题：基于 Phase 0 竞品标题规律（不是A是B / 冒号对照 / 引号反讽 / 身份词前置）
+4. 标题：基于 Phase 0 竞品标题规律，产 ≥5 个候选标题，写入 frontmatter `title_candidates` 数组（W-04，每条标注句式模板：不是A是B/冒号/引号反讽/身份词/数字悬念/问句）
 5. 摘要：100-150 字，含具体数字/场景/人物
 6. 文末 frontmatter 含标记：`SOUL+STYLE+PERSONA 全量注入`
 铁律：有名有姓人物 + 具体场景 + 可验证数据 + 热点钩子；理论引用≤20%；无 ## 小标题/列表/加粗；无脏话。
@@ -224,6 +252,10 @@ def build_steps(slug: str, date: str, brief_path: str | None, mode: str,
     add("0.work", "0", "subagent",
         task_file=_write_task(slug, "0.work", _task_phase0(slug, date, brief_path, mb)),
         output=_research(slug, date, "competitor-style"))
+    # P0-OPT-02：竞品结构 NLP 确定性分析（对竞品蒸馏报告产出 metrics）
+    add("0.analyze", "0", "code",
+        cmd=f"python scripts/competitor_analyzer.py {_research(slug, date, 'competitor-style')} > output/state/{slug}_competitor_metrics.json",
+        output=f"output/state/{slug}_competitor_metrics.json")
     add("0.verify", "0", "gate_verify",
         cmd=f"bash scripts/pipeline-gate.sh verify 0 {slug} {date}")
 
@@ -248,6 +280,13 @@ def build_steps(slug: str, date: str, brief_path: str | None, mode: str,
     # Phase 3
     add("3.check", "3", "gate_check",
         cmd=f"bash scripts/pipeline-gate.sh check 3 {slug} {date}")
+    # W-01：写作前 section-level outline
+    add("3.outline", "3", "subagent",
+        task_file=_write_task(slug, "3.outline", _task_phase3_outline(slug, date, brief_path, mb)),
+        output=f"output/state/{slug}_outline.json")
+    add("3.outline_check", "3", "code",
+        cmd=f"python -c \"import json,sys; d=json.load(open('output/state/{slug}_outline.json')); assert len(d)>=5, '节数<5'; assert sum(s.get('word_budget',0) for s in d)>={mb}, '总字数预算不足'; assert all(s.get('thesis') for s in d), '有节缺论点'; print('outline OK', len(d), '节')\"",
+        output=f"output/state/{slug}_outline.json")
     add("3.work", "3", "subagent",
         task_file=_write_task(slug, "3.work", _task_phase3(slug, date, brief_path, mb)),
         output=f"output/wechat_articles/*/{slug}_*_{date}.md")

@@ -204,7 +204,48 @@ def verify_claims(
 
         verified_claims.append(claim)
 
+    # QAH-04：多声明交叉验证——同主题数值不一致检测，标 needs_claude_review
+    cross_issues = cross_validate_claims(verified_claims)
+    for c in verified_claims:
+        c["cross_validation_issues"] = cross_issues.get(c["id"], [])
+
     return verified_claims
+
+
+def cross_validate_claims(claims: list[dict]) -> dict:
+    """QAH-04：检测同一事实多声明间的一致性。
+    找上下文相似（分词 Jaccard>0.4）但数值差异>2倍的 DATA 声明对，标记不一致。
+    返回 {claim_id: [issue 描述]}。
+    """
+    issues: dict = {}
+    data_claims = [c for c in claims if c.get("type") == "DATA"]
+    for i, a in enumerate(data_claims):
+        ta = set(a.get("context", "").split())
+        va = _extract_numeric_values(a.get("text", ""))
+        if not va:
+            continue
+        for b in data_claims[i + 1:]:
+            tb = set(b.get("context", "").split())
+            if not ta or not tb:
+                continue
+            jaccard = len(ta & tb) / len(ta | tb) if (ta | tb) else 0
+            if jaccard < 0.4:
+                continue
+            vb = _extract_numeric_values(b.get("text", ""))
+            if not vb:
+                continue
+            # 比较最大数值
+            ma, mb = max(va), max(vb)
+            if mb == 0:
+                continue
+            ratio = ma / mb
+            if ratio > 2.0 or ratio < 0.5:
+                msg = (f"与声明 {b['id']}「{b.get('text','')}」数值不一致"
+                       f"（{ma} vs {mb}，比值 {ratio:.2f}），上下文相似(J={jaccard:.2f})")
+                issues.setdefault(a["id"], []).append(msg)
+                issues.setdefault(b["id"], []).append(
+                    f"与声明 {a['id']}「{a.get('text','')}」数值不一致")
+    return issues
 
 
 def _compute_confidence(claim: dict, verdict: str, search_result: str) -> float:
@@ -234,13 +275,9 @@ def _compute_confidence(claim: dict, verdict: str, search_result: str) -> float:
     if has_corroboration:
         score += 0.2
 
-    # 权威信源
-    authoritative_domains = (
-        "gov.cn", "people.com.cn", "xinhuanet.com", "who.int", "ilo.org",
-        "europa.eu", "un.org", "cdc.gov", "chinacdc.cn", "acftu.org",
-    )
-    if any(d in search_result for d in authoritative_domains):
-        score += 0.2
+    # 权威信源（QAH-02：三级可信度分级，替代原二值 +0.2）
+    cred = _source_credibility(search_result)
+    score += cred  # Tier1 +0.3 / Tier2 +0.2 / Tier3 +0.1 / 无 +0
 
     # 与判定一致性调整
     if verdict == "FALSIFIED":
@@ -333,27 +370,37 @@ def _judge_claim(claim: dict, search_result: str, strictness: str) -> dict:
             }
 
     elif claim_type == "DATA":
+        # QAH-05：信源时效性——数据年份距今>3年标过期风险（caveat，不阻断）
+        recency_note = ""
+        if claim.get("data_year"):
+            try:
+                from datetime import date
+                age = date.today().year - int(claim["data_year"])
+                if age > 3:
+                    recency_note = f"（⚠ 数据年份 {claim['data_year']}，距今 {age} 年，可能过期）"
+            except (ValueError, TypeError):
+                pass
         if has_corroboration and source_count >= 1:
             # 额外检查：数值范围是否合理
             if _check_value_range(text, search_result):
                 return {
                     "verdict": "VERIFIED",
-                    "reason": f"数据在搜索结果中得到确认。"
+                    "reason": f"数据在搜索结果中得到确认。{recency_note}".strip()
                 }
             else:
                 return {
                     "verdict": "FALSIFIED",
-                    "reason": f"数据「{text}」与搜索结果中的实际数值不符。"
+                    "reason": f"数据「{text}」与搜索结果中的实际数值不符。{recency_note}".strip()
                 }
         elif claim.get("is_approximate"):
             return {
                 "verdict": "UNVERIFIABLE",
-                "reason": "约数无法精确验证，但方向描述与行业趋势一致则可接受。"
+                "reason": f"约数无法精确验证，但方向描述与行业趋势一致则可接受。{recency_note}".strip()
             }
         else:
             return {
                 "verdict": "UNVERIFIABLE",
-                "reason": f"数据「{text}」在搜索结果中未找到直接来源。"
+                "reason": f"数据「{text}」在搜索结果中未找到直接来源。{recency_note}".strip()
             }
 
     elif claim_type == "QUOTE":
@@ -445,9 +492,29 @@ def _check_contradiction(claim_text: str, search_result: str) -> bool:
     return False
 
 
+def _source_credibility(search_result: str) -> float:
+    """QAH-02：信源可信度三级评分。
+    Tier-1 政府/国际组织（gov.cn/stats.gov.cn/who.int/un.org/ilo.org/...）+0.3
+    Tier-2 主流媒体（people.com.cn/xinhuanet.com/cctv.com/...）+0.2
+    Tier-3 其他可识别信源 +0.1；无信源 +0
+    """
+    tier1 = ("gov.cn", "stats.gov.cn", "mohrss.gov.cn", "who.int", "un.org",
+             "ilo.org", "europa.eu", "cdc.gov", "chinacdc.cn", "acftu.org",
+             "moe.gov.cn", "npc.gov.cn")
+    tier2 = ("people.com.cn", "xinhuanet.com", "cctv.com", "chinadaily.com.cn",
+             "thepaper.cn", "caixin.com", "bjnews.com", "sciencenet.cn")
+    if any(d in search_result for d in tier1):
+        return 0.3
+    if any(d in search_result for d in tier2):
+        return 0.2
+    # 有 URL 但非上述域 → Tier-3
+    if re.search(r'https?://', search_result):
+        return 0.1
+    return 0.0
+
+
 def _estimate_source_count(search_result: str) -> int:
     """估算搜索结果中的独立信源数量"""
-    # 统计 URL 数量作为信源数的代理
     urls = re.findall(r'https?://[^\s]+', search_result)
     # 去重域名
     domains = set()
