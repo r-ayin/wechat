@@ -122,7 +122,7 @@ gate_verify() {
             f=$(resolve_checkpoint "3-article")
             [ -z "$f" ] && { echo "❌ 文章文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
-            [ "$size" -lt 10000 ] && { echo "❌ < 10KB (可能不足4000字)"; exit 3; }
+            [ "$size" -lt 40000 ] && { echo "❌ < 40KB (约13000字，不足深度长文标准15000字)"; exit 3; }
             grep -q "SOUL+STYLE+PERSONA" "$f" || { echo "❌ 缺persona注入标记(metadata)；需在文章frontmatter中包含"; exit 3; }
             grep -qE "摘要:" "$f" || { echo "❌ 缺摘要(公众号显示必需)"; exit 3; }
             local title_len=$(head -1 "$f" | sed 's/^# //' | wc -m)
