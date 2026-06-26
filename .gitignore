@@ -1,0 +1,8 @@
+output/research/
+output/briefs/
+output/state/
+*.json.bak
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

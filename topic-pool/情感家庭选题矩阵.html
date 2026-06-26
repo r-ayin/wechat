@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选题矩阵 — 家庭·情感·婚姻·孤独·原子化</title>
+<style>
+:root {
+  --bg: #0d0d0d;
+  --panel: #1a1a1a;
+  --line: #2a2a2a;
+  --text: #e0e0e0;
+  --muted: #888;
+  --accent1: #ff6b6b;
+  --accent2: #ffd93d;
+  --accent3: #6bcb77;
+  --accent4: #4d96ff;
+  --tag-bg: #222;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  line-height: 1.7;
+  padding: 40px 20px;
+}
+.container { max-width: 960px; margin: 0 auto; }
+
+/* Header */
+.header {
+  text-align: center;
+  padding: 60px 0 50px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 50px;
+}
+.header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+.header .sub {
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+/* Stats row */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 50px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+}
+.stat-card .num {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.stat-card .label { color: var(--muted); margin-top: 8px; font-size: 0.9rem; }
+.stat-card.c1 .num { color: var(--accent1); }
+.stat-card.c2 .num { color: var(--accent2); }
+.stat-card.c3 .num { color: var(--accent3); }
+.stat-card.c4 .num { color: var(--accent4); }
+
+/* Section */
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 50px 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-emoji { font-size: 1.6rem; }
+
+/* Topic card */
+.topic-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+}
+.topic-card:hover { border-color: #444; }
+.topic-card .id-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.topic-card .id-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+.topic-card .id-tag.hot { background: #3d1515; color: var(--accent1); }
+.topic-card .id-tag.evg { background: #153d1f; color: var(--accent3); }
+.topic-card .pillar-tag {
+  font-size: 0.75rem;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tag-bg);
+  color: var(--accent4);
+}
+.topic-card h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.topic-card .angle-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent2);
+  margin-bottom: 6px;
+}
+.topic-card .angle-text {
+  color: #ccc;
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+  line-height: 1.8;
+}
+.topic-card .data-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.topic-card .data-chip {
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #111;
+  border: 1px solid #333;
+  color: #aaa;
+}
+.topic-card .scores {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.topic-card .scores span { color: #ccc; font-weight: 600; }
+
+/* Matrix */
+.matrix {
+  margin-top: 50px;
+  padding: 30px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+.matrix h3 { font-size: 1.2rem; margin-bottom: 20px; }
+.matrix table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.matrix th, .matrix td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.matrix th { color: var(--muted); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.matrix .bar-cell { width: 120px; }
+.matrix .bar-fill {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--accent1);
+  opacity: 0.7;
+}
+.matrix .check { color: var(--accent3); }
+.matrix .empty { color: var(--accent1); }
+
+/* Footer */
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 640px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .header h1 { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- ═══════════ HEADER ═══════════ -->
+<div class="header">
+  <h1>选题矩阵</h1>
+  <p class="sub">家庭 · 情感 · 婚姻 · 孤独 · 人际关系 · 原子化<br>微信公众号「被压迫者小组」— 信息差平权者</p>
+</div>
+
+<!-- ═══════════ STATS ═══════════ -->
+<div class="stats">
+  <div class="stat-card c1"><div class="num">13</div><div class="label">总选题数</div></div>
+  <div class="stat-card c2"><div class="num">0</div><div class="label">已发表</div></div>
+  <div class="stat-card c3"><div class="num">6</div><div class="label">子主题</div></div>
+  <div class="stat-card c4"><div class="num">2026-06-26</div><div class="label">最后更新</div></div>
+</div>
+
+<!-- ═══════════ 一、婚姻制度 ═══════════ -->
+<div class="section-title"><span class="section-emoji">💔</span> 婚姻制度 — 为什么没人结婚了</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-015</span>
+    <span class="pillar-tag">城市与生存</span>
+  </div>
+  <h3>年轻人不结婚，不是因为房子和彩礼</h3>
+  <div class="angle-label">▼ 反直觉核心</div>
+  <div class="angle-text">所有人都说"结不起"，但数据告诉我们连"结得起"的人也在减少。婚姻从<strong>生存必需品</strong>变成了<strong>消费升级品</strong>——过去的逻辑是"不结婚怎么活"，现在的逻辑是"结婚能让我得到什么"。从男性角度：彩礼+房子+婚礼+育儿=完整套餐，算完经济账后觉得"没意思"。从女性角度：经济独立后不需要通过婚姻获得保障。从制度角度：单身经济正在拆解婚姻的陪伴、照料、情绪价值功能。</div>
+  <div class="data-row">
+    <span class="data-chip">2026Q1结婚169.7万对 同比-6%</span>
+    <span class="data-chip">每3对结婚就有1对离婚</span>
+    <span class="data-chip">结离比 2.73:1</span>
+  </div>
+  <div class="scores">热度 <span>7</span> · 反直觉 <span>6</span> · 叙事空间 <span>7</span> · 结构深度 <span>5</span> · 人格匹配 <span>3.2</span></div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-003</span>
+    <span class="pillar-tag">城市与生存</span>
+  </div>
+  <h3>男生退出婚姻内卷 — 2.4亿单身人口正在改写社会规则</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">全国单身人口超2.4亿，一人户家庭占比超1/4。不是"找不到"，是算完账后觉得<strong>"没意思"</strong>——投入两代人积蓄+未来几十年自由，回报充满不确定性。从三个不同阶层的单身男性故事切入，展示婚姻退出不是单一阶层的现象。</div>
+  <div class="data-row">
+    <span class="data-chip">单身人口 2.4亿</span>
+    <span class="data-chip">一人户家庭占比 1/4+</span>
+  </div>
+  <div class="scores">总评分 <span>7.5</span></div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-009</span>
+    <span class="pillar-tag">城市与生存</span>
+  </div>
+  <h3>彩礼每高10万，结婚意愿降5.88% — 婚姻的价码和它的买家</h3>
+  <div class="angle-label">▼ 反直觉核心</div>
+  <div class="angle-text"><strong>不是女性要高价彩礼，是彩礼本身在摧毁结婚意愿</strong>——学术研究证实彩礼越高男性越不想结婚。彩礼不是结果，是信号——指向农村养老保障缺失、性别比失衡、阶层固化。从"九个春节因为彩礼谈崩"的故事切入。</div>
+  <div class="data-row">
+    <span class="data-chip">全国平均彩礼 12.7万元</span>
+    <span class="data-chip">彩礼+10万 → 结婚意愿-5.88pp</span>
+    <span class="data-chip">结婚登记十年近乎腰斩</span>
+  </div>
+  <div class="scores">五维评分 <span>6.6</span> · 热度9 · 反直觉7 · 叙事7 · 结构6 · 人格3.9</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-004</span>
+    <span class="pillar-tag">城市与生存</span>
+  </div>
+  <h3>离婚爆满，结婚渺渺 — 每三对结婚就有一对离婚意味着什么</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">不是危言耸听，是数学——当结婚的收益（经济保障+情感陪伴+社会认可）减去成本（彩礼+房子+自由+风险）<strong>等于负数</strong>时，婚姻制度本身需要被审视。</div>
+  <div class="data-row">
+    <span class="data-chip">2026Q1 结离比 2.73:1</span>
+  </div>
+  <div class="scores">总评分 <span>7.0</span></div>
+</div>
+
+<!-- ═══════════ 二、家庭结构 ═══════════ -->
+<div class="section-title"><span class="section-emoji">🏠</span> 家庭结构 — 被拆解的传统单元</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag evg">evg-012</span>
+    <span class="pillar-tag">城市与生存</span>
+    <span style="color:var(--accent2);font-size:0.75rem;margin-left:auto;">🆕 新增</span>
+  </div>
+  <h3>四二一家庭的困局 — 两个中年人，四个老人，一个孩子</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">从一对80后夫妻的真实账本切入——月收入两万，四个老人两个有慢性病，一个孩子上小学，房贷还剩十八年。这不是个人选择失败，是<strong>一代人的系统性困境</strong>。独生子女政策制造的"4-2-1"结构陷阱——照护经济、养老金替代率下降、社会化养老缺位。这是个人无法逃脱的数学题。</div>
+  <div class="scores">五维评分 <span>6.2</span> · 热度7 · 反直觉5 · 叙事8 · 结构8 · 人格4.3</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-010</span>
+    <span class="pillar-tag">心理与规训</span>
+  </div>
+  <h3>上海出现"生育搭子" — 没有婚姻的合作生娃，和它照出的制度空白</h3>
+  <div class="angle-label">▼ 反直觉核心</div>
+  <div class="angle-text">不是"不婚不育"，是<strong>"不婚但育"</strong>——两个人没恋爱没结婚，纯粹为生孩子走到一起。这是一个比"不婚"更让制度措手不及的选择。暴露的法律真空：未婚女性不能做试管婴儿、亲子关系认定无依据、法院没有处理流程。</div>
+  <div class="data-row">
+    <span class="data-chip">中科院：非婚生育孩子6岁前安全感缺失为普通儿童2.1倍</span>
+  </div>
+  <div class="scores">五维评分 <span>6.4</span> · 热度7 · 反直觉8 · 叙事7 · 结构5 · 人格3.2</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag evg">evg-009</span>
+    <span class="pillar-tag">城市与生存</span>
+  </div>
+  <h3>买房：六个钱包和一个三十年的约定</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">首付、房贷利率、六个钱包的阶级分析——谁买得起，谁永远买不起。婚姻+房子+家庭的捆绑逻辑拆解。房子不只是房子，是中国式婚姻和家庭的<strong>硬通货</strong>。</div>
+  <div class="scores">总评分 <span>9.5</span> · 常青基石</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-006</span>
+    <span class="pillar-tag">劳动与阶级</span>
+  </div>
+  <h3>育儿期视同缴费 — 建议很好，但它解决不了的问题更值得说</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">郑功成建议女性1-2年育儿期视同养老保险缴费年限。这是对生育社会价值的承认，但解决不了根本问题——<strong>为什么生育变成了需要"补偿"的负担？</strong>丁克群体的反向歧视、失独家庭的特殊困境，都是同一个问题的不同切面。</div>
+  <div class="scores">总评分 <span>6.5</span></div>
+</div>
+
+<!-- ═══════════ 三、孤独与原子化 ═══════════ -->
+<div class="section-title"><span class="section-emoji">🔗</span> 孤独与原子化 — "一个人"的时代</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-024</span>
+    <span class="pillar-tag">心理与规训</span>
+  </div>
+  <h3>每天上网6小时，仍然孤独 — Z世代的数字社交悖论</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">77.9%受访青年每日网络超4小时，近半数超6小时，但64.3%感到深层孤独难以排解。数字给了我们"永远在线"的连接，却没给我们<strong>"被理解"</strong>的感觉。三个悖论：<strong>①连接越多越孤独 ②展示越多越自卑 ③信息越多越不信任</strong>。</div>
+  <div class="data-row">
+    <span class="data-chip">77.9% 每日网络超4h</span>
+    <span class="data-chip">64.3% 深层孤独难排解</span>
+    <span class="data-chip">48.3% 因他人完美形象自卑 (女61.2%)</span>
+  </div>
+  <div class="scores">五维评分 <span>4.7</span> · 热度7 · 反直觉3 · 叙事4 · 结构5 · 人格5.0</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-025</span>
+    <span class="pillar-tag">心理与规训</span>
+  </div>
+  <h3>不是不想社交，是怕了人情债 — 盲盒饭局和搭子社交的兴起</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">68%的人感到线下社交能力退化，同时搭子社交搜索量年增300%。表面矛盾，逻辑一致——熟人社交有温度但有压力（礼尚往来、情感绑架、"灵魂拷问"），陌生人社交无预设无负担但无法深入。盲盒饭局和搭子社交是在<strong>"孤独"和"负担"之间找到的中间态</strong>。</div>
+  <div class="data-row">
+    <span class="data-chip">68% 感到线下社交能力退化</span>
+    <span class="data-chip">搭子社交搜索量年增 300%</span>
+  </div>
+  <div class="scores">五维评分 <span>4.2</span> · 热度7 · 反直觉3 · 叙事4 · 结构5 · 人格2.5</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-019</span>
+    <span class="pillar-tag">心理与规训</span>
+  </div>
+  <h3>断亲 — 80%的年轻人不走亲戚了</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">不是人情冷漠，是<strong>城市化割断了地缘纽带</strong>。从费孝通"差序格局"理论出发——亲戚关系变淡是社会转型的必然结果，不是道德堕落。三代人视角：年轻一代的解脱感（终于不用被"灵魂拷问"）、父母一代的失落感（"家不像家了"）、社会学者的结构性分析（城镇化+少子化+原子化三重叠加）。</div>
+  <div class="data-row">
+    <span class="data-chip">社科院：80%年轻人与亲戚联系仅1-2次/年</span>
+    <span class="data-chip">超60%青年与亲戚互动减少</span>
+    <span class="data-chip">近1/5基本不走亲戚</span>
+  </div>
+  <div class="scores">五维评分 <span>5.2</span> · 热度7 · 反直觉3 · 叙事5.5 · 结构7 · 人格4.3</div>
+</div>
+
+<!-- ═══════════ 四、青年情绪 ═══════════ -->
+<div class="section-title"><span class="section-emoji">🌫️</span> 青年情绪 — 新词照见的时代</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-020</span>
+    <span class="pillar-tag">城市与生存</span>
+  </div>
+  <h3>全职儿女、老鼠人、烂尾娃 — 三个新词照见的时代</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">三个词三种应对策略：<strong>回家</strong>（全职儿女——跟父母同住以家务换取经济支持）、<strong>躲起来</strong>（老鼠人——低社交低欲望宅居）、<strong>认命</strong>（烂尾娃——受过高教但找不到匹配工作）。把标签还原为人——每个词背后都有一个具体的人在做理性选择。它们为什么同时出现？这不是个人选择，是<strong>结构困境的三种理性应对</strong>。</div>
+  <div class="scores">五维评分 <span>5.2</span> · 热度7 · 反直觉5 · 叙事5 · 结构6 · 人格3.3</div>
+</div>
+
+<div class="topic-card">
+  <div class="id-row">
+    <span class="id-tag hot">hot-018</span>
+    <span class="pillar-tag">心理与规训</span>
+  </div>
+  <h3>感觉一切都会更糟 — 当代年轻人的习得性无助</h3>
+  <div class="angle-label">▼ 核心叙事</div>
+  <div class="angle-text">从躺平到全职儿女到烂尾娃到老鼠人——新词不断涌现但情绪一直没变。这不是心理学问题，是结构问题。当社会持续传递"努力就有回报"的叙事而现实不断否定它时，<strong>"停止努力"不是懒惰，是理性的自我保护</strong>。从习得性无助的心理学实验出发——不是个体病了，是环境让人学了"做什么都没用"。</div>
+  <div class="data-row">
+    <span class="data-chip">人格匹配度 5.7 — 极高，与SOUL.md核心信念直球重叠</span>
+  </div>
+  <div class="scores">五维评分 <span>5.3</span> · 热度7 · 反直觉3 · 叙事5.5 · 结构6 · 人格5.7</div>
+</div>
+
+<!-- ═══════════ 优先级矩阵 ═══════════ -->
+<div class="matrix">
+  <h3>📊 选题优先级矩阵</h3>
+  <table>
+    <thead>
+      <tr><th>#</th><th>选题</th><th>ID</th><th>类型</th><th>评分</th><th class="bar-cell">热度</th><th>反直觉</th><th>叙事</th><th>结构</th><th>人格</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>年轻人不结婚，不是因为房子和彩礼</td><td>hot-015</td><td><span class="check">hot</span></td><td>6.0</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>6</td><td>7</td><td>5</td></tr>
+      <tr><td>2</td><td>生育搭子</td><td>hot-010</td><td><span class="check">hot</span></td><td>6.4</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>8</td><td>7</td><td>5</td></tr>
+      <tr><td>3</td><td>彩礼每高10万</td><td>hot-009</td><td><span class="check">hot</span></td><td>6.6</td><td class="bar-cell"><div class="bar-fill" style="width:90%"></div></td><td>9</td><td>7</td><td>7</td><td>6</td></tr>
+      <tr><td>4</td><td>男生退出婚姻内卷</td><td>hot-003</td><td><span class="check">hot</span></td><td>7.5</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>5</td><td>四二一家庭困局</td><td>evg-012</td><td><span class="empty">evg</span></td><td>6.2</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>5</td><td>8</td><td>8</td></tr>
+      <tr><td>6</td><td>断亲：80%不走亲戚</td><td>hot-019</td><td><span class="check">hot</span></td><td>5.2</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>3</td><td>5.5</td><td>7</td></tr>
+      <tr><td>7</td><td>每天上网6h仍然孤独</td><td>hot-024</td><td><span class="check">hot</span></td><td>4.7</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>3</td><td>4</td><td>5</td></tr>
+      <tr><td>8</td><td>习得性无助</td><td>hot-018</td><td><span class="check">hot</span></td><td>5.3</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>3</td><td>5.5</td><td>6</td></tr>
+      <tr><td>9</td><td>三个新词</td><td>hot-020</td><td><span class="check">hot</span></td><td>5.2</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>5</td><td>5</td><td>6</td></tr>
+      <tr><td>10</td><td>怕了人情债</td><td>hot-025</td><td><span class="check">hot</span></td><td>4.2</td><td class="bar-cell"><div class="bar-fill" style="width:70%"></div></td><td>7</td><td>3</td><td>4</td><td>5</td></tr>
+      <tr><td>11</td><td>买房：六个钱包</td><td>evg-009</td><td><span class="empty">evg</span></td><td>9.5</td><td class="bar-cell"><div class="bar-fill" style="width:60%"></div></td><td>6</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>12</td><td>离婚爆满结婚渺渺</td><td>hot-004</td><td><span class="check">hot</span></td><td>7.0</td><td class="bar-cell"><div class="bar-fill" style="width:80%"></div></td><td>8</td><td>—</td><td>—</td><td>—</td></tr>
+      <tr><td>13</td><td>育儿期视同缴费</td><td>hot-006</td><td><span class="check">hot</span></td><td>6.5</td><td class="bar-cell"><div class="bar-fill" style="width:60%"></div></td><td>6</td><td>—</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  wechat 选题池 · 最后更新 2026-06-26 · GitHub: <a href="https://github.com/r-ayin/wechat" style="color:var(--accent4);">r-ayin/wechat</a><br>
+  管线五支柱：劳动与阶级 · 教育与阶层 · 城市与生存 · 心理与规训 · 技术与权力
+</div>
+
+</div>
+</body>
+</html>

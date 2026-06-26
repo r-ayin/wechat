@@ -1,0 +1,49 @@
+[
+  {
+    "mode": "quick",
+    "prompt": "深度分析宁德时代",
+    "expected": {
+      "phases": ["采集×3", "分析×2", "整合"],
+      "min_sections": 5,
+      "min_words": 2000,
+      "max_minutes": 10,
+      "checklist": {
+        "exec_summary": true,
+        "core_contradiction": true,
+        "constraints_analysis": true,
+        "business_deconstruction": true,
+        "endgame_projection": true,
+        "source_urls": true
+      }
+    },
+    "description": "快速体验模式 — 个股深度分析，5-10分钟产出"
+  },
+  {
+    "mode": "quick",
+    "prompt": "分析中国光伏行业的竞争格局",
+    "expected": {
+      "phases": ["采集×3", "分析×2", "整合"],
+      "min_sections": 5,
+      "min_words": 2000,
+      "max_minutes": 10,
+      "checklist": {
+        "market_shares": true,
+        "cost_structure": true,
+        "regulatory_factors": true,
+        "technology_moat": true,
+        "endgame": true
+      }
+    },
+    "description": "快速体验模式 — 行业竞争格局分析"
+  },
+  {
+    "mode": "general",
+    "prompt": "深度分析最近AI监管政策的发展趋势及其对普通人的影响",
+    "expected": { "min_sections": 5, "min_words": 2000, "max_minutes": 10 }
+  },
+  {
+    "mode": "general",
+    "prompt": "分析全球气候变化对保险业的冲击以及普通人该如何应对",
+    "expected": { "min_sections": 5, "min_words": 2000, "max_minutes": 10 }
+  }
+]
