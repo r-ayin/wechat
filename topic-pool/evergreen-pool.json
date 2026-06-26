@@ -1,11 +1,118 @@
 {
   "_meta": {
-    "updated": "2026-06-25",
-    "total": 28,
+    "updated": "2026-06-26",
+    "total": 39,
     "selection_formula": "选题优先级 = 五维爆款评分（热度×0.20 + 反直觉×0.25 + 叙事空间×0.20 + 结构深度×0.15 + 人格匹配×0.20）",
-    "v2_notes": "2026-06-25 全面升级：新增21个选题覆盖劳动、婚姻、生育、教育、社保、医疗、失业、社交孤独、新就业形态、青年情绪十大领域，五维评分排序"
+    "v3_notes": "2026-06-26 新增：AI失业冲击白领、第一学历歧视、照护危机、农村空心化、性别职场、创作者幻灭、心理辅导底线、教育公平、户籍解绑、环境正义11个选题"
   },
   "topics": [
+    {
+      "id": "hot-026",
+      "title": "AI 终于开始抢白领的饭碗了——GPT-5 和 Claude 4 正在重新定义谁会被替代",
+      "pillar": "技术与权力",
+      "five_dim_score": 7.5,
+      "scores": {"heat": 10, "counter_intuitive": 8, "narrative_space": 8, "structural_depth": 8, "persona_fit": 3.9},
+      "urgency": "热点·时效窗口",
+      "event": "2026上半年 GPT-5/Claude 4 规模化落地企业——法律文书、客服、初级编程、翻译四领域首当其冲",
+      "angle": "反直觉入口：以前都说'AI替代蓝领'，结果蓝领工作一个没少，白领工作开始蒸发了。从三个被AI替代或威胁的白领故事切入——一个初级律师、一个客服主管、一个翻译——分析为什么这一次不一样",
+      "data": "约7000万岗位面临自动化风险；GPT-5在法律文书撰写上准确率达92%",
+      "status": "ready"
+    },
+    {
+      "id": "hot-027",
+      "title": "你的第一学历是一本吗——就业市场里的出身歧视和它背后1270万人的愤怒",
+      "pillar": "教育与阶层",
+      "five_dim_score": 6.5,
+      "scores": {"heat": 9, "counter_intuitive": 5, "narrative_space": 8, "structural_depth": 7, "persona_fit": 4.3},
+      "urgency": "热点",
+      "event": "全国政协委员袁亚湘6月呼吁破除'唯第一学历'就业歧视，加速《反就业歧视法》立法",
+      "angle": "一个985硕士因为本科是双非被刷掉的故事。第一学历歧视是这个时代最荒谬的阶层再生产机制：高考那一次排名，比之后所有的努力都重要。从个人故事→数据（多少企业暗中设限）→制度分析（为什么歧视'第一学历'会加剧阶层固化）→国际对比",
+      "status": "ready"
+    },
+    {
+      "id": "hot-028",
+      "title": "每所中小学必须配心理老师了——但心理老师自己可能也需要心理老师",
+      "pillar": "心理与规训",
+      "five_dim_score": 5.5,
+      "scores": {"heat": 8, "counter_intuitive": 4, "narrative_space": 6, "structural_depth": 6, "persona_fit": 4.3},
+      "urgency": "热点",
+      "event": "教育部等四部门《中小学基本办学条件底线要求》首次将心理辅导室和心理教师列为硬性要求",
+      "angle": "这是好事。但一个心理老师面对全校几千个学生、每周一次的心理课、所有突发危机干预——这到底是'配备'还是'敷衍'？从一个县城中学心理老师的真实工作状态切入",
+      "status": "ready"
+    },
+    {
+      "id": "hot-029",
+      "title": "幼儿园要看家长的工资流水——教育公平从三岁开始就不公平了",
+      "pillar": "教育与阶层",
+      "five_dim_score": 6.0,
+      "scores": {"heat": 8, "counter_intuitive": 6, "narrative_space": 7, "structural_depth": 6, "persona_fit": 3.2},
+      "urgency": "热点",
+      "event": "6月云南大理祥云县公立幼儿园要求家长提供工资流水等经济证明，被指'看人下菜碟'",
+      "angle": "一所公立幼儿园为什么敢要求家长出示工资流水？因为它知道有人挤破头想进去。这不是一个县的个案，是教育资源分配不公的极端表现。从云南事件切入，延伸到幼儿园入园难、公立民办鸿沟、教育公平从三岁开始",
+      "status": "ready"
+    },
+    {
+      "id": "hot-030",
+      "title": "不需要户口了——常住地基本公共服务的户籍解绑能改变什么",
+      "pillar": "城市与生存",
+      "five_dim_score": 5.2,
+      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 5, "structural_depth": 6, "persona_fit": 3.9},
+      "urgency": "热点",
+      "event": "6月国务院发文：随迁子女教育、公租房保障等基本公共服务与户籍脱钩",
+      "angle": "这是过去十年最大的一次户籍改革。但'常住地'怎么证明？租房合同？社保？居住证？从一对在上海打工、孩子终于能在城里上学的夫妻的故事切入，分析政策能改变什么和不能改变什么",
+      "status": "ready"
+    },
+    {
+      "id": "evg-012",
+      "title": "四二一家庭的困局：两个中年人，四个老人，一个孩子",
+      "pillar": "城市与生存",
+      "five_dim_score": 6.2,
+      "scores": {"heat": 7, "counter_intuitive": 5, "narrative_space": 8, "structural_depth": 8, "persona_fit": 4.3},
+      "urgency": "常青·基石",
+      "angle": "从一对80后夫妻的真实账本切入：月收入两万，四个老人两个有慢性病，一个孩子上小学，房贷还剩十八年。分析独生子女政策制造的'4-2-1'结构陷阱——这不是个人选择失败，是一代人的系统性困境。覆盖照护经济、养老金替代率下降、社会化养老缺位",
+      "status": "ready"
+    },
+    {
+      "id": "evg-013",
+      "title": "农村正在消失——和它带走的那一半中国",
+      "pillar": "城市与生存",
+      "five_dim_score": 5.8,
+      "scores": {"heat": 6, "counter_intuitive": 6, "narrative_space": 9, "structural_depth": 8, "persona_fit": 3.2},
+      "urgency": "常青·基石",
+      "angle": "十年间90万个自然村消失。从一个正在'合并'的村庄讲起——最后几户老人、被关停的村小、荒废的诊所。这不是'城镇化'的胜利，是一半中国人的根正在被拔掉。分析土地流转、留守老人、县城衰落的连锁反应",
+      "status": "ready"
+    },
+    {
+      "id": "evg-014",
+      "title": "同样的工作，她比他少拿四分之一——中国职场性别歧视的账本",
+      "pillar": "劳动与阶级",
+      "five_dim_score": 5.5,
+      "scores": {"heat": 6, "counter_intuitive": 8, "narrative_space": 7, "structural_depth": 7, "persona_fit": 2.5},
+      "urgency": "常青",
+      "angle": "反直觉入口：很多人觉得'现在男女已经平等了'——但数据说性别薪酬差距仍在23%-30%，而且随着职业层级上升反而扩大。从三个不同行业女性的工资单切入，分析歧视链条：招聘筛选（'你打算什么时候生孩子'）→晋升天花板（'管理岗不适合女性'）→退休年龄差（早退5年工资少计5年）",
+      "status": "ready"
+    },
+    {
+      "id": "evg-015",
+      "title": "直播间的幻灭：一千个主播里只有一个能月入过万",
+      "pillar": "技术与权力",
+      "five_dim_score": 5.2,
+      "scores": {"heat": 7, "counter_intuitive": 8, "narrative_space": 6, "structural_depth": 6, "persona_fit": 2.5},
+      "urgency": "常青",
+      "angle": "反直觉入口：平台经济不是'人人都能做'的创业机会——是幸存者偏差的巨型实验。从一个在直播间待了八个月、粉丝不到两千的主播的视角切入，分析平台创作者经济的金字塔结构：0.1%的人拿走80%的收入，99.9%的人是平台的免费内容工人",
+      "data": "头部0.1%主播拿走80%直播收入；95%主播月收入低于3000元",
+      "status": "ready"
+    },
+    {
+      "id": "evg-016",
+      "title": "你家小区的垃圾去哪了——环境正义的阶级账本",
+      "pillar": "技术与权力",
+      "five_dim_score": 5.0,
+      "scores": {"heat": 5, "counter_intuitive": 7, "narrative_space": 7, "structural_depth": 7, "persona_fit": 2.5},
+      "urgency": "常青",
+      "angle": "垃圾焚烧厂、化工厂、污水处理站——它们从来不建在富人区旁边。从一座垃圾焚烧厂周边村庄的癌症发病率切入，分析环境不公的阶级地理学：为什么穷人的空气和富人的空气不一样",
+      "status": "ready"
+    },
     {
       "id": "hot-007",
       "title": "反对内卷式加班——加班正在扼杀中国的消费和创新",

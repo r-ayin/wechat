@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "updated": "2026-06-23",
+    "updated": "2026-06-26",
     "strategy": "对标发现 → 热点信号 → 72h内产出 → 与常青选题形成互链",
     "scan_schedule": {
       "full_scan": "daily 09:00",
@@ -88,6 +88,55 @@
       "pillar": "心理与规训",
       "expected_event": "政策 / 流行病学报告 / 重大事件",
       "frequency": "monthly"
+    },
+    {
+      "id": "watch-009",
+      "keyword": "AI 替代 失业 白领 自动化 GPT Claude 裁员",
+      "pillar": "技术与权力",
+      "expected_event": "企业AI替代裁员报道 / 研究机构自动化预测报告",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-010",
+      "keyword": "2026 出生人口 生育率 结婚登记 最新数据",
+      "pillar": "城市与生存",
+      "expected_event": "季度/年度人口数据公布",
+      "frequency": "monthly"
+    },
+    {
+      "id": "watch-011",
+      "keyword": "延迟退休 方案细则 实施时间表 2026",
+      "pillar": "劳动与阶级",
+      "expected_event": "方案公布 / 征求意见稿 / 地方试点",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-012",
+      "keyword": "医保 DRG DIP 按病种付费 看病难 2026",
+      "pillar": "城市与生存",
+      "expected_event": "政策调整 / 医院应对措施 / 患者投诉爆发",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-013",
+      "keyword": "第一学历 就业歧视 反就业歧视法 招聘 985 211",
+      "pillar": "教育与阶层",
+      "expected_event": "立法进展 / 典型判例 / 企业政策调整",
+      "frequency": "weekly"
+    },
+    {
+      "id": "watch-014",
+      "keyword": "农村 空心化 消失 县中塌陷 留守老人 土地流转",
+      "pillar": "城市与生存",
+      "expected_event": "调查报告 / 政策出台 / 深度报道",
+      "frequency": "monthly"
+    },
+    {
+      "id": "watch-015",
+      "keyword": "直播 带货 网红 收入 平台 创作者 维权",
+      "pillar": "技术与权力",
+      "expected_event": "平台政策变化 / 头部主播事件 / 创作者权益纠纷",
+      "frequency": "weekly"
     }
   ]
 }
