@@ -4,6 +4,12 @@
 # 每个阶段启动前必须先过门禁。不过门禁 = 管线拒绝执行。
 # 这不是建议，是硬编码阻断。
 
+# 门禁阈值来源:
+# Phase 0/1: 基于历史产出文件大小分布的下限
+# Phase 2: 基于 CLAUDE.md 定义的字数标准 (15000 汉字 × 3 bytes/char ≈ 45000 bytes)
+# Phase 3: 同上
+# 标题长度: 微信公众号显示约束 (短标题无辨识度，长标题被截断)
+
 set -euo pipefail
 
 TOPIC="${3:-}"
@@ -98,6 +104,7 @@ gate_verify() {
             f=$(resolve_checkpoint "0-competitor")
             [ -z "$f" ] && { echo "❌ competitor-style 文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
+            # 基于历史竞品文件最低 2859B，设置 2000B 为安全下限
             [ "$size" -lt 2000 ] && { echo "❌ < 2KB ($size bytes)"; exit 3; }
             grep -qE "维度1|维度2|维度3|维度4|维度5|五维" "$f" || { echo "❌ 五维不完整"; exit 3; }
             echo "✅ Phase 0 验证通过 (${size} bytes)"
@@ -106,6 +113,7 @@ gate_verify() {
             f=$(resolve_checkpoint "1-brief")
             [ -z "$f" ] && { echo "❌ brief 文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
+            # 基于历史简报最低 3215B，设置 1500B 为安全下限
             [ "$size" -lt 1500 ] && { echo "❌ < 1.5KB ($size bytes)"; exit 3; }
             echo "✅ Phase 1 验证通过 (${size} bytes)"
             ;;
@@ -113,7 +121,8 @@ gate_verify() {
             f=$(resolve_checkpoint "2-analysis")
             [ -z "$f" ] && { echo "❌ analysis 文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
-            [ "$size" -lt 10000 ] && { echo "❌ < 10KB ($size bytes)"; exit 3; }
+            # 基于 CLAUDE.md 深度长文标准 (15000汉字 × 3 bytes/char ≈ 45000 bytes)
+            [ "$size" -lt 45000 ] && { echo "❌ < 45KB ($size bytes, 不足 godtier 分析深度下限)"; exit 3; }
             local layers=$(grep -c "^## L" "$f" || true)
             [ "$layers" -lt 10 ] && { echo "❌ 仅${layers}层(需≥10)"; exit 3; }
             echo "✅ Phase 2 验证通过 (${size} bytes, ${layers}层)"
@@ -122,12 +131,14 @@ gate_verify() {
             f=$(resolve_checkpoint "3-article")
             [ -z "$f" ] && { echo "❌ 文章文件缺失"; exit 3; }
             local size=$(wc -c < "$f")
-            [ "$size" -lt 40000 ] && { echo "❌ < 40KB (约13000字，不足深度长文标准15000字)"; exit 3; }
+            # 基于 CLAUDE.md 深度长文标准: 15000汉字 × 3 bytes/char ≈ 45000 bytes
+            [ "$size" -lt 45000 ] && { echo "❌ < 45KB (约15000汉字，未达 CLAUDE.md 深度长文下限)"; exit 3; }
             grep -q "SOUL+STYLE+PERSONA" "$f" || { echo "❌ 缺persona注入标记(metadata)；需在文章frontmatter中包含"; exit 3; }
             grep -qE "摘要:" "$f" || { echo "❌ 缺摘要(公众号显示必需)"; exit 3; }
+            # 微信公众号显示约束: 短标题无辨识度，长标题被截断
             local title_len=$(head -1 "$f" | sed 's/^# //' | wc -m)
-            [ "$title_len" -lt 8 ] && { echo "❌ 标题过短(<8字)"; exit 3; }
-            [ "$title_len" -gt 35 ] && echo "⚠️  标题过长(>35字, 可能影响传播)"
+            [ "$title_len" -lt 8 ] && { echo "❌ 标题过短(<8字, 公众号列表页无辨识度)"; exit 3; }
+            [ "$title_len" -gt 35 ] && echo "⚠️  标题过长(>35字, 公众号推送中被截断)"
             grep -qE "你只需要|只要我们还" "$f" && echo "⚠️  检测到可能反模式结尾"
             echo "✅ Phase 3 验证通过 (${size} bytes)"
             ;;

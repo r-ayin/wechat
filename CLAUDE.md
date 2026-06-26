@@ -7,7 +7,7 @@
 - **核心主张**：用深度研究内容帮普通人磨平 AI 时代的信息差
 - **内容形态**：微信公众号深度长文（15000-30000 字/篇）
 - **人格系统**：SOUL.md + STYLE.md + PERSONA.md 三件套全量注入
-- **情感温度**：2/10（冷峻克制、数据密集、具体人物叙事、结构性批判）
+- **情感温度+写作风格**：见 persona/STYLE.md（由 persona 引擎从96篇历史文章蒸馏，自动更新。禁止在此处硬编码。）
 - **技术栈**：godtier-deep-research（共享技能）+ persona 引擎
 - **状态**：🟢 活跃生产
 
@@ -193,6 +193,11 @@ wechat/
 | godtier-deep-research | `.claude/skills/godtier-deep-research/` | 深度研究引擎（已内化） |
 | script-verifier (L4) | `script-verifier/` | L4 防幻觉验证（已内化） |
 | PROTOCOL.md | `PROTOCOL.md` | 项目协议 |
+
+## 管线可调参数
+- QA最大迭代轮数: 3 (可在 pipeline-gate.sh 中调整)
+- 竞品搜索篇数: 5+ (可在 Phase 0 中根据竞品密度调整)
+- 热点扫描间隔: 4h (可在 hot-scanner.py 中调整)
 
 ## 关联项目
 - [抖音脚本项目](https://github.com/r-ayin/douyin) — 将微信长文拆分为口播脚本（独立仓库）

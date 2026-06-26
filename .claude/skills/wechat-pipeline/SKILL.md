@@ -13,14 +13,14 @@ triggers:
 1. **不可跳阶段** — 每阶段必须产出对应文件，pipeline-gate.sh 验证通过才能进入下一阶段
 2. **persona 全量注入** — Phase 3 写作前必须先读 `persona/SOUL.md` + `persona/STYLE.md` + `persona/PERSONA.md`
 3. **QA 门禁强制** — Phase 3.5 必须跑 script-verifier（extract → WebSearch → judge），FALSIFIED=0 才算通过
-4. **对标写法** — 每篇文章必须包含：具体的人+具体场景+可验证数据+热点钩子+理论≤20%
+4. **对标写法** — 每篇文章必须包含：具体的人+具体场景+可验证数据+热点钩子+理论引用服务于解释现象，不单独展开（比例由 persona/STYLE.md 风格分析自然确定）
 5. **严禁脏话** — persona 文件中的粗口是内部人格标记，不是发表用语
 
 ## 六阶段流水线
 
 ### Phase 0: 竞品风格蒸馏
 **产出**: `output/research/{slug}_competitor-style_{date}.md`
-**内容**: 搜5+篇竞品文章 → 五维拆解（切口/论点/人物/证据/差异化）→ 提取对标写法
+**内容**: 搜竞品文章（数量取决于竞品格局密度，默认≥5篇）→ 五维拆解（切口/论点/人物/证据/差异化）→ 提取对标写法
 **门禁**: 文件 ≥2000 bytes && 包含五维标签
 
 ### Phase 1: 研究简报
@@ -31,7 +31,7 @@ triggers:
 ### Phase 2: godtier 13层深度分析
 **产出**: `output/research/{slug}_analysis_{date}.md`
 **内容**: L-1前提挑战→L0反向证伪→L1范式谬误→...→L10综合断言。每层锚定具体数据。
-**门禁**: 文件 ≥15000 bytes (约5000字) && 包含 ≥10层
+**门禁**: 文件 ≥45000 bytes (对应 CLAUDE.md 深度长文 15000汉字 × 3 bytes/char ≈ 45000 bytes) && 包含 ≥10层
 
 ### Phase 3: persona 人格化重写
 **前置**: 必须先读 persona/SOUL.md + persona/STYLE.md + persona/PERSONA.md
@@ -40,9 +40,9 @@ triggers:
 - 开头：具体的人+具体场景（不用抽象问题/宣言式开头）
 - 主体：人物故事→结构分析(数据/理论支撑)→回到人物
 - 结尾：回到场景/人物/开放式问题，不给简单答案
-- 情感温度：2/10（冷峻克制）
+- 情感温度：读取 persona/STYLE.md（禁止硬编码固定值）
 - 格式：无 Markdown 小标题(##)、无列表(-)、无加粗(**)
-- 长度：15000-30000字（对标历史最佳：7小时工作制约7000字→新标准15000+）
+- 长度：15000-30000字（CLAUDE.md 深度长文标准）
 - **禁止**：脏话、粗口、空洞理论堆叠、政治口号、"治愈""正常""客观""正能量"
 - **Persona 标记**：在文章 frontmatter 中添加 `SOUL+STYLE+PERSONA 全量注入`（管道门禁检查此标记），但正文中不出现该字符串
 
@@ -53,7 +53,7 @@ triggers:
    - Step A: `python script-verifier/verifier.py extract {article} -o plan.json`
    - Step B: Agent 逐条 WebSearch 搜证，写入 results.json
    - Step C: `python script-verifier/verifier.py judge plan.json --results results.json -o report.json`
-4. **迭代修复**: FALSIFIED 立即修，最多3轮
+4. **迭代修复**: FALSIFIED 立即修，最多 N 轮（默认3，可在 pipeline-gate.sh 调整）
 **产出**: `output/research/{slug}_QA_{date}.md`
 **通过条件**: FALSIFIED=0（或 grep -cE 'FALSIFIED.*0|门禁通过|GATE:.*PASS' report.json）
 
