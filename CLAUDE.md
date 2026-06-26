@@ -11,6 +11,46 @@
 - **技术栈**：godtier-deep-research（共享技能）+ persona 引擎
 - **状态**：🟢 活跃生产
 
+## 🔴 管线强制规则（不可跳过）
+
+> 违反视为流程违规。任何文章产出必须经过完整六阶段管线。
+
+1. **写任何文章 → 必须先加载 `wechat-pipeline` Skill**
+   - Skill 位置：`.claude/skills/wechat-pipeline/SKILL.md`
+   - 触发词：做一期关于 / 跑管线 / 写一篇 / 开始写 / 深度研究这个
+
+2. **不可跳阶段** — Phase 0→1→2→3→3.5→4 严格顺序
+   - 每阶段用 `bash scripts/pipeline-gate.sh verify {phase}` 门禁检查
+   - 产出文件不通过门禁 → 不可进入下一阶段
+
+3. **Phase 3 写作前 → 强制读取 persona 三件套**
+   - `persona/SOUL.md` — 核心信念与世界観
+   - `persona/STYLE.md` — 15维风格指纹
+   - `persona/PERSONA.md` — 紧凑人设卡
+   - 未读 persona 就开始写 → 视为违规
+
+4. **严禁脏话和粗口**
+   - "我草""我靠""他妈的""傻逼"等绝不出现在发表文章中
+   - persona 文件中出现的此类词汇是内部人格标记，不是发表用语
+
+5. **对标写法铁律** — 每篇文章必须包含：
+   - 一个有名有姓的真实人物（化名可）+ 具体故事
+   - 一处具体场景描写（时间+地点+环境）
+   - 一组可验证的数据或事实
+   - 一个当前热点事件作为钩子
+   - 理论引用 ≤ 全文 20%
+
+6. **QA 门禁** — Phase 3.5 必须跑 script-verifier
+   - `python script-verifier/verifier.py extract → WebSearch → judge`
+   - FALSIFIED=0 才算通过
+   - 最多 3 轮迭代修复
+
+7. **Persona 同步** — 每次写作前：
+   ```bash
+   python ../persona/adapters/wechat_bridge.py sync
+   ```
+   确保 persona 文件与引擎最新版一致
+
 ## 🔀 模式路由
 
 | 触发词 | 模式 | 行为 |
