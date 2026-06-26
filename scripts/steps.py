@@ -108,16 +108,15 @@ def _task_phase2(slug, date, min_bytes) -> str:
 
 选题: {slug} 日期: {date}
 
-## 执行（复用 godtier 引擎，不要自创流程）
-1. 运行 `python .claude/skills/godtier-deep-research/scripts/orchestration/executor.py plan {slug} --mode auto`
-2. 按 phase1 agent_list 并行 delegate_task 8 个采集 Agent（prompt 模板见 .claude/skills/godtier-deep-research/workflows/05-phase1-collection.md）
-3. 按 phase2 agent_list 并行 delegate_task 7 个分析 Agent（模板见 workflows/06-phase2-analysis.md，强制调用 scripts/computation/* 脚本计算，禁止心算）
-4. 整合为 13 层（L-1 到 L10）分析长文
+## 执行（单 agent 自包含，禁止 delegate_task/派发子-子-agent——本环境 nesting 受限，嵌套会 stall）
+1. 读 .claude/skills/godtier-deep-research/workflows/05-phase1-collection.md 与 06-phase2-analysis.md，了解 8 个采集角色 + 7 个分析角色 + 13 层（L-1 到 L10）结构。
+2. 你**自行串行**完成采集（WebSearch 每个维度）+ 分析各角色的工作。强制调用 scripts/computation/* 脚本做数值计算（如 stats/correlation.py、finance/*.py），禁止心算。
+3. 整合为 13 层分析长文，**分多次 Write/Edit 追加**到输出文件（先 Write 写前几层，再 Edit append 后续层），直到 ≥{min_bytes} bytes 且 ≥10 个 `## L` 层标题。不要试图一次生成全文（易超时）。
+4. 网络受限时：WebSearch 结果不足不要卡死，用已有 output/research/ 下同主题产物 + 你已有知识补全，标注信源。
 
 ## 输出
 写入 {_research(slug, date, 'analysis')}
 门禁：≥{min_bytes} bytes && ≥10 个 `## L` 层标题。
-若本环境 WECHAT_MIN_BYTES 已降为 draft 档，相应放宽。
 """
 
 
