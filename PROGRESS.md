@@ -23,6 +23,7 @@
 - [x] 2026-06-26: 统一编排入口 — scripts/pipeline.py 确定性引擎 + steps.py 步骤物化器 + wechat-pipeline SKILL 薄入口（agent-loop，从任意点恢复，门禁代码强制，每步子 agent 隔离，主上下文不持内容，可移植 WorkBuddy）；gate 加 WECHAT_MIN_BYTES 可配置 + draft 档；gaokao 文章加 slug 前缀
 - [x] 2026-06-27: 全量优化实现 — 13 个新工具脚本（style_fingerprint/competitor_analyzer/title_scorer/ending_detector/structural_consistency/style_evolution/persona_drift/predictive_scanner/feedback_collector/research_cache/knowledge_base/multi_platform/metrics_panel）；Phase 3 加 outline 步骤(W-01)；gate verify 3 加风格/结尾/逻辑 advisory(W-02/W-06/QAH-03)；fact_checker 三级信源可信度+交叉验证+时效(QAH-02/04/05)；claim_extractor data_year；hot-scanner 查询去重(HS-06)；pipeline.py tool 子命令统一包装
 - [x] 2026-06-27: gaokao-score-inequality 长文产出 — 省籍彩票：你的高考从出生那天就被判了分（hot）
+- [x] 2026-06-27: marriage-unbundling 长文产出 — 婚姻没有被抛弃，是被拆成了零件（hot，45688 bytes，QA FALSIFIED=0）
 
 ## 当前任务
 管线日常运营：选题 → 研究 → 重写 → QA → 输出
