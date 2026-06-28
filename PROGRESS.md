@@ -6,7 +6,7 @@
 🟢 活跃生产 — 管线运行中
 
 ## 当前里程碑
-15篇微信长文已产出（11 hot + 4 evergreen），管线 v2.2 双模式就位
+16篇微信长文已产出（12 hot + 4 evergreen），管线 v2.2 双模式就位
 
 ## 已完成
 - [x] 项目从 douyin/ 拆分独立
@@ -14,7 +14,7 @@
 - [x] persona 人格三件套（SOUL+STYLE+PERSONA）全量注入管线
 - [x] QA 四步门禁（搜证→逻辑审查→L4验证→迭代修复）
 - [x] 双模式入口（🚀自动 / 🎯手动 Dankoe 采访）
-- [x] 15 篇微信长文产出（11 hot + 4 evergreen）
+- [x] 16 篇微信长文产出（12 hot + 4 evergreen）
 - [x] 对标账号数据库建立
 - [x] 热点扫描器 hot-scanner.py（43关键词×五支柱）
 - [x] 常青选题池 + 热点监控
@@ -26,6 +26,7 @@
 - [x] 2026-06-27: marriage-unbundling 长文产出 — 婚姻没有被抛弃，是被拆成了零件（hot，45688 bytes，QA FALSIFIED=0）
 - [x] 2026-06-28: 今日选题更新 — WebSearch(百度真实抓取)→consume→注入 evergreen-pool，新增 6 条可溯源热点选题 hot-032~037（47→53），覆盖五支柱：①高考志愿985/211反转 ②1270万毕业生43.9%offer率学历倒挂 ③最低工资31省破2000上海2740 ④AI标注工4分钱一个框AI富士康 ⑤房价跌房租涨租客占收入65% ⑥人均ADHD赛博诊断。scan-results.json 同步替换(6-23旧版备份 scan-results-2026-06-23.bak.json)
 - [x] 2026-06-28: hot-scanner.py consume 双缺陷修复(HS-009) — ①`_extract_title` 改为 query 优先(旧实现对无换行长摘要截前80字致标题碎片化)；②新增 `_match_pillar` 替换"首个token命中即break"内联匹配：query+摘要合并文本、按命中token字符长度计分(长特定token如ADHD/最低工资权重高、争议/收入等短噪声token权重低)、关键词组全命中×2加权、token小写比对(修 ADHD/AI 大小写失配)。6条今日选题回归全归类正确(scan/event-scan/report 不受影响)
+- [x] 2026-06-28: hot-033 1270万毕业生，43.9%拿到offer：学历倒挂时代，文凭为什么失灵了 (hot)
 
 ## 当前任务
 管线日常运营：选题 → 研究 → 重写 → QA → 输出
