@@ -1,7 +1,9 @@
 output/research/
 output/briefs/
 output/state/
+output/*.html
 *.json.bak
+*.bak.json
 __pycache__/
 *.pyc
 .DS_Store
