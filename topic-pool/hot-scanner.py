@@ -293,6 +293,42 @@ def _merged_pillar_keywords() -> dict[str, list[str]]:
     return merged
 
 
+def _match_pillar(query: str, summary: str, merged_kw: dict[str, list[str]]) -> str:
+    """按命中权重选支柱，修复 HS-009 支柱误归类。
+
+    旧 consume 匹配（首个 token 命中即 break）的两个问题：
+      1. 只看 query，丢失摘要里的丰富信号；
+      2. 劳动与阶级关键词含"争议/收入/调整"等跨支柱噪声 token，且声明顺序靠前，
+         导致含"争议"的高考/ADHD、含"收入"的房租全被误归劳动。
+
+    修复：query+summary 合并文本做匹配；完整关键词组全命中按 token 数×2 计分
+    （高可信），单 token 命中计 1 分（弱信号）；取最高分支柱。
+    并列时 dict 保序让劳动与阶级（基石支柱）tie-break 优先。
+    """
+    text = (query + " " + summary).lower()
+    best_pillar = "未分类"
+    best_score = 0
+    for pillar, keywords in merged_kw.items():
+        score = 0
+        for kw in keywords:
+            toks = [t for t in kw.split() if t]
+            if not toks:
+                continue
+            # token 也要 lower：text 已 lower，否则 "ADHD"/"AI" 等含字母 token 会大小写失配
+            hit_toks = [t for t in toks if t.lower() in text]
+            if not hit_toks:
+                continue
+            # 按命中 token 字符长度计分：长且特定的 token(ADHD/专注达/最低工资)权重高，
+            # 短噪声 token(争议/收入/热搜)权重低，避免噪声词跨支柱误匹配后靠声明顺序抢占
+            weight = sum(len(t) for t in hit_toks)
+            # 关键词组全部命中：高可信，再 ×2 加权
+            score += weight * 2 if len(hit_toks) == len(toks) else weight
+        if score > best_score:
+            best_score = score
+            best_pillar = pillar
+    return best_pillar
+
+
 def build_search_queries(pillar: str = None, mode: str = "hybrid") -> list[dict]:
     """构建搜索查询列表
 
@@ -462,12 +498,16 @@ def parse_search_result(query: dict, websearch_summary: str) -> dict | None:
 
 
 def _extract_title(summary: str, query: dict) -> str:
-    """从 WebSearch 摘要中提取标题"""
-    # 优先用搜索词本身
-    q = query.get("query", "")
-    # 找第一句有信息量的
-    lines = summary.strip().split("\n")
-    for line in lines:
+    """标题优先用搜索词本身（精炼、可作选题标题）；摘要无换行时截前80字会变冗长片段。
+
+    HS-009：旧实现对整段无换行的长摘要直接取前80字，导致标题变成摘要碎片。
+    WebSearch 摘要通常是连续一段，split("\\n") 只得一行即被取走。改为 query 优先。
+    """
+    q = query.get("query", "").strip()
+    if q:
+        return q
+    # query 为空时才退回摘要首句
+    for line in summary.strip().split("\n"):
         line = line.strip()
         if len(line) > 10 and not line.startswith(("http", "www")):
             return line[:80]
@@ -724,12 +764,9 @@ def main():
             if not summary or len(summary.strip()) < 30:
                 continue
 
-            # 支柱匹配：关键词任一分词出现在 query 中即归该支柱
-            matched_pillar = "未分类"
-            for pillar, keywords in merged_kw.items():
-                if any(any(tok in query for tok in kw.split()) for kw in keywords):
-                    matched_pillar = pillar
-                    break
+            # 支柱匹配：HS-009 改用 _match_pillar（query+摘要 权重匹配），
+            # 旧"首个 token 命中即 break"会让含"争议/收入"噪声词的选题被误归劳动
+            matched_pillar = _match_pillar(query, summary, merged_kw)
 
             # HS-008：用 parse_search_result 解析（原为死代码），统一标题/角度/评分提取
             query_dict = {

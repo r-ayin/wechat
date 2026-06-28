@@ -5,7 +5,9 @@
     "active": 37,
     "merged": 2,
     "selection_formula": "选题优先级 = 五维爆款评分（热度×0.20 + 反直觉×0.25 + 叙事空间×0.20 + 结构深度×0.15 + 人格匹配×0.20）",
-    "v5_notes": "2026-06-26 新增高考分数省份不均选题(hot-031)；情感温度改为动态计算(个人×竞对三向加权)"
+    "v5_notes": "2026-06-26 新增高考分数省份不均选题(hot-031)；情感温度改为动态计算(个人×竞对三向加权)",
+    "last_scan_updated": "2026-06-28",
+    "today_new": 6
   },
   "topics": [
     {
@@ -13,7 +15,13 @@
       "title": "浙江99人700分，河南48人——高考分数不是教育差距，是制度设计差距",
       "pillar": "教育与阶层",
       "five_dim_score": 8.5,
-      "scores": {"heat": 10, "counter_intuitive": 9, "narrative_space": 8, "structural_depth": 9, "persona_fit": 4.3},
+      "scores": {
+        "heat": 10,
+        "counter_intuitive": 9,
+        "narrative_space": 8,
+        "structural_depth": 9,
+        "persona_fit": 4.3
+      },
       "urgency": "热点·时效窗口",
       "event": "2026高考出分：浙江700分以上99人断层第一，河南48人，河北36人，广东不足20人。江苏650分以上占比2.7%。",
       "angle": "反直觉入口：不是浙江学生更聪明，是浙江'7选3'等级赋分最低40分——比其他省高10分起步。同一个学生换一个省考试，分数可以差几十分。这不是教育水平差距，是制度设计在制造'伪差距'。从三个考生切入——一个浙江660分能上浙大、一个河南660分只能上郑大、一个江苏考生说'我们从来不跟其他省比总分，因为规则不一样'。深层分析：赋分制度如何成为阶层再生产的隐形工具（好学校→好赋分→好分数→好大学→好工作）",
@@ -25,7 +33,13 @@
       "title": "AI 终于开始抢白领的饭碗了——GPT-5 和 Claude 4 正在重新定义谁会被替代",
       "pillar": "技术与权力",
       "five_dim_score": 7.5,
-      "scores": {"heat": 10, "counter_intuitive": 8, "narrative_space": 8, "structural_depth": 8, "persona_fit": 3.9},
+      "scores": {
+        "heat": 10,
+        "counter_intuitive": 8,
+        "narrative_space": 8,
+        "structural_depth": 8,
+        "persona_fit": 3.9
+      },
       "urgency": "热点·时效窗口",
       "event": "2026上半年 GPT-5/Claude 4 规模化落地企业——法律文书、客服、初级编程、翻译四领域首当其冲",
       "angle": "反直觉入口：以前都说'AI替代蓝领'，结果蓝领工作一个没少，白领工作开始蒸发了。从三个被AI替代或威胁的白领故事切入——一个初级律师、一个客服主管、一个翻译——分析为什么这一次不一样",
@@ -37,7 +51,13 @@
       "title": "你的第一学历是一本吗——就业市场里的出身歧视和它背后1270万人的愤怒",
       "pillar": "教育与阶层",
       "five_dim_score": 6.5,
-      "scores": {"heat": 9, "counter_intuitive": 5, "narrative_space": 8, "structural_depth": 7, "persona_fit": 4.3},
+      "scores": {
+        "heat": 9,
+        "counter_intuitive": 5,
+        "narrative_space": 8,
+        "structural_depth": 7,
+        "persona_fit": 4.3
+      },
       "urgency": "热点",
       "event": "全国政协委员袁亚湘6月呼吁破除'唯第一学历'就业歧视，加速《反就业歧视法》立法",
       "angle": "一个985硕士因为本科是双非被刷掉的故事。第一学历歧视是这个时代最荒谬的阶层再生产机制：高考那一次排名，比之后所有的努力都重要。从个人故事→数据（多少企业暗中设限）→制度分析（为什么歧视'第一学历'会加剧阶层固化）→国际对比",
@@ -48,7 +68,13 @@
       "title": "每所中小学必须配心理老师了——但心理老师自己可能也需要心理老师",
       "pillar": "心理与规训",
       "five_dim_score": 5.5,
-      "scores": {"heat": 8, "counter_intuitive": 4, "narrative_space": 6, "structural_depth": 6, "persona_fit": 4.3},
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 4,
+        "narrative_space": 6,
+        "structural_depth": 6,
+        "persona_fit": 4.3
+      },
       "urgency": "热点",
       "event": "教育部等四部门《中小学基本办学条件底线要求》首次将心理辅导室和心理教师列为硬性要求",
       "angle": "这是好事。但一个心理老师面对全校几千个学生、每周一次的心理课、所有突发危机干预——这到底是'配备'还是'敷衍'？从一个县城中学心理老师的真实工作状态切入",
@@ -59,7 +85,13 @@
       "title": "幼儿园要看家长的工资流水——教育公平从三岁开始就不公平了",
       "pillar": "教育与阶层",
       "five_dim_score": 6.0,
-      "scores": {"heat": 8, "counter_intuitive": 6, "narrative_space": 7, "structural_depth": 6, "persona_fit": 3.2},
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 6,
+        "narrative_space": 7,
+        "structural_depth": 6,
+        "persona_fit": 3.2
+      },
       "urgency": "热点",
       "event": "6月云南大理祥云县公立幼儿园要求家长提供工资流水等经济证明，被指'看人下菜碟'",
       "angle": "一所公立幼儿园为什么敢要求家长出示工资流水？因为它知道有人挤破头想进去。这不是一个县的个案，是教育资源分配不公的极端表现。从云南事件切入，延伸到幼儿园入园难、公立民办鸿沟、教育公平从三岁开始",
@@ -70,7 +102,13 @@
       "title": "不需要户口了——常住地基本公共服务的户籍解绑能改变什么",
       "pillar": "城市与生存",
       "five_dim_score": 5.2,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 5, "structural_depth": 6, "persona_fit": 3.9},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 5,
+        "structural_depth": 6,
+        "persona_fit": 3.9
+      },
       "urgency": "热点",
       "event": "6月国务院发文：随迁子女教育、公租房保障等基本公共服务与户籍脱钩",
       "angle": "这是过去十年最大的一次户籍改革。但'常住地'怎么证明？租房合同？社保？居住证？从一对在上海打工、孩子终于能在城里上学的夫妻的故事切入，分析政策能改变什么和不能改变什么",
@@ -81,7 +119,13 @@
       "title": "四二一家庭的困局：两个中年人，四个老人，一个孩子",
       "pillar": "城市与生存",
       "five_dim_score": 6.2,
-      "scores": {"heat": 7, "counter_intuitive": 5, "narrative_space": 8, "structural_depth": 8, "persona_fit": 4.3},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 5,
+        "narrative_space": 8,
+        "structural_depth": 8,
+        "persona_fit": 4.3
+      },
       "urgency": "常青·基石",
       "angle": "从一对80后夫妻的真实账本切入：月收入两万，四个老人两个有慢性病，一个孩子上小学，房贷还剩十八年。分析独生子女政策制造的'4-2-1'结构陷阱——这不是个人选择失败，是一代人的系统性困境。覆盖照护经济、养老金替代率下降、社会化养老缺位",
       "status": "ready"
@@ -91,7 +135,13 @@
       "title": "农村正在消失——和它带走的那一半中国",
       "pillar": "城市与生存",
       "five_dim_score": 5.8,
-      "scores": {"heat": 6, "counter_intuitive": 6, "narrative_space": 9, "structural_depth": 8, "persona_fit": 3.2},
+      "scores": {
+        "heat": 6,
+        "counter_intuitive": 6,
+        "narrative_space": 9,
+        "structural_depth": 8,
+        "persona_fit": 3.2
+      },
       "urgency": "常青·基石",
       "angle": "十年间90万个自然村消失。从一个正在'合并'的村庄讲起——最后几户老人、被关停的村小、荒废的诊所。这不是'城镇化'的胜利，是一半中国人的根正在被拔掉。分析土地流转、留守老人、县城衰落的连锁反应",
       "status": "ready"
@@ -101,7 +151,13 @@
       "title": "同样的工作，她比他少拿四分之一——中国职场性别歧视的账本",
       "pillar": "劳动与阶级",
       "five_dim_score": 5.5,
-      "scores": {"heat": 6, "counter_intuitive": 8, "narrative_space": 7, "structural_depth": 7, "persona_fit": 2.5},
+      "scores": {
+        "heat": 6,
+        "counter_intuitive": 8,
+        "narrative_space": 7,
+        "structural_depth": 7,
+        "persona_fit": 2.5
+      },
       "urgency": "常青",
       "angle": "反直觉入口：很多人觉得'现在男女已经平等了'——但数据说性别薪酬差距仍在23%-30%，而且随着职业层级上升反而扩大。从三个不同行业女性的工资单切入，分析歧视链条：招聘筛选（'你打算什么时候生孩子'）→晋升天花板（'管理岗不适合女性'）→退休年龄差（早退5年工资少计5年）",
       "status": "ready"
@@ -111,7 +167,13 @@
       "title": "直播间的幻灭：一千个主播里只有一个能月入过万",
       "pillar": "技术与权力",
       "five_dim_score": 5.2,
-      "scores": {"heat": 7, "counter_intuitive": 8, "narrative_space": 6, "structural_depth": 6, "persona_fit": 2.5},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 8,
+        "narrative_space": 6,
+        "structural_depth": 6,
+        "persona_fit": 2.5
+      },
       "urgency": "常青",
       "angle": "反直觉入口：平台经济不是'人人都能做'的创业机会——是幸存者偏差的巨型实验。从一个在直播间待了八个月、粉丝不到两千的主播的视角切入，分析平台创作者经济的金字塔结构：0.1%的人拿走80%的收入，99.9%的人是平台的免费内容工人",
       "data": "头部0.1%主播拿走80%直播收入；95%主播月收入低于3000元",
@@ -122,7 +184,13 @@
       "title": "你家小区的垃圾去哪了——环境正义的阶级账本",
       "pillar": "技术与权力",
       "five_dim_score": 5.0,
-      "scores": {"heat": 5, "counter_intuitive": 7, "narrative_space": 7, "structural_depth": 7, "persona_fit": 2.5},
+      "scores": {
+        "heat": 5,
+        "counter_intuitive": 7,
+        "narrative_space": 7,
+        "structural_depth": 7,
+        "persona_fit": 2.5
+      },
       "urgency": "常青",
       "angle": "垃圾焚烧厂、化工厂、污水处理站——它们从来不建在富人区旁边。从一座垃圾焚烧厂周边村庄的癌症发病率切入，分析环境不公的阶级地理学：为什么穷人的空气和富人的空气不一样",
       "status": "ready"
@@ -132,7 +200,13 @@
       "title": "反对内卷式加班——加班正在扼杀中国的消费和创新",
       "pillar": "劳动与阶级",
       "five_dim_score": 6.8,
-      "scores": {"heat": 9, "counter_intuitive": 5, "narrative_space": 9, "structural_depth": 8, "persona_fit": 3.9},
+      "scores": {
+        "heat": 9,
+        "counter_intuitive": 5,
+        "narrative_space": 9,
+        "structural_depth": 8,
+        "persona_fit": 3.9
+      },
       "urgency": "热点+延续",
       "event": "陆铭委员6月提案：减少内卷式加班、释放经济社会发展新动能",
       "angle": "三个打工人故事——一个每天隐形加班的运营、一个免费加班的程序员、一个'不敢第一个走'的年轻人。论证加班不是勤奋，是系统性抑制消费、阻碍创新、降低生育的毒药。像7小时工作制那篇的结构：人物叙事→数据→历史纵深→结构分析→诚实结尾",
@@ -144,7 +218,13 @@
       "title": "60岁还在打工——8700万超龄劳动者的权益保卫战",
       "pillar": "劳动与阶级",
       "five_dim_score": 4.7,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 5, "structural_depth": 6, "persona_fit": 3.2},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 5,
+        "structural_depth": 6,
+        "persona_fit": 3.2
+      },
       "urgency": "热点·时效窗口",
       "event": "7月1日《超龄劳动者基本权益保障暂行规定》生效——我国首部超龄劳动者专项规章",
       "window": "7月1日前发布，过期失效",
@@ -157,7 +237,13 @@
       "title": "彩礼每高10万，结婚意愿降5.88%——婚姻的价码和它的买家",
       "pillar": "城市与生存",
       "five_dim_score": 6.6,
-      "scores": {"heat": 8, "counter_intuitive": 7, "narrative_space": 7, "structural_depth": 6, "persona_fit": 3.9},
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 7,
+        "narrative_space": 7,
+        "structural_depth": 6,
+        "persona_fit": 3.9
+      },
       "urgency": "常青+热点",
       "event": "2026一季度结婚登记再创历史新低（169.7万对）；中央一号文件首提省际彩礼联动治理",
       "angle": "反直觉入口：不是女性要高价彩礼，是彩礼本身在摧毁结婚意愿——学术研究证实彩礼越高男性越不想结婚。彩礼不是结果，是信号——指向农村养老保障缺失、性别比失衡、阶层固化。从'九个春节因为彩礼谈崩'的故事切入",
@@ -169,7 +255,13 @@
       "title": "上海出现'生育搭子'：没有婚姻的合作生娃，和它照出的制度空白",
       "pillar": "心理与规训",
       "five_dim_score": 6.4,
-      "scores": {"heat": 7, "counter_intuitive": 8, "narrative_space": 7, "structural_depth": 5, "persona_fit": 3.2},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 8,
+        "narrative_space": 7,
+        "structural_depth": 5,
+        "persona_fit": 3.2
+      },
       "urgency": "热点",
       "event": "6月初上海博主介绍'生育搭子'现象引发全网争议",
       "angle": "反常识入口：不是'不婚不育'，是'不婚但育'——两个人没恋爱没结婚，纯粹为生孩子走到一起。这是一个比'不婚'更让制度措手不及的选择。分析为什么会出现（女性生育年龄压力→婚恋成本太高→制度滞后），以及它暴露的法律真空：未婚女性不能做试管婴儿、亲子关系认定无依据、法院没有处理流程",
@@ -181,7 +273,13 @@
       "title": "学区房腰斩：三把刀同时砍下，一套房子的教育神话结束了",
       "pillar": "教育与阶层",
       "five_dim_score": 6.8,
-      "scores": {"heat": 9, "counter_intuitive": 6, "narrative_space": 7, "structural_depth": 7, "persona_fit": 3.9},
+      "scores": {
+        "heat": 9,
+        "counter_intuitive": 6,
+        "narrative_space": 7,
+        "structural_depth": 7,
+        "persona_fit": 3.9
+      },
       "urgency": "热点",
       "event": "2026上半年全国多城出台政策切断房产与入学资格绑定；国务院发文'逐步消除基本公共服务与户籍挂钩'",
       "angle": "数据入口：北京蜂鸟家园43平开间从950万跌到450万——腰斩的不只是一个楼盘，是一套'买房子=买教育'的社会契约。从三个家庭的故事切入：一个刚高位接盘的、一个在庆幸没买的、一个卖了学区房租房的。分析学区房定价逻辑被拆解的三把刀：多校划片、教师轮岗、户籍脱钩",
@@ -193,7 +291,13 @@
       "title": "全国第一个'取消中考'的县——和它能告诉我们的事",
       "pillar": "教育与阶层",
       "five_dim_score": 5.8,
-      "scores": {"heat": 8, "counter_intuitive": 7, "narrative_space": 5, "structural_depth": 6, "persona_fit": 3.2},
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 7,
+        "narrative_space": 5,
+        "structural_depth": 6,
+        "persona_fit": 3.2
+      },
       "urgency": "热点",
       "event": "浙江嵊泗县成为全国首个取消中考选拔功能的县级行政区，全民'全员直升'高中",
       "angle": "这个县的初中毕业生只有300人，常住人口已连续27年负增长。它'取消中考'不是因为先进，是因为没人了。但这恰恰是中国教育即将面对的普遍困境——当出生人口从1786万跌到不足800万，教育资源从'不够分'变成'分不完'。嵊泗是未来的预言",
@@ -204,7 +308,13 @@
       "title": "你的退休金凭什么比我多五倍——养老金公平的账本",
       "pillar": "劳动与阶级",
       "five_dim_score": 6.2,
-      "scores": {"heat": 7, "counter_intuitive": 5, "narrative_space": 7, "structural_depth": 7, "persona_fit": 3.9},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 5,
+        "narrative_space": 7,
+        "structural_depth": 7,
+        "persona_fit": 3.9
+      },
       "urgency": "常青+热点",
       "event": "6月养老金调整通知未公布持续发酵；政协委员建议'劳动者退休后养老待遇应平等'",
       "angle": "三个老人的故事：一个体制内退休月入一万二，一个企业退休月入三千，一个农村老人每月一百多。他们年轻时都在工作，差距从哪来的？分析养老金双轨制并轨后的遗留差距、'多缴多得'在收入分配不公下的悖论、城乡养老的制度性分割",
@@ -216,7 +326,13 @@
       "title": "集采药便宜了，但你还敢吃吗——华泰制药丑闻背后的医保困局",
       "pillar": "技术与权力",
       "five_dim_score": 5.5,
-      "scores": {"heat": 7, "counter_intuitive": 5, "narrative_space": 6, "structural_depth": 6, "persona_fit": 2.5},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 5,
+        "narrative_space": 6,
+        "structural_depth": 6,
+        "persona_fit": 2.5
+      },
       "urgency": "热点",
       "event": "6月华泰制药抗心律失常'救命药'被曝生产线严重缺陷，被取消集采资格并禁入18个月",
       "angle": "集采把药价打下来了，但质量底线怎么守？从华泰制药的丑闻切入，分析集采的困境：降价压力→企业压缩成本→质量风险→患者信任崩塌。这不是'要不要集采'的问题，是'便宜的药和安全的药能不能是同一种药'",
@@ -227,7 +343,13 @@
       "title": "婚姻正在被拆解——不是人们抛弃了婚姻，是婚姻的每一个功能都找到了替代品",
       "pillar": "城市与生存",
       "five_dim_score": 9.0,
-      "scores": {"heat": 9, "counter_intuitive": 9, "narrative_space": 10, "structural_depth": 10, "persona_fit": 4.3},
+      "scores": {
+        "heat": 9,
+        "counter_intuitive": 9,
+        "narrative_space": 10,
+        "structural_depth": 10,
+        "persona_fit": 4.3
+      },
       "urgency": "常青·基石",
       "event": "2026Q1结婚登记169.7万对同比降6%；单身人口超2.4亿；一人户家庭超1/4；结离比2.73:1。但数据只是结果。",
       "angle": "核心论点：婚姻的衰落不是因为年轻人'不想结了'，是因为婚姻曾经垄断的每一项功能——经济安全、性、居住、生育、养老、情感支持、社会身份——都在被市场、技术和国家逐个拆解和外包。这不是道德危机，是一场制度级的'去捆绑'，中国人正在经历从'家庭人'到'个体人'的文明跃迁。",
@@ -240,7 +362,13 @@
       "title": "医保个人账户的钱，终于不能买面膜了——谁是'白名单'的赢家和输家",
       "pillar": "城市与生存",
       "five_dim_score": 4.5,
-      "scores": {"heat": 6, "counter_intuitive": 4, "narrative_space": 5, "structural_depth": 5, "persona_fit": 2.5},
+      "scores": {
+        "heat": 6,
+        "counter_intuitive": 4,
+        "narrative_space": 5,
+        "structural_depth": 5,
+        "persona_fit": 2.5
+      },
       "urgency": "热点",
       "event": "医保个人账户白名单制度落地，械字号面膜等被踢出",
       "angle": "有人觉得这是'救命钱回归救命'，有人觉得'我的钱我怎么花还要你管'。分析医保个人账户的制度设计逻辑——它到底是个人的钱还是社会的钱",
@@ -409,7 +537,13 @@
       "title": "投了2000份简历没有回音——30岁白领失业自白",
       "pillar": "劳动与阶级",
       "five_dim_score": 5.4,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 6.5, "structural_depth": 7, "persona_fit": 4.3},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 6.5,
+        "structural_depth": 7,
+        "persona_fit": 4.3
+      },
       "urgency": "热点",
       "event": "GDP增长5%但就业市场持续疲软，GDP与就业脱钩加剧",
       "angle": "30岁前亚马逊客服被裁后投2000份简历、面试机会屈指可数的真实故事。为什么GDP在增长但就业市场在崩塌——GDP与就业脱钩的结构性分析。从一个人的求职故事延伸到一整个世代的困境：学历贬值、岗位错配、自动化替代",
@@ -430,7 +564,13 @@
       "title": "断亲：80%的年轻人不走亲戚了",
       "pillar": "心理与规训",
       "five_dim_score": 5.2,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 5.5, "structural_depth": 7, "persona_fit": 4.3},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 5.5,
+        "structural_depth": 7,
+        "persona_fit": 4.3
+      },
       "urgency": "常青",
       "event": "80%受访者与父辈亲戚联系每年仅1-2次，近1/5基本不走亲戚",
       "angle": "不是人情冷漠，是城市化割断了地缘纽带。从费孝通'差序格局'理论出发——亲戚关系变淡是社会转型的必然结果，不是道德堕落。三代人视角：年轻一代的解脱感（终于不用被'灵魂拷问'）、父母一代的失落感（'家不像家了'）、社会学者的结构性分析（城镇化+少子化+原子化三重叠加）",
@@ -442,7 +582,13 @@
       "title": "全职儿女、老鼠人、烂尾娃——三个新词背后，是一代人的习得性无助",
       "pillar": "心理与规训",
       "five_dim_score": 7.5,
-      "scores": {"heat": 8, "counter_intuitive": 8, "narrative_space": 9, "structural_depth": 8, "persona_fit": 5.7},
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 8,
+        "narrative_space": 9,
+        "structural_depth": 8,
+        "persona_fit": 5.7
+      },
       "urgency": "常青",
       "event": "2025-2026年三个新词几乎同时出现并广泛传播；从躺平到全职儿女到烂尾娃到老鼠人——新词不断涌现但底层情绪一直没变",
       "angle": "两段式结构——上半段：三个新词作为症状。回家（全职儿女）、躲起来（老鼠人）、认命（烂尾娃），每个词背后都有一个具体的人在做一个理性的选择。把标签还原为人。下半段：从症状切到诊断。从习得性无助的心理学实验出发——当社会持续传递'努力就有回报'而现实不断否定它时，'停止努力'不是懒惰，是理性的自我保护。不是个体病了，是环境让人学了'做什么都没用'。三个词同时出现不是巧合——它们是同一代人面对同一个结构困境的三种理性应对策略。完美定位：心理问题→社会结构，与SOUL.md核心信念直球重叠",
@@ -454,7 +600,13 @@
       "title": "1270万毕业生，和没人要的学历",
       "pillar": "教育与阶层",
       "five_dim_score": 4.8,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 4, "structural_depth": 7, "persona_fit": 4.0},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 4,
+        "structural_depth": 7,
+        "persona_fit": 4.0
+      },
       "urgency": "热点",
       "event": "2026届高校毕业生1270万创历史新高，有效岗位仅567万",
       "angle": "学历贬值的数学：当每年有1270万张新学历涌入市场，而岗位在减少，学历就不再是敲门砖，是入场券——而且是最基础的那种。从法学/汉语言文学7:1供需比切入，分析中国高等教育工业化的产物：大学扩招二十年把学历从'稀缺品'变成了'标配'，但经济增速放缓后，这套系统出了问题",
@@ -466,7 +618,13 @@
       "title": "3.2亿灵活就业者，和44%的非标准人生",
       "pillar": "劳动与阶级",
       "five_dim_score": 4.8,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 5, "structural_depth": 6, "persona_fit": 3.9},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 5,
+        "structural_depth": 6,
+        "persona_fit": 3.9
+      },
       "urgency": "常青",
       "event": "灵活就业/零工经济覆盖3.2亿人，占就业人口44%",
       "angle": "3.2亿人——相当于整个美国的人口，正在活在'非标准'的就业形态里：没有劳动合同、没有社保、没有工伤保护、没有带薪年假。他们不是'打零工'的少数派，是正在成为主流。这是一个正在发生的制度性变革：中国社正从'组织化稳定就业社会'走向'平台化碎片就业社会'",
@@ -478,7 +636,13 @@
       "title": "16.9%的青年失业率，和20%的恐惧",
       "pillar": "劳动与阶级",
       "five_dim_score": 4.8,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 5, "structural_depth": 6, "persona_fit": 3.6},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 5,
+        "structural_depth": 6,
+        "persona_fit": 3.6
+      },
       "urgency": "热点+常青",
       "event": "16-24岁青年失业率16.9%；花旗分析师警告可能攀至20%",
       "angle": "每6个想找工作的年轻人就有1个没有工作。但比16.9%更可怕的是那些'不找了'的人——不被计入统计的放弃者、靠父母的全职儿女、在灵活就业里挣扎的隐形失业者。如果加回这些，数字是多少？不知道。不确定性才是最大的恐惧",
@@ -489,7 +653,13 @@
       "title": "每天上网6小时，仍然孤独——Z世代的数字社交悖论",
       "pillar": "心理与规训",
       "five_dim_score": 4.7,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 4, "structural_depth": 5, "persona_fit": 5.0},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 4,
+        "structural_depth": 5,
+        "persona_fit": 5.0
+      },
       "urgency": "常青",
       "event": "中国青年报《赛博格的友谊》研究报告发布",
       "angle": "77.9%受访青年每日网络超4小时，近半数超6小时，但64.3%感到深层孤独难以排解。数字给了我们'永远在线'的连接，却没给我们'被理解'的感觉。从数据切入分析三个悖论：连接越多越孤独、展示越多越自卑、信息越多越不信任",
@@ -501,11 +671,125 @@
       "title": "不是不想社交，是怕了人情债——盲盒饭局和搭子社交的兴起",
       "pillar": "心理与规训",
       "five_dim_score": 4.2,
-      "scores": {"heat": 7, "counter_intuitive": 3, "narrative_space": 4, "structural_depth": 5, "persona_fit": 2.5},
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 3,
+        "narrative_space": 4,
+        "structural_depth": 5,
+        "persona_fit": 2.5
+      },
       "urgency": "常青",
       "event": "盲盒饭局在多个城市兴起；搭子社交搜索量年增300%",
       "angle": "68%的人感到线下社交能力退化，同时搭子社交暴涨。表面矛盾，逻辑一致：不是不想社交，是怕了人情债——熟人社交有温度但有压力（礼尚往来、情感绑架、'灵魂拷问'），陌生人社交无预设无负担但无法深入。盲盒饭局和搭子社交的兴起，是当代年轻人在'孤独'和'负担'之间找到的中间态",
       "data": "68%感到线下社交能力退化；搭子社交搜索量年增300%",
+      "status": "ready"
+    },
+    {
+      "id": "hot-032",
+      "title": "985冷门专业遇冷，211王牌杀疯：名校光环为什么突然不灵了",
+      "pillar": "教育与阶层",
+      "five_dim_score": 7.8,
+      "scores": {
+        "heat": 9,
+        "counter_intuitive": 8,
+        "narrative_space": 7.5,
+        "structural_depth": 8,
+        "persona_fit": 4.5
+      },
+      "urgency": "热点·今日扫描 2026-06-28（6月出分填志愿窗口）",
+      "event": "2026高考1290万考生出分填志愿，多所985冷门专业投档线跳水需降分补录，211王牌(电气/通信/财经)分数线走高；超七成家长优先看专业就业前景；新高考堵死冲名校再转专业；教育部终结冷热混搭大杂烩专业组。",
+      "angle": "反直觉入口：五年前闭眼冲985，现在985冷门专业反成就业陷阱。麦可思数据2024届本科毕业半年月均6199元——名校光环失效不是偶然，是千万毕业生下企业招聘精细化+新高考锁专业的叠加。表面选学校，实际赌4年后的就业周期。近四年撤销1.22万个过剩专业。",
+      "data": "1290万考生；超七成家长优先专业；2024届本科半年月均6199元近六成起薪<6000；转专业需排名前10%；六大绿牌全工科(电气/微电子/自动化/能源动力/车辆/新能源)；法学/英语/会计等6专业成重灾区；近四年撤销1.22万个过剩专业新增1.02万个",
+      "status": "ready"
+    },
+    {
+      "id": "hot-033",
+      "title": "1270万毕业生，43.9%拿到offer：学历倒挂时代，文凭为什么失灵了",
+      "pillar": "教育与阶层",
+      "five_dim_score": 8.0,
+      "scores": {
+        "heat": 9,
+        "counter_intuitive": 9,
+        "narrative_space": 7.5,
+        "structural_depth": 8,
+        "persona_fit": 4.5
+      },
+      "urgency": "热点·今日扫描 2026-06-28（毕业季窗口）",
+      "event": "2026届高校毕业生1270万(同比+48万)连续8年破千万，求职大军超1500万；offer率跌至43.9%近六成本科生或毕业即待业；专科offer率56%反超本科45%与硕博40%呈学历倒挂。",
+      "angle": "反直觉入口：专科生offer率反超硕博——文凭越高反而越难签约。这不是个体的错，是1980年14.7万到2026年1270万26年增13倍的学历通胀+企业不再培养白纸(1年经验岗位同比降12.38%)。个体在千万供给前失去议价权。期望8000-10000实际5800，落差被称为近3000元现实税。",
+      "data": "1270万(+48万)；求职大军超1500万；有效校招岗567万供需比2:1；offer率43.9%；专科56%/本科45%/硕博40%；国考98:1央企岗>1000:1；期望8000-10000实际5800(较5年前降12%)；本科期望7291实际5215落差28.5%；青年失业率16.5%；1年经验岗位同比降12.38%",
+      "status": "ready"
+    },
+    {
+      "id": "hot-034",
+      "title": "最低工资2740元：这条线下面，是谁在替整个系统兜底",
+      "pillar": "劳动与阶级",
+      "five_dim_score": 7.6,
+      "scores": {
+        "heat": 7,
+        "counter_intuitive": 8,
+        "narrative_space": 8,
+        "structural_depth": 8,
+        "persona_fit": 4.5
+      },
+      "urgency": "热点·今日扫描 2026-06-28（2026集中调整窗口）",
+      "event": "2026年最低工资集中调整窗口期，31省第一档月最低工资全部破2000元；上海2740元领跑(唯一破2700)，北京2540元/小时27.7元最高，深圳2520元，苏浙一类区2660元，贵州1660→1790涨7.8%。",
+      "angle": "反直觉入口：最低工资看似只管最低薪岗位，实际联动失业金(70-80%)、病假工资(≥80%)、试用期、加班费基数——它抬高的是整条低收入保障链。争议：上调是否挤压就业、加速机器替代。这条法律底线抬高的背后，是无数拿不到它的人，和靠它连带活下去的人。",
+      "data": "31省第一档全破2000；上海2740/北京2540/小时27.7/深圳2520/苏浙2660；贵州1660→1790涨7.8%；失业金按最低工资70-80%；病假工资≥80%；人社部规定每两年至少调一次",
+      "status": "ready"
+    },
+    {
+      "id": "hot-035",
+      "title": "AI富士康里的标注工：4分钱一个框，教会徒弟饿死师傅",
+      "pillar": "技术与权力",
+      "five_dim_score": 7.9,
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 8,
+        "narrative_space": 8,
+        "structural_depth": 8,
+        "persona_fit": 4.6
+      },
+      "urgency": "热点·今日扫描 2026-06-28",
+      "event": "AI数据标注被称人工智能背后的老师，河南贵州等偏远地区建超千人标注基地称AI富士康；河南87.1%岗位月薪3-6K，贵州78.2%岗位3-6K对比贵州平均工资9.7K低44.9%。",
+      "angle": "反直觉入口：多少智能背后就有多少人工，而这人工正在被它训练出的智能淘汰。智能标注工具已完成60%重复工作，基础标注员面临被替代。2018年时薪25-40元如今缩水。金字塔：基础8-12K/质检15-20K/主管25K/训练师35K+——同一个AI产业链，顶端和底端是两个阶级。",
+      "data": "河南87.1%岗位3-6K；贵州78.2%岗位3-6K对比9.7K低44.9%；3D点云标注底薪2500每框4分日均2500框需95%合格；基础8-12K/质检15-20K/主管25K/训练师35K+；2018时薪25-40元；智能标注已完成60%重复工作",
+      "status": "ready"
+    },
+    {
+      "id": "hot-036",
+      "title": "房价跌了，房租却涨：你的工资，房东拿走了65%",
+      "pillar": "城市与生存",
+      "five_dim_score": 7.7,
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 8,
+        "narrative_space": 8,
+        "structural_depth": 7.5,
+        "persona_fit": 4.5
+      },
+      "urgency": "热点·今日扫描 2026-06-28（毕业租房季）",
+      "event": "2026年3月租赁旺季起北京上海深圳住宅租金连续3月环比上涨；深圳2月环比涨5.2%核心区涨7-9%；北京回龙观租客月租占税后收入65%；全国租金同比涨4.3%而收入增长仅3.6%。",
+      "angle": "反直觉入口：房价跌房租却涨——因为房价看信心金融游戏，房租锚定刚需钱包。买转租大迁徙推高需求，房东把持有成本转嫁给掏空钱包的打工人。一线租金均价83.81元/平米/月，40平开间3300元。44%租客希望租金仅占收入10%以下——但现实是65%。",
+      "data": "1-5月一线租金累计涨0.21%；深圳2月环比5.2%核心区7-9%；北京租客占收入65%；租金同比4.3% vs 收入3.6%；一线均价83.81元/平米/月40平3300元；深圳泊寓清退3-4万间；44%租客希望租金<10%收入",
+      "status": "ready"
+    },
+    {
+      "id": "hot-037",
+      "title": "人均ADHD：当一个病变成社交标签，谁还在乎真病人",
+      "pillar": "心理与规训",
+      "five_dim_score": 7.9,
+      "scores": {
+        "heat": 8,
+        "counter_intuitive": 8,
+        "narrative_space": 8,
+        "structural_depth": 8,
+        "persona_fit": 4.6
+      },
+      "urgency": "热点·今日扫描 2026-06-28",
+      "event": "2025年底罗永浩自曝患ADHD吃专注达十几年到最大剂量仍失效；2026年1月1日医保新增盐酸胍法辛缓释片与盐酸右哌甲酯缓释胶囊(限6岁以上ADHD)；中国6-16岁儿童ADHD患病率6.4%居儿童精神障碍首位，患儿约2300万就诊率不足10%。",
+      "angle": "反直觉入口：当一个病变成社交标签流通，最需要帮助的真患者反而消失了。半月谈批人均ADHD赛博诊断：社交平台约70%ADHD内容将正常人类体验过度病理化，0.99元自测量表诱导消费。同时专注达断货、聪明药流入考研考场地下市场。诊断爆炸与药企推动、真患者困境被遮蔽。",
+      "data": "6-16岁患病率6.4%居首位；患儿约2300万就诊率<10%；专注达2023起断货27/36mg缺货；医保新增2药限6岁以上；社交平台约70%内容过度病理化；0.99元自测量表；成人患病率约3%",
       "status": "ready"
     }
   ]
