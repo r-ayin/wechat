@@ -1,0 +1,22 @@
+{
+  "case_id": "case-2026-06-30-004",
+  "agent_id": "ralph-wiggum-autonomous-loop",
+  "timestamp": "2026-06-30T00:25Z",
+  "project": "wechat-main",
+  "work_unit": "归档 06-29 热点扫描结果, 恢复 wechat-main main 至 clean (scout-scan 报 dirty=1)",
+  "situation": "scout-scan @2026-06-29T16:17Z 报 wechat-main dirty=1; git status --short 仅 ' M topic-pool/scan-results.json'。diff 显示该 tracked 文件追加 36 条选题(100→668 行区间, 文件总 45 entries, last scanned_at 2026-06-29T14:10:42Z)。溯源: topic-pool/hot-scanner.py scan 子命令带 --output 时会读取现存文件并 append 新选题(line 738-746: existing+new_topics merged → write_text); 06-29 一次 pipeline 运行以 --output topic-pool/scan-results.json 调用, 把运行时输出写进 tracked 文件, 致 main 脏。predictive_scanner.py 仅读不写(_load_json line 254), 排除。git log 示 aa5aa4f 'feat: 今日选题更新(6条热点)' 为既有工作流先例——即 scan-results.json 是定期提交的运行时累积数据文件, 非 bug 产物。CONTENT_PIPELINE.md §五 亦将 scan-results.json 列为选题池文件。",
+  "action": "判定为正常数据更新待归档而非结构性代码 bug (gitignore 会破坏 aa5aa4f 既定 '今日选题更新' 工作流并丢失 baseline)。最小正确动作: 把 pending 扫描数据提交入 opt-worktree 恢复 main clean。bash scripts/opt-worktree.sh wechat-main commit data:scan-update-0629 '<说明>' topic-pool/scan-results.json → 脚本判方向分歧(engine→data)开新 worktree opt-data-1782750013, commit 8607265。提交前 python3 json.load 校验完整(45 entries, valid JSON)。case 写入 wechat-main opt-data worktree .claude/decisions/ (非 AS main), 沿用 case-164 rehome 先例避免跨项目孤儿 [[case-file-orphan-on-cross-project-work]]。",
+  "files_changed": [
+    "wechat-main/topic-pool/scan-results.json"
+  ],
+  "worktree": "/home/admin/workspace/.opt-worktrees/wechat-main/opt-data-1782750013 (branch auto/opt-data-1782750013, commit 8607265; main 520a5b2 clean)",
+  "direction": "data:scan-update-0629",
+  "outcome": "succeeded",
+  "outcome_evidence": [
+    "git -C wechat-main status --short 提交后输出空(main clean, 可观察)",
+    "git -C .opt-worktrees/wechat-main/opt-data-1782750013 log --oneline -1 → 8607265 opt(data:scan-update-0629):... (可观察)",
+    "git -C <wt> diff --stat main → topic-pool/scan-results.json 665 insertions, .opt-direction 2 (可观察, 改动隔离在 worktree)",
+    "python3 json.load(topic-pool/scan-results.json) → valid JSON, 45 entries (提交前校验通过)"
+  ],
+  "next_suggestion": "opt-data-1782750013 待人工 merge/reject(wechat-main, data:scan-update-0629, 仅数据更新无代码改动, merge 风险低)。结构性观察(OPEN, 非本轮): wechat-main 每次 hot-scanner scan --output topic-pool/scan-results.json 都会脏 main 直至人工归档——可考虑加一个轻量 'scan → 自动提交数据更新' 的 cron, 或文档化 'scan 后须 commit' 的 SOP, 但属工作流优化非 bug, 留待后续独立小单位。下轮: 重跑 scout-scan; 1BfrYW9R opt-tests-1782749552(4907402) 仍 pending → 依 [[scout-scan-recommend-blind-to-pending-worktrees]] 继续跳过 #1; AS 债务项见 autonomous-state.md。"
+}
