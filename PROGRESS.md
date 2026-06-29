@@ -1,6 +1,6 @@
 # wechat — 进度追踪
 
-> 最后更新：2026-06-28
+> 最后更新：2026-06-29
 
 ## 状态
 🟢 活跃生产 — 管线运行中
@@ -35,12 +35,12 @@
 管线日常运营：选题 → 研究 → 重写 → QA → 输出
 
 ## 待办
-- [ ] 对标账号 T1-T3 定期更新
-- [ ] 选题池 UCB 信号优化（`feedback_collector` 已就绪，待接入 hot-scanner 排序）
-- [ ] persona 风格进化周期（`style_evolution` 已就绪，待累积≥5条发布反馈后跑 evolve）
-- [ ] PD-04：STYLE.md 15维有效性 A/B 盲测，去冗余维度
-- [ ] PD-07：STYLE.md 时段加权重新蒸馏（2021/2022-23/2024-26 权重 0.2/0.3/0.5）
-- [ ] style_fingerprint 阈值用已有15篇回测校准后从 advisory 收紧为阻断
+- [ ] 对标账号 T1-T3 定期更新（⏳ stale: 上次 2026-06-26，>3天未跑）
+- [ ] 选题池 UCB 信号优化（`feedback_collector` 已就绪，待接入 hot-scanner 排序；阻塞于 ≥5条发布反馈累积）
+- [ ] persona 风格进化周期（`style_evolution` 已就绪，待累积≥5条发布反馈后跑 evolve；阻塞同上）
+- [ ] PD-04：STYLE.md 15维有效性 A/B 盲测，去冗余维度（依赖 feedback_collector 数据）
+- [ ] PD-07：STYLE.md 时段加权重新蒸馏（2021/2022-23/2024-26 权重 0.2/0.3/0.5；可独立启动）
+- [ ] style_fingerprint 阈值用已有17篇回测校准后从 advisory 收紧为阻断（文章数已够，待排期）
 
 ## 阻塞项
-无
+无（UCB/evolve/PD-04 共享同一前置：发布反馈累积；其余可独立推进）
