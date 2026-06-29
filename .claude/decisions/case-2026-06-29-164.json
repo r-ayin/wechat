@@ -1,0 +1,15 @@
+{
+  "case_id": "case-2026-06-29-164",
+  "agent_id": "ralph-wiggum-autonomous-loop",
+  "timestamp": "2026-06-29T05:10:00Z",
+  "project": "wechat-main",
+  "work_unit": "docs:progress-stale — PROGRESS.md 刷新至 2026-06-29 + 标注待办 stale/阻塞依赖",
+  "situation": "scout-scan #3 wechat-main (score=0.0, PROGRESS 0.8天最 stale)。AS opt-cases-1782708487 仍 pending merge（case-163 next_suggestion 让人工审），引擎不应自动合。切到 wechat-main 做最小文档润色：PROGRESS.md 头戳停在 2026-06-28、待办项未标 stale 时长与共享前置依赖，致下轮 scout 难判断优先级。",
+  "action": "1) opt-worktree.sh . commit docs:progress-stale → 触发 area 分歧检测开新 worktree opt-docs-1782709369；2) Edit PROGRESS.md '最后更新'→2026-06-29；3) 待办 6 条补 stale 注释(对标>3天/UCB+evolve+PD-04 共享 feedback_collector 前置/style_fingerprint 文章数已够)；4) 阻塞项注明共享前置关系；5) git add+commit 进 auto/opt-docs-1782709369。opt-worktree.sh commit 因 WT_BASE 路径拼接 bug(line 48 误把 relative project+'../.opt-worktrees/...' 双重嵌套)跳过，改用 cd worktree 后手动 git add+commit（仅 PROGRESS.md，未带 .opt-direction）。",
+  "files_changed": ["PROGRESS.md"],
+  "worktree": "auto/opt-docs-1782709369",
+  "direction": "docs:progress-stale",
+  "outcome": "succeeded",
+  "outcome_evidence": "git -C /home/admin/workspace/.opt-worktrees/wechat-main/opt-docs-1782709369 log -1 --oneline = '5e0e576 opt(docs:progress-stale): PROGRESS.md 刷新至 2026-06-29 + 标注 stale/阻塞依赖'；git diff HEAD~1 --stat = 'PROGRESS.md | 1 file changed, 8 insertions(+), 8 deletions(-)'；main HEAD=6fc14ee 未变；head -3 PROGRESS.md 显示 '> 最后更新：2026-06-29'",
+  "next_suggestion": "1) 人工审 AS opt-cases-1782708487（HEAD=37ac78e，含 case-151-163 归档）merge/reject；2) 若 pending 枝仍未审，下轮在 wechat-main 续做 style_fingerprint 阈值回测校准（17篇数据已够，独立可启动）或 PD-07 时段加权重蒸馏；3) opt-worktree.sh line 48 WT_BASE 路径拼接 bug 应修复（project-relative path + '../.opt-worktrees/' 双重嵌套致 reuse 分支写 .opt-direction 失败），属 autonomous-studio engine:tooling 方向小工作单位"
+}
