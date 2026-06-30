@@ -38,6 +38,12 @@ if [ -f "${WECHAT_ENV:-$HOME/.wechat-env}" ]; then
   # shellcheck disable=SC1090
   set +u; source "${WECHAT_ENV:-$HOME/.wechat-env}"; set -u
 fi
+# DeepSeek key 兜底：wechat-env 没配则从 personal-assistant .env 取（ECS 共置）
+if [ -z "${DEEPSEEK_API_KEY:-}" ] && [ -f /opt/personal-assistant/.env ]; then
+  DEEPSEEK_API_KEY="$(grep -E '^DEEPSEEK_API_KEY=' /opt/personal-assistant/.env \
+    | head -1 | cut -d= -f2- | tr -d '\"' || true)"
+  export DEEPSEEK_API_KEY
+fi
 
 echo "===== $(date -Iseconds) daily-hotspot [$DATE] ====="
 
@@ -47,10 +53,18 @@ if [ -d .git ] && command -v git >/dev/null 2>&1; then
 fi
 
 # --- 2. 搜索取数 ---
-BACKEND="${SEARCH_BACKEND:-bing}"
-echo "  [2/4] 取数 (backend=$BACKEND)..."
+BACKEND="${SEARCH_BACKEND:-bocha}"
+echo "  [2/5] 取数 (backend=$BACKEND)..."
 USE_FALLBACK=1
-if [ "$BACKEND" = "brave" ]; then
+if [ "$BACKEND" = "bocha" ]; then
+  if [ -z "${BOCHA_API_KEY:-}" ]; then
+    echo "  WARN: BOCHA_API_KEY 未设置，跳过取数（用共享池渲染）" | tee -a "$LOG"
+  else
+    python3 scripts/bocha_search.py \
+      --output "$SCAN_RAW" --top 5 --concurrency 3 --sleep 0.3 2>>"$LOG"
+    USE_FALLBACK=0
+  fi
+elif [ "$BACKEND" = "brave" ]; then
   if [ -z "${BRAVE_SEARCH_KEY:-}" ]; then
     echo "  WARN: BRAVE_SEARCH_KEY 未设置，跳过取数（用共享池渲染）" | tee -a "$LOG"
   else
@@ -68,7 +82,7 @@ fi
 
 # --- 3. consume 评分 ---
 if [ "${USE_FALLBACK:-0}" = "0" ] && [ -s "$SCAN_RAW" ]; then
-  echo "  [3/4] consume 评分..."
+  echo "  [3/5] consume 评分..."
   # 3a. 当天日报文件（min-score 0，保留全部今日选题）
   python3 topic-pool/hot-scanner.py consume "$SCAN_RAW" \
     --output "$SCAN_DAILY" --min-score 0 2>>"$LOG"
@@ -79,8 +93,20 @@ else
   echo "  WARN: 取数为空或失败，跳过 consume（用共享池渲染）" | tee -a "$LOG"
 fi
 
-# --- 4. 渲染 HTML ---
-echo "  [4/4] 渲染日报..."
+# --- 4. DeepSeek 精炼（把 Bing 摘要炼成真热点标题 + 事实摘要）---
+# DEEPSEEK_API_KEY 缺失则跳过，保留原 query 标题（不阻断渲染）。
+if [ -n "${DEEPSEEK_API_KEY:-}" ] && [ -s "$SCAN_DAILY" ]; then
+  echo "  [4/5] DeepSeek 精炼标题+摘要..."
+  python3 scripts/deepseek_refine.py \
+    --scan "$SCAN_DAILY" --raw "$SCAN_RAW" 2>>"$LOG" \
+    && echo "  ✅ 精炼完成" | tee -a "$LOG" \
+    || echo "  ⚠️ 精炼失败（保留原标题继续渲染）" | tee -a "$LOG"
+else
+  echo "  [4/5] 跳过 DeepSeek 精炼（无 key 或无 scan-daily）" | tee -a "$LOG"
+fi
+
+# --- 5. 渲染 HTML ---
+echo "  [5/5] 渲染日报..."
 # 优先用当天日报文件；为空则回退共享池
 SCAN_FOR_REPORT="$SCAN_DAILY"
 if [ ! -s "$SCAN_DAILY" ]; then

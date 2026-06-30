@@ -140,6 +140,10 @@ _CSS = """  * { box-sizing: border-box; }
   .score b { color: #1d1d1f; font-size: 15px; }
   h3 { margin: 0 0 8px; font-size: 17px; line-height: 1.4; }
   .summary { margin: 0 0 12px; font-size: 14px; color: #3a3a3c; }
+  .digest { margin: 0 0 12px; padding: 10px 12px; font-size: 14px;
+            color: #1d1d1f; background: #f5f5f7; border-radius: 8px;
+            border-left: 3px solid #007aff; line-height: 1.55; }
+  .query-prov { margin: 0 0 6px; font-size: 12px; color: #8e8e93; }
   .dims { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
   .dim { display: flex; align-items: center; gap: 6px; font-size: 12px; min-width: 110px; }
   .dim span { color: #6e6e73; min-width: 36px; }
@@ -172,6 +176,8 @@ def _render_card(index: int, item: dict) -> str:
     pillar = item.get("pillar") or "未分类"
     title = item.get("title") or "(无标题)"
     summary = item.get("angle") or ""
+    digest = item.get("digest") or ""
+    query_prov = item.get("query") or ""
     source = item.get("source") or "?"
     scan_mode = item.get("scan_mode") or ""
     scanned = item.get("scanned_at") or ""
@@ -188,6 +194,12 @@ def _render_card(index: int, item: dict) -> str:
     if scanned:
         provenance += f" · {_esc(scanned)}"
 
+    digest_html = (
+        f'    <div class="digest">{_esc(digest)}</div>\n' if digest else "")
+    query_html = (
+        f'    <div class="query-prov">查询词: {_esc(query_prov)}</div>\n'
+        if query_prov and query_prov != title else "")
+
     return (
         f'<article class="card {tier_cls}">\n'
         f'  <div class="rank">{index}</div>\n'
@@ -198,10 +210,12 @@ def _render_card(index: int, item: dict) -> str:
         f'      <span class="score">总分 <b>{_esc(_fmt_num(total))}</b></span>\n'
         f'    </div>\n'
         f'    <h3>{_esc(title)}</h3>\n'
+        f'    {digest_html}'
         f'    <p class="summary">{_esc(summary)}</p>\n'
         f'    <div class="dims">{dims}</div>\n'
         f'    <div class="flags">{flags}</div>\n'
         f'    <div class="angle">{provenance}</div>\n'
+        f'    {query_html}'
         f'  </div>\n'
         f'</article>\n'
     )
