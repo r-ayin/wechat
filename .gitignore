@@ -1,6 +1,7 @@
 output/research/
 output/briefs/
 output/state/
+output/cron/
 output/*.html
 *.json.bak
 *.bak.json
@@ -8,3 +9,4 @@ __pycache__/
 *.pyc
 .DS_Store
 Thumbs.db
+.wechat-env
