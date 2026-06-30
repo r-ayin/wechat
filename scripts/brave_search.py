@@ -38,6 +38,12 @@ _TOPIC_POOL = _ROOT / "topic-pool"
 _BRAVE_ENDPOINT = "https://api.search.brave.com/res/v1/web/search"
 _DEFAULT_OUTPUT = "/tmp/wechat-scan-results.json"
 
+# 重试策略：仅重试瞬时错误（429 限流 / 5xx 服务端 / 网络抖动）。
+# 401/403/400 等客户端错误不重试（重试也不会变）。
+_RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
+_MAX_RETRIES = 2          # 初次失败后最多再试 2 次（共 3 次尝试）
+_RETRY_BASE_SLEEP = 2.0   # 退避基数；第 n 次重试前 sleep base * 2^n（2s, 4s）
+
 
 # =========================================================================
 # 查询源：复用 hot-scanner.py（纯本地，零网络）
@@ -110,23 +116,35 @@ def _summarize(results: list[dict]) -> str:
 def _fetch_one(query: str, key: str, count: int,
                freshness: str | None) -> tuple[str, bool]:
     """取一条 query 的 summary。返回 (summary, ok)。
-    freshness 命中 0 条时回退到不限时间再试一次。"""
-    try:
-        results = _brave_search(query, key, count, freshness)
-        if not results and freshness:
-            results = _brave_search(query, key, count, None)
-        return _summarize(results), bool(results)
-    except urllib.error.HTTPError as e:
-        body = ""
+    freshness 命中 0 条时回退到不限时间再试一次。
+    瞬时错误（429/5xx/网络）按指数退避重试 _MAX_RETRIES 次。"""
+    last_err = ""
+    for attempt in range(_MAX_RETRIES + 1):
         try:
-            body = e.read().decode("utf-8", errors="replace")[:200]
-        except Exception:
-            pass
-        print(f"⚠️ [{e.code}] {query!r}: {body}", file=sys.stderr)
-    except urllib.error.URLError as e:
-        print(f"⚠️ 网络错误 {query!r}: {e.reason}", file=sys.stderr)
-    except Exception as e:  # noqa: BLE001
-        print(f"⚠️ 异常 {query!r}: {e}", file=sys.stderr)
+            results = _brave_search(query, key, count, freshness)
+            if not results and freshness:
+                results = _brave_search(query, key, count, None)
+            return _summarize(results), bool(results)
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", errors="replace")[:200]
+            except Exception:
+                pass
+            last_err = f"[{e.code}] {body}"
+            if e.code not in _RETRYABLE_HTTP_CODES:
+                break  # 客户端错误，重试无意义
+        except urllib.error.URLError as e:
+            last_err = f"网络错误 {e.reason}"
+        except Exception as e:  # noqa: BLE001
+            last_err = f"异常 {e}"
+            break  # 未知异常不重试
+        if attempt < _MAX_RETRIES:
+            sleep_s = _RETRY_BASE_SLEEP * (2 ** attempt)
+            print(f"  ↻ 重试 {attempt+1}/{_MAX_RETRIES} [{query!r}] "
+                  f"{sleep_s:.1f}s 后重试（{last_err[:80]}）", file=sys.stderr)
+            time.sleep(sleep_s)
+    print(f"⚠️ [{query!r}] {last_err}", file=sys.stderr)
     return "", False
 
 

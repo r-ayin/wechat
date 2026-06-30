@@ -42,6 +42,12 @@ _DEFAULT_MODEL = "gpt-4o-mini"
 _MAX_TOKENS = 1500
 _TIMEOUT = 30
 
+# 重试策略：仅重试瞬时错误（429 限流 / 5xx 服务端 / 网络抖动）。
+# 401/403 等客户端错误不重试（敏感词被拦 / 鉴权失败，重试也不会变）。
+_RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
+_MAX_RETRIES = 2          # 初次失败后最多再试 2 次（共 3 次尝试）
+_RETRY_BASE_SLEEP = 2.0   # 退避基数；第 n 次重试前 sleep base * 2^n（2s, 4s）
+
 
 def _load_queries(pillar: str | None, mode: str) -> list[dict]:
     """从 hot-scanner.py 的 build_search_queries() 拿查询列表。"""
@@ -67,25 +73,44 @@ def _parse_content(content) -> dict | list | None:
 
 
 def _bocha_fetch(api_key: str, base_url: str, query: str, top: int) -> str:
-    """调博查 API，返回拼好的 summary 字符串。失败返回空串。"""
+    """调博查 API，返回拼好的 summary 字符串。失败返回空串。
+    瞬时错误（429/5xx/网络/超时）按指数退避重试 _MAX_RETRIES 次。"""
     body = json.dumps({"query": query}, ensure_ascii=False).encode("utf-8")
-    req = urllib.request.Request(
-        f"{base_url.rstrip('/')}",
-        data=body,
-        headers={
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json; charset=utf-8",
-        },
-        method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:  # noqa: S310
-            data = json.loads(resp.read().decode("utf-8", "replace"))
-    except (urllib.error.URLError, urllib.error.HTTPError,
-            TimeoutError, json.JSONDecodeError) as e:
-        print(f"  ⚠️ 博查调用失败 [{query!r}]: {e}", file=sys.stderr)
-        return ""
-    except Exception as e:  # noqa: BLE001
-        print(f"  ⚠️ 博查异常 [{query!r}]: {e}", file=sys.stderr)
+    last_err = ""
+    data = None
+    for attempt in range(_MAX_RETRIES + 1):
+        req = urllib.request.Request(
+            f"{base_url.rstrip('/')}",
+            data=body,
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json; charset=utf-8",
+            },
+            method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:  # noqa: S310
+                data = json.loads(resp.read().decode("utf-8", "replace"))
+            break  # 成功，跳出重试
+        except urllib.error.HTTPError as e:
+            last_err = f"HTTP {e.code}"
+            if e.code not in _RETRYABLE_HTTP_CODES:
+                break  # 客户端错误（401/403 等），不重试
+        except (urllib.error.URLError, TimeoutError) as e:
+            last_err = f"网络错误 {e}"
+        except json.JSONDecodeError as e:
+            last_err = f"JSON 解析失败 {e}"
+            break  # 响应体形状异常，重试也不会变
+        except Exception as e:  # noqa: BLE001
+            last_err = f"异常 {e}"
+            break  # 未知异常不重试
+        if attempt < _MAX_RETRIES:
+            sleep_s = _RETRY_BASE_SLEEP * (2 ** attempt)
+            print(f"  ↻ 重试 {attempt+1}/{_MAX_RETRIES} [{query!r}] "
+                  f"{sleep_s:.1f}s 后重试（{last_err[:80]}）", file=sys.stderr)
+            time.sleep(sleep_s)
+
+    if data is None:
+        print(f"  ⚠️ 博查调用失败 [{query!r}]: {last_err}", file=sys.stderr)
         return ""
 
     if data.get("code") != 200:
