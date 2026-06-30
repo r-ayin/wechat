@@ -3,9 +3,10 @@
 #
 # 链路：搜索取数 → hot-scanner consume 评分 → daily_report 渲染 HTML
 #
-# 取数后端（SEARCH_BACKEND，默认 bing）：
-#   - bing  : 抓 cn.bing.com SERP，无需 key，中国 ECS 可达（默认）
-#   - brave : Brave API，需 BRAVE_SEARCH_KEY，中国 ECS 被封不可用（供有代理/海外机器用）
+# 取数后端（SEARCH_BACKEND，默认 brave；mihomo 不可用时自动降级 bocha）：
+#   - brave : Brave API，需 BRAVE_SEARCH_KEY + mihomo 代理（systemd 守护，127.0.0.1:7890）
+#   - bocha : 博查 API，需 BOCHA_API_KEY，国内直连（限流严重，fallback 用）
+#   - bing  : 抓 cn.bing.com SERP，无需 key，中国 ECS 可达
 #
 # 设计：
 #   - 当天选题写独立日期戳文件 output/state/scan-daily-{date}.json（min-score 0，
@@ -45,6 +46,26 @@ if [ -z "${DEEPSEEK_API_KEY:-}" ] && [ -f /opt/personal-assistant/.env ]; then
   export DEEPSEEK_API_KEY
 fi
 
+# mihomo 代理自动注入：Brave 后端经 CloudUpup 订阅出海。
+# mihomo down 或 Brave 经代理不可达时，把 backend 降级到 bocha（国内直连）。
+# 显式 SEARCH_BACKEND 覆盖优先；仅在默认 brave 时触发降级。
+BACKEND="${SEARCH_BACKEND:-brave}"
+if [ "$BACKEND" = "brave" ]; then
+  if ! systemctl is-active --quiet mihomo 2>/dev/null; then
+    echo "  WARN: mihomo 不可用，Brave 需代理 — 降级到 bocha" | tee -a "$LOG"
+    BACKEND=bocha
+  else
+    export HTTPS_PROXY="http://127.0.0.1:7890"
+    export HTTP_PROXY="http://127.0.0.1:7890"
+    # 健康探测：Brave 根路径经代理（5s 超时；-f 把 4xx/5xx 当失败）
+    if ! curl -fs -m 5 -x "$HTTPS_PROXY" -o /dev/null https://api.search.brave.com/ 2>/dev/null; then
+      echo "  WARN: Brave 经代理不可达 — 降级到 bocha（HTTPS_PROXY 已清）" | tee -a "$LOG"
+      unset HTTPS_PROXY HTTP_PROXY
+      BACKEND=bocha
+    fi
+  fi
+fi
+
 echo "===== $(date -Iseconds) daily-hotspot [$DATE] ====="
 
 # --- 1. 可选 git pull ---
@@ -53,7 +74,6 @@ if [ -d .git ] && command -v git >/dev/null 2>&1; then
 fi
 
 # --- 2. 搜索取数 ---
-BACKEND="${SEARCH_BACKEND:-bocha}"
 echo "  [2/5] 取数 (backend=$BACKEND)..."
 USE_FALLBACK=1
 if [ "$BACKEND" = "bocha" ]; then
