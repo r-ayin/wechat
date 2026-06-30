@@ -729,7 +729,7 @@ def main():
                     deficit.append("热度低→需要等事件触发或自己制造争议")
                 print(f"  [{r['pillar']}] {r['title']}")
                 if deficit:
-                    print(f"     ⚠️ {"；".join(deficit)}")
+                    print(f"     ⚠️ {'；'.join(deficit)}")
                 # HS-008：r['angle'] 已是角度字符串，直接用，不再误用 _extract_angle(summary, query)
                 print(f"     切入: {r.get('angle', '')}")
                 print()
