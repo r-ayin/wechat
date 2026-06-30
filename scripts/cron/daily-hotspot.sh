@@ -98,9 +98,17 @@ else
   exit 1
 fi
 
-# --- 5. QQ 推送（可选：QQ_APP_ID 配置了才推，失败不阻断）---
+# --- 5. 邮件推送（可选：SMTP_HOST 配置了才推，失败不阻断）---
+if [ -n "${SMTP_HOST:-}" ] && [ -n "${MAIL_TO:-}" ]; then
+  echo "  [5/5] 邮件推送..."
+  python3 scripts/mail_push.py "$REPORT" 2>>"$LOG" \
+    && echo "  ✅ 已发邮件到 $MAIL_TO" | tee -a "$LOG" \
+    || echo "  ⚠️ 邮件推送失败（报告仍已生成）" | tee -a "$LOG"
+fi
+
+# --- 6. QQ 推送（可选：QQ_APP_ID 配置了才推，失败不阻断）---
 if [ -n "${QQ_APP_ID:-}" ] && [ -n "${QQ_TARGET:-}" ]; then
-  echo "  [5/5] QQ 推送..."
+  echo "  [6/6] QQ 推送..."
   python3 scripts/qq_push.py "$REPORT" 2>>"$LOG" \
     && echo "  ✅ 已推送到 QQ" | tee -a "$LOG" \
     || echo "  ⚠️ QQ 推送失败（报告仍已生成）" | tee -a "$LOG"
