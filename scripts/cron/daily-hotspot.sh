@@ -98,4 +98,12 @@ else
   exit 1
 fi
 
+# --- 5. QQ 推送（可选：QQ_APP_ID 配置了才推，失败不阻断）---
+if [ -n "${QQ_APP_ID:-}" ] && [ -n "${QQ_TARGET:-}" ]; then
+  echo "  [5/5] QQ 推送..."
+  python3 scripts/qq_push.py "$REPORT" 2>>"$LOG" \
+    && echo "  ✅ 已推送到 QQ" | tee -a "$LOG" \
+    || echo "  ⚠️ QQ 推送失败（报告仍已生成）" | tee -a "$LOG"
+fi
+
 echo "===== done ====="
