@@ -100,6 +100,10 @@ else
   echo "  WARN: 未知 SEARCH_BACKEND=$BACKEND，跳过取数" | tee -a "$LOG"
 fi
 
+# 搜索取数后清代理 env：DeepSeek 精炼、mail_push 等国内服务不该走 HK 代理。
+# （仅 brave 分支会 export HTTPS_PROXY/HTTP_PROXY；其他分支本就没设，unset 安全）
+unset HTTPS_PROXY HTTP_PROXY 2>/dev/null || true
+
 # --- 3. consume 评分 ---
 if [ "${USE_FALLBACK:-0}" = "0" ] && [ -s "$SCAN_RAW" ]; then
   echo "  [3/5] consume 评分..."
