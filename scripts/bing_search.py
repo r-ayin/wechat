@@ -39,6 +39,13 @@ _BING_URL = "https://cn.bing.com/search"
 _UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36")
 
+# 重试策略（WM-M-004 audit-2026-07-01-004）：复用 brave_search.py 的瞬时错误重试模式。
+# Bing SERP 抓取同样会遭遇 5xx / 网络抖动，单次失败直接丢 query 会让长文模式漏抓严重。
+# 仅重试瞬时错误；4xx 客户端错误不重试（重试也不会变）。
+_RETRYABLE_HTTP_CODES = {429, 500, 502, 503, 504}
+_MAX_RETRIES = 2          # 初次失败后最多再试 2 次（共 3 次尝试）
+_RETRY_BASE_SLEEP = 2.0   # 退避基数；第 n 次重试前 sleep base * 2^n（2s, 4s）
+
 # b_algo 结果块
 _BLOCK_RE = re.compile(r'<li class="b_algo".*?</li>', re.S)
 _H2_RE = re.compile(r'<h2[^>]*>(.*?)</h2>', re.S)
@@ -288,20 +295,40 @@ def _summarize_long(results: list[dict], pages_per_query: int,
 def _fetch_one(query: str, count: int, long_form: bool,
                pages_per_query: int, page_timeout: int,
                max_chars_per_page: int) -> tuple[str, bool]:
-    try:
-        results = _bing_fetch(query, count)
-        if long_form:
-            summary = _summarize_long(
-                results, pages_per_query, page_timeout, max_chars_per_page)
-        else:
-            summary = _summarize(results)
-        return summary, bool(results)
-    except urllib.error.HTTPError as e:
-        print(f"⚠️ [{e.code}] {query!r}", file=sys.stderr)
-    except urllib.error.URLError as e:
-        print(f"⚠️ 网络错误 {query!r}: {e.reason}", file=sys.stderr)
-    except Exception as e:  # noqa: BLE001
-        print(f"⚠️ 异常 {query!r}: {e}", file=sys.stderr)
+    """取一条 query 的 summary。瞬时错误（429/5xx/网络）按指数退避重试 _MAX_RETRIES 次。
+
+    WM-M-004 (audit-2026-07-01-004): 复用 brave_search._fetch_one 的重试模式，避免单次
+    5xx / 网络抖动就让整条 query 丢失（长文模式下尤其昂贵，已抓的页面正文也白费）。
+    """
+    last_err = ""
+    for attempt in range(_MAX_RETRIES + 1):
+        try:
+            results = _bing_fetch(query, count)
+            if long_form:
+                summary = _summarize_long(
+                    results, pages_per_query, page_timeout, max_chars_per_page)
+            else:
+                summary = _summarize(results)
+            return summary, bool(results)
+        except urllib.error.HTTPError as e:
+            last_err = f"[{e.code}]"
+            if e.code not in _RETRYABLE_HTTP_CODES:
+                print(f"⚠️ [{e.code}] {query!r}", file=sys.stderr)
+                break  # 客户端错误，重试无意义
+        except urllib.error.URLError as e:
+            last_err = f"网络错误 {e.reason}"
+        except Exception as e:  # noqa: BLE001
+            last_err = f"异常 {e}"
+            print(f"⚠️ 异常 {query!r}: {e}", file=sys.stderr)
+            break  # 未知异常不重试
+        if attempt < _MAX_RETRIES:
+            sleep_s = _RETRY_BASE_SLEEP * (2 ** attempt)
+            print(f"  ↻ 重试 {attempt+1}/{_MAX_RETRIES} [{query!r}] "
+                  f"{sleep_s:.1f}s 后重试（{last_err[:80]}）", file=sys.stderr)
+            time.sleep(sleep_s)
+    if last_err and "异常" not in last_err and "[" not in last_err:
+        # 仅网络错误走到这里时打印（HTTPError/Exception 已在上面打印）
+        print(f"⚠️ {last_err} {query!r}", file=sys.stderr)
     return "", False
 
 
