@@ -28,6 +28,7 @@ import argparse
 import concurrent.futures as cf
 import json
 import os
+import re
 import sys
 import time
 import urllib.error
@@ -125,7 +126,6 @@ def _bocha_fetch(api_key: str, base_url: str, query: str, top: int) -> str:
             ans = m.get("content", "")
             if isinstance(ans, str) and ans.strip():
                 # 剥 [引用:N] 标记
-                import re
                 ans_clean = re.sub(r"\[引用:\d+(?:,\d+)*\]", "", ans).strip()
                 if ans_clean:
                     parts.append(f"【AI 综合答案】{ans_clean}")
