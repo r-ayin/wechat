@@ -89,13 +89,25 @@ def _run_gate(action: str, phase: str, slug: str, date: str,
     """运行 pipeline-gate.sh，返回 (exit_code, stdout). 不抛异常。
 
     min_bytes 非 None 时注入 WECHAT_MIN_BYTES env（draft 档生效，PIPE-02 修复）。
+    timeout=120s 防 pipeline-gate.sh 卡死挂住整条管线（WM-M-001 audit finding）。
+    超时返回 exit_code=124 + 描述性消息，调用方按失败处理即可。
     """
     env = os.environ.copy()
     if min_bytes is not None:
         env["WECHAT_MIN_BYTES"] = str(min_bytes)
     cmd = ["bash", str(_ROOT / "scripts" / "pipeline-gate.sh"), action, phase, slug, date]
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(_ROOT), env=env)
-    return r.returncode, (r.stdout + r.stderr).strip()
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(_ROOT), env=env,
+                           timeout=120)
+        return r.returncode, (r.stdout + r.stderr).strip()
+    except subprocess.TimeoutExpired as e:
+        # 超时：stdout/stderr 可能部分可用，拼起来给调用方看；exit 124 与 GNU timeout 一致
+        partial = ((e.stdout or b"").decode("utf-8", errors="replace")
+                   + (e.stderr or b"").decode("utf-8", errors="replace")).strip()
+        msg = f"[gate timeout after 120s] action={action} phase={phase} slug={slug}"
+        if partial:
+            msg += f"\n{partial}"
+        return 124, msg
 
 
 def _resolve_article(slug: str, date: str) -> str:
