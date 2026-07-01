@@ -307,15 +307,40 @@ def cmd_plan(args) -> None:
 # 命令：tool（统一包装独立优化工具）
 # =========================================================================
 
+# 已知独立工具白名单（cmd_tool 仅允许调度这些，防路径遍历与未授权执行）
+_ALLOWED_TOOLS = frozenset({
+    "bing_search", "bocha_search", "brave_search", "competitor_analyzer",
+    "daily_report", "deepseek_refine", "ending_detector", "feedback_collector",
+    "knowledge_base", "mail_push", "metrics_panel", "multi_platform",
+    "persona_drift", "predictive_scanner", "qq_push", "research_cache",
+    "steps", "structural_consistency_checker", "style_evolution",
+    "style_fingerprint", "title_scorer",
+})
+
+
 def cmd_tool(args) -> None:
     """运行 scripts/ 下的独立工具（metrics_panel/feedback_collector/style_evolution/...）。
     用法: python scripts/pipeline.py tool <name> [args...]，等价于 python scripts/<name>.py [args...]
+    安全：name 走白名单校验（拒 .. / 路径分隔符），rest 过滤 shell 元字符参数。
     """
     name = args.name
+    if ".." in name or "/" in name or "\\" in name:
+        raise SystemExit(f"❌ 非法工具名: {name!r}（含路径分隔符或 ..）")
+    if name not in _ALLOWED_TOOLS:
+        allowed = ", ".join(sorted(_ALLOWED_TOOLS))
+        raise SystemExit(f"❌ 未知工具: {name}（允许: {allowed}）")
     script = _ROOT / "scripts" / f"{name}.py"
     if not script.exists():
-        raise SystemExit(f"❌ 未知工具: {name}（{script} 不存在）")
-    cmd = ["python3", str(script)] + args.rest
+        raise SystemExit(f"❌ 工具脚本缺失: {script}")
+    # 过滤 rest 中可能的 shell 注入片段（`;` `|` `&` `$()` `` ` ``）
+    dangerous = {";", "|", "&", "$(", "`", "&&", "||"}
+    safe_rest = []
+    for tok in args.rest:
+        if any(d in tok for d in dangerous):
+            print(f"⚠️  已过滤可疑参数: {tok!r}", file=sys.stderr)
+            continue
+        safe_rest.append(tok)
+    cmd = ["python3", str(script)] + safe_rest
     r = subprocess.run(cmd, cwd=str(_ROOT))
     sys.exit(r.returncode)
 
