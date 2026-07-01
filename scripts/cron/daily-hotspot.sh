@@ -40,10 +40,20 @@ if [ -f "${WECHAT_ENV:-$HOME/.wechat-env}" ]; then
   set +u; source "${WECHAT_ENV:-$HOME/.wechat-env}"; set -u
 fi
 # DeepSeek key 兜底：wechat-env 没配则从 personal-assistant .env 取（ECS 共置）
+# WM-H-003 fix: 原 grep+cut+tr 管道对含 $/空格/单引号的 key 会被 shell 展开或截断。
+# 改用 sed 精确提取 + printf %q 转义，再 eval 安全赋值（避免直接 $(...) 内联展开）。
 if [ -z "${DEEPSEEK_API_KEY:-}" ] && [ -f /opt/personal-assistant/.env ]; then
-  DEEPSEEK_API_KEY="$(grep -E '^DEEPSEEK_API_KEY=' /opt/personal-assistant/.env \
-    | head -1 | cut -d= -f2- | tr -d '\"' || true)"
-  export DEEPSEEK_API_KEY
+  _ds_raw="$(sed -n 's/^DEEPSEEK_API_KEY=//p' /opt/personal-assistant/.env | head -1)"
+  # 剥成对引号（"x" → x, 'x' → x），裸值保留
+  case "$_ds_raw" in
+    \"*\") _ds_raw="${_ds_raw#\"}"; _ds_raw="${_ds_raw%\"}" ;;
+    \'*\') _ds_raw="${_ds_raw#\'}"; _ds_raw="${_ds_raw%\'}" ;;
+  esac
+  if [ -n "$_ds_raw" ]; then
+    DEEPSEEK_API_KEY="$_ds_raw"
+    export DEEPSEEK_API_KEY
+  fi
+  unset _ds_raw
 fi
 
 # mihomo 代理自动注入：Brave 后端经 CloudUpup 订阅出海。
