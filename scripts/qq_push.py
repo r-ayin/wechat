@@ -43,7 +43,12 @@ def _load_env(path: str | None) -> dict:
             line = line.strip()
             if line and not line.startswith("#") and "=" in line:
                 k, _, v = line.partition("=")
-                env.setdefault(k.strip(), v.strip())
+                v = v.strip()
+                # .env 惯例允许 KEY="value" / KEY='value'；strip 仅去空白会保留引号，
+                # 致 token/secret 字面含 " 鉴权失败。成对引号才剥，避免误伤值内含引号。
+                if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
+                    v = v[1:-1]
+                env.setdefault(k.strip(), v)
     return env
 
 
