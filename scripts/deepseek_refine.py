@@ -206,6 +206,10 @@ def run(args) -> int:
     refined = 0
     skipped_no_raw = 0
     failed = 0
+    # Collect results separately to avoid concurrent mutation of `items`
+    # dicts inside the as_completed loop (race window when threads resolve
+    # out-of-order and caller reads items mid-write).
+    updates: list[tuple[dict, str, dict]] = []
     with cf.ThreadPoolExecutor(max_workers=args.concurrency) as pool:
         futures = {
             pool.submit(refine_one, it, raw, ctx): (it, q)
@@ -225,10 +229,14 @@ def run(args) -> int:
                 else:
                     failed += 1
                 continue
-            it["query"] = q
-            it["title"] = res["headline"]
-            it["digest"] = res["digest"]
+            updates.append((it, q, res))
             refined += 1
+
+    # Single-threaded writeback — safe from races and easy to audit.
+    for it, q, res in updates:
+        it["query"] = q
+        it["title"] = res["headline"]
+        it["digest"] = res["digest"]
 
     scan_path.write_text(
         json.dumps(items, ensure_ascii=False, indent=2), encoding="utf-8")
