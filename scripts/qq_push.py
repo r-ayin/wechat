@@ -61,9 +61,11 @@ def _get_token(app_id: str, client_secret: str) -> str:
         with urllib.request.urlopen(req, timeout=15) as r:  # noqa: S310
             d = json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        raise RuntimeError(f"取 token HTTP {e.code}: {e.read().decode('utf-8','replace')[:200]}")
+        # 响应体脱敏：QQ Bot token/error body 可能含敏感字段，仅记 status code
+        raise RuntimeError(f"取 token HTTP {e.code}") from None
     tok = d.get("access_token")
     if not tok:
+        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
         raise RuntimeError(f"无 access_token: {d}")
     return tok
 
@@ -79,7 +81,8 @@ def _api(url: str, token: str, data: dict | None = None,
         with urllib.request.urlopen(req, timeout=30) as r:  # noqa: S310
             return json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        raise RuntimeError(f"API HTTP {e.code}: {e.read().decode('utf-8','replace')[:200]}")
+        # 响应体脱敏：API error body 可能含用户 openid/token 等敏感字段
+        raise RuntimeError(f"API HTTP {e.code}") from None
 
 
 def _upload_file(token: str, target_type: str, target_id: str,
@@ -108,9 +111,11 @@ def _upload_file(token: str, target_type: str, target_id: str,
         with urllib.request.urlopen(req, timeout=60) as r:  # noqa: S310
             d = json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
-        raise RuntimeError(f"上传 HTTP {e.code}: {e.read().decode('utf-8','replace')[:300]}")
+        # 响应体脱敏：上传接口错误体可能含文件元数据/用户信息
+        raise RuntimeError(f"上传 HTTP {e.code}") from None
     fu = (d.get("file_info") or {}).get("file_uuid") or d.get("file_uuid")
     if not fu:
+        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
         raise RuntimeError(f"上传无 file_uuid: {d}")
     return fu
 
