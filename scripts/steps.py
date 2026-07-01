@@ -284,7 +284,7 @@ def build_steps(slug: str, date: str, brief_path: str | None, mode: str,
         task_file=_write_task(slug, "3.outline", _task_phase3_outline(slug, date, brief_path, mb)),
         output=f"output/state/{slug}_outline.json")
     add("3.outline_check", "3", "code",
-        cmd=f"python -c \"import json,sys; d=json.load(open('output/state/{slug}_outline.json')); assert len(d)>=5, '节数<5'; assert sum(s.get('word_budget',0) for s in d)>={mb}, '总字数预算不足'; assert all(s.get('thesis') for s in d), '有节缺论点'; print('outline OK', len(d), '节')\"",
+        cmd=f"python scripts/check_outline.py output/state/{slug}_outline.json {mb}",
         output=f"output/state/{slug}_outline.json")
     add("3.work", "3", "subagent",
         task_file=_write_task(slug, "3.work", _task_phase3(slug, date, brief_path, mb)),
