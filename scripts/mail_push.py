@@ -25,6 +25,7 @@ import smtplib
 import ssl
 import sys
 import time
+import traceback
 from email.message import EmailMessage
 from pathlib import Path
 
@@ -77,6 +78,7 @@ def run(args) -> int:
         return 0
     except Exception as e:  # noqa: BLE001
         print(f"❌ 邮件发送失败: {type(e).__name__}: {e}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         return 2
 
 
