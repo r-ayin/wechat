@@ -778,17 +778,29 @@ def main():
             }
             topic = parse_search_result(query_dict, summary)
             if topic is None:
-                # summary 过短等回退：用 query 作标题
+                # MV-006：summary 过短等回退 —— 与正常路径对齐评分语义
+                # 复用 parse_search_result 同款 has_event/has_controversy/has_data 检测关键字
+                # 及 _extract_angle 推荐角度，避免回退选题被不公平降权
+                summary_lower = summary.lower() if summary else ""
+                has_event = any(kw in summary_lower for kw in [
+                    "提案", "建议", "发布", "宣布", "判决", "最新",
+                    "称", "表示", "报道", "数据显示",
+                ])
+                has_controversy = any(kw in summary_lower for kw in [
+                    "争议", "反对", "质疑", "批评", "不满", "争议不断",
+                    "吵", "矛盾", "反弹", "两极分化",
+                ])
+                has_data = bool(re.search(r'\d+[万亿%]', summary_lower))
                 topic = {
                     "title": query,
-                    "angle": summary[:200],
+                    "angle": _extract_angle(summary, query_dict),
                     "pillar": matched_pillar,
                     "source": "websearch",
                     "scan_mode": "keyword",
                     "scanned_at": datetime.now(timezone.utc).isoformat(),
-                    "has_event": False,
-                    "has_controversy": False,
-                    "has_data": False,
+                    "has_event": has_event,
+                    "has_controversy": has_controversy,
+                    "has_data": has_data,
                 }
                 scores = score_bomb_potential(topic)
                 topic.update(scores)
