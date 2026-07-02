@@ -460,10 +460,33 @@ def _judge_claim(claim: dict, search_result: str, strictness: str) -> dict:
 
 
 def _check_corroboration(claim_text: str, search_result: str) -> bool:
-    """检查搜索结果是否支持该声明"""
-    # 提取声明中的关键实体（数字、专有名词）
-    key_entities = re.findall(r'[\d,]+\.?\d*|[《〈][^》〉]+[》〉]|[A-Z一-鿿]{2,6}', claim_text)
-    key_entities = [e for e in key_entities if len(e) >= 2]
+    """检查搜索结果是否支持该声明
+
+    MV-002 fix: 收紧关键实体提取，避免噪声 entity（短 CJK 词、纯年份/小数字）
+    触发虚假 VERIFIED。
+      - 数字 entity 要求 ≥3 位或带千分位/小数点（排除 "0"/"1"/"2026" 等噪声）
+      - CJK entity 长度 > 2（排除 "我们"/"他们"/"但是" 等高频双字词）
+      - 显式停用词表过滤残余高频虚词
+    """
+    # 数字 (≥3位或含千分位/小数) | 书名号内容 | CJK/字母混合 (>2字符)
+    raw_entities = re.findall(
+        r'\d{3,}|\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+\.\d+|[《〈][^》〉]+[》〉]|[A-Za-z一-鿿]{3,}',
+        claim_text,
+    )
+
+    # 停用词：高频虚词/代词，即便长度≥3也无鉴别力
+    _STOP_WORDS = frozenset({
+        "我们", "他们", "她们", "它们", "自己", "这个", "那个", "这些", "那些",
+        "什么", "怎么", "如何", "为什么", "但是", "而且", "或者", "以及", "因为",
+        "所以", "如果", "虽然", "然而", "因此", "于是", "不过", "只是", "就是",
+        "还是", "已经", "可以", "应该", "需要", "可能", "必须", "the", "and", "for",
+        "that", "this", "with", "from", "have", "been", "will", "are", "was", "were",
+    })
+
+    key_entities = [
+        e for e in raw_entities
+        if e not in _STOP_WORDS and not re.fullmatch(r'\d{1,4}', e)  # 再挡一次纯年份
+    ]
 
     if not key_entities:
         # 没提取到关键实体，检查语义重叠
