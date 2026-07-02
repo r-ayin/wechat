@@ -61,10 +61,18 @@ def generate_search_queries(claims: list[dict], max_queries: int = 30) -> list[d
     queries.sort(key=lambda q: (priority_order.get(q["priority"], 2), q["claim_id"]))
 
     # 截断到最大查询数
+    truncated_count = 0
     if len(queries) > max_queries:
+        truncated_count = len(queries) - max_queries
+        print(
+            f"[fact_checker] WARNING: generate_search_queries truncated {truncated_count} "
+            f"lower-priority queries (max_queries={max_queries}, original={len(queries)}). "
+            f"Affected priorities: {sorted({q['priority'] for q in queries[max_queries:]})}",
+            file=sys.stderr,
+        )
         queries = queries[:max_queries]
 
-    return queries
+    return {"queries": queries, "truncated_count": truncated_count}
 
 
 def _build_query(claim: dict) -> str | None:
@@ -636,11 +644,14 @@ def main():
             data = json.load(f)
 
         claims = data.get("claims", data)  # 兼容两种输入格式
-        queries = generate_search_queries(claims, args.max_queries)
+        result = generate_search_queries(claims, args.max_queries)
+        queries = result["queries"]
+        truncated_count = result["truncated_count"]
 
         print(json.dumps({
             "mode": "plan",
             "total_queries": len(queries),
+            "truncated_count": truncated_count,
             "queries": queries,
             "generated_at": datetime.now(timezone.utc).isoformat(),
         }, ensure_ascii=False, indent=2))

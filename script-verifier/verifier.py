@@ -76,7 +76,9 @@ def extract_and_plan(script_path: str) -> dict:
     claims = extracted["claims"]
 
     # 生成搜索计划
-    queries = generate_search_queries(claims)
+    plan_result = generate_search_queries(claims)
+    queries = plan_result["queries"]
+    truncated_count = plan_result["truncated_count"]
 
     return {
         "script": script_path,
@@ -87,6 +89,7 @@ def extract_and_plan(script_path: str) -> dict:
         "extraction_summary": extracted["summary"],
         "search_plan": {
             "total_queries": len(queries),
+            "truncated_count": truncated_count,
             "queries": queries,
         },
     }
