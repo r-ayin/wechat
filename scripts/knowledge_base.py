@@ -16,6 +16,7 @@ Exit code: 0 (pure utility script, always exit 0)
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import re
 import sys
@@ -116,9 +117,14 @@ def _cmd_add(args: argparse.Namespace) -> None:
     # ensure output directory exists
     _KB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    # append to JSONL
+    # append to JSONL with exclusive lock (concurrent-safe)
     with open(_KB_PATH, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+        try:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            f.flush()
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
     # output summary
     summary = {
