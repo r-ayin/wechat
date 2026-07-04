@@ -30,6 +30,15 @@ RESEARCH_DIR="output/research"
 ARTICLE_DIR="output/wechat_articles"
 WECHAT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+# GATE-10 (WM-GATE-02): TOPIC 直接插值进 find -name 的 glob（resolve_checkpoint 各 case）。
+# TOPIC 来自 agent/用户输入；含 glob 元字符 * ? [ ] 时会拓宽匹配（strict 模式下
+# ${TOPIC}_*.md 变 *_*.md 全匹配），导致跨 topic 误判/checkpoint 串读。
+# 空 TOPIC 是合法值（status/loose 模式），仅在非空时校验为 slug 字符集。
+if [ -n "$TOPIC" ] && [[ "$TOPIC" =~ [^a-zA-Z0-9_-] ]]; then
+    echo "❌ GATE-10: 非法 TOPIC 字符（仅允许 [a-zA-Z0-9_-]）：拒绝 glob 注入到 find -name" >&2
+    exit 1
+fi
+
 # 确保输出目录存在
 mkdir -p "$WECHAT_ROOT/$RESEARCH_DIR" "$WECHAT_ROOT/$ARTICLE_DIR/hot" "$WECHAT_ROOT/$ARTICLE_DIR/evergreen"
 
