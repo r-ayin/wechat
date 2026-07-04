@@ -19,6 +19,7 @@ CLI:
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import mimetypes
 import os
@@ -33,6 +34,43 @@ from pathlib import Path
 _TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken"
 _API_BASE = "https://api.sgroup.qq.com"
 _DEFAULT_ENV = "/opt/wanxia/.env"
+
+# B 节 audit-log 埋点（audit-2026-07-05-001 WM-QQ-01）：QQ Bot API 为外部 HTTP 出站
+# 敏感路径（token 端点 + 上传 + 发消息，凭证 QQ_CLIENT_SECRET 经手）。append-only
+# 写 JSONL，对齐 .claude/decisions/audit-log.schema.json。自身异常吞掉——审计日志
+# 失败不得影响推送主流程。模式镜像 bocha_search._audit_log。
+_AUDIT_DIR = Path(__file__).resolve().parent.parent / ".audit"
+_AUDIT_SEQ = 0
+
+
+def _audit_log(action: str, resource: dict, result: str,
+               details: dict | None = None) -> None:
+    global _AUDIT_SEQ
+    try:
+        _AUDIT_SEQ += 1
+        _AUDIT_DIR.mkdir(parents=True, exist_ok=True)
+        now = datetime.datetime.now(datetime.timezone.utc)
+        today = now.strftime("%Y-%m-%d")
+        ts = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        seq = f"{os.getpid() % 1000000:06d}{_AUDIT_SEQ:03d}"
+        rec = {
+            "id": f"audit-{now.strftime('%Y%m%d-%H%M%S')}-{seq}",
+            "timestamp": ts,
+            "userId": "autonomous-engine",
+            "userRole": "engine",
+            "action": action,
+            "resource": resource,
+            "result": result,
+            "ip": "local",
+            "sensitive": True,
+            "sensitiveLevel": "medium",
+            "details": details or {},
+        }
+        path = _AUDIT_DIR / f"audit-{today}.jsonl"
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
 
 
 def _load_env(path: str | None) -> dict:
@@ -62,11 +100,26 @@ def _get_token(app_id: str, client_secret: str) -> str:
             d = json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         # 响应体脱敏：QQ Bot token/error body 可能含敏感字段，仅记 status code
+        _audit_log("external_call",
+                   {"type": "api", "identifier": "qq-bot-token",
+                    "baseUrl": _TOKEN_URL},
+                   "failure", {"reason": f"HTTP {e.code}"})
         raise RuntimeError(f"取 token HTTP {e.code}") from None
     tok = d.get("access_token")
     if not tok:
-        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
-        raise RuntimeError(f"无 access_token: {d}")
+        # WM-QQ-01 (audit-2026-07-05-001)：d 是 token 端点的外部响应体（json.loads
+        # 而来），非"本地 JSON"——原注释错误。token 端点响应可能含 refresh_token/
+        # _scope 等邻近凭证字段，不得整包打到 stderr/cron 日志。只记 key 名。
+        _audit_log("external_call",
+                   {"type": "api", "identifier": "qq-bot-token",
+                    "baseUrl": _TOKEN_URL},
+                   "failure",
+                   {"reason": "no access_token", "responseKeys": list(d.keys())})
+        raise RuntimeError(f"无 access_token (keys={list(d.keys())})") from None
+    _audit_log("external_call",
+               {"type": "api", "identifier": "qq-bot-token",
+                "baseUrl": _TOKEN_URL},
+               "success")
     return tok
 
 
@@ -82,6 +135,10 @@ def _api(url: str, token: str, data: dict | None = None,
             return json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         # 响应体脱敏：API error body 可能含用户 openid/token 等敏感字段
+        _audit_log("external_call",
+                   {"type": "api", "identifier": "qq-bot-api",
+                    "baseUrl": url},
+                   "failure", {"reason": f"HTTP {e.code}"})
         raise RuntimeError(f"API HTTP {e.code}") from None
 
 
@@ -112,11 +169,25 @@ def _upload_file(token: str, target_type: str, target_id: str,
             d = json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         # 响应体脱敏：上传接口错误体可能含文件元数据/用户信息
+        _audit_log("external_call",
+                   {"type": "api", "identifier": "qq-bot-upload",
+                    "baseUrl": url},
+                   "failure", {"reason": f"HTTP {e.code}"})
         raise RuntimeError(f"上传 HTTP {e.code}") from None
     fu = (d.get("file_info") or {}).get("file_uuid") or d.get("file_uuid")
     if not fu:
-        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
-        raise RuntimeError(f"上传无 file_uuid: {d}")
+        # WM-QQ-01 (audit-2026-07-05-001)：d 是上传端点的外部响应体，非"本地 JSON"
+        # ——原注释错误。只记 key 名，不整包泄露响应体到 stderr/cron 日志。
+        _audit_log("external_call",
+                   {"type": "api", "identifier": "qq-bot-upload",
+                    "baseUrl": url},
+                   "failure",
+                   {"reason": "no file_uuid", "responseKeys": list(d.keys())})
+        raise RuntimeError(f"上传无 file_uuid (keys={list(d.keys())})") from None
+    _audit_log("external_call",
+               {"type": "api", "identifier": "qq-bot-upload",
+                "baseUrl": url},
+               "success", {"fileUuid": fu[:10] + "..."})
     return fu
 
 
