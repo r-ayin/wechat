@@ -25,6 +25,7 @@ L4 脚本验证主编排器
 """
 
 import json
+import os
 import re
 import sys
 import io
@@ -53,6 +54,21 @@ def _count_words(text: str) -> int:
     当作词，避免 len(text) 那样把字符数误报为词数（旧实现偏高约 20%）。
     """
     return len(re.findall(r'[一-鿿]|[A-Za-z]+|\d+', text))
+
+
+def _atomic_write_text(path: str, text: str) -> None:
+    """原子写文本（WM-VER-02, audit-2026-07-05-001）。
+
+    tmp + os.replace + os.fsync：避免崩溃半写导致下游 pipeline-gate 的 grep 兜底
+    读到残缺 JSON 字段（如 `"falsified": 0` 片段）而误判门禁通过。
+    """
+    p = Path(path)
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(text)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, p)
 
 
 # =========================================================================
@@ -349,7 +365,7 @@ def main():
         result = extract_and_plan(args.script)
         output = json.dumps(result, ensure_ascii=False, indent=2)
         if args.output:
-            Path(args.output).write_text(output, encoding='utf-8')
+            _atomic_write_text(args.output, output)
             print(f"[OK] 计划已写入 {args.output}")
             print(f"   声明数: {result['extraction_summary']['total']}")
             print(f"   搜索查询: {result['search_plan']['total_queries']}")
@@ -371,7 +387,7 @@ def main():
         )
         output = json.dumps(report, ensure_ascii=False, indent=2)
         if args.output:
-            Path(args.output).write_text(output, encoding='utf-8')
+            _atomic_write_text(args.output, output)
             status_map = {"PASS": "[OK] PASS", "PASS_WITH_CAVEATS": "[WARN] PASS_WITH_CAVEATS", "FAIL": "[FAIL] FAIL"}
             status = status_map.get(report["overall"], f"[?] {report['overall']}")
             print(f"{status}  验证: {report['summary']['verified']} / "
@@ -408,7 +424,7 @@ def main():
 
         output = json.dumps(report, ensure_ascii=False, indent=2)
         if args.output:
-            Path(args.output).write_text(output, encoding='utf-8')
+            _atomic_write_text(args.output, output)
             status_map = {"PASS": "[OK] PASS", "PASS_WITH_CAVEATS": "[WARN] PASS_WITH_CAVEATS", "FAIL": "[FAIL] FAIL"}
             status = status_map.get(report["overall"], f"[?] {report['overall']}")
             print(f"{status} | 总数:{report['summary']['total']} "
@@ -448,8 +464,9 @@ def main():
             merged = merge_retry_report([report])  # 单次合并以补全 retry_history/status
             merged["retries"] = retries_so_far
             merged["_retry_history"] = history
-            Path(args.report_json).write_text(
-                json.dumps(merged, ensure_ascii=False, indent=2), encoding='utf-8')
+            _atomic_write_text(
+                args.report_json,
+                json.dumps(merged, ensure_ascii=False, indent=2))
             print(f"[STOP] 已达最大重试次数 ({max_retries})")
             print(f"  建议: 放弃该选题或降级为观点类内容")
             print(f"  最终报告已写回 {args.report_json}（status={merged.get('status')})")
@@ -458,8 +475,9 @@ def main():
         # 自增计数器并写回，使循环调用能正确推进
         report["retries"] = retries_so_far + 1
         report["_retry_history"] = history
-        Path(args.report_json).write_text(
-            json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+        _atomic_write_text(
+            args.report_json,
+            json.dumps(report, ensure_ascii=False, indent=2))
 
         print(f"[RETRY {retries_so_far + 1}/{max_retries}] 修复任务已生成")
         print(f"  FALSIFIED: {len(report.get('falsified_claims', []))} 条")

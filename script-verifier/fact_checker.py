@@ -617,7 +617,11 @@ def _check_value_range(claim_text: str, search_result: str) -> bool:
             if 0.5 <= ratio <= 2.0:
                 return True
 
-    return len(result_nums) == 0  # 搜索结果无数值 → 无法比较 → 默认通过
+    # 声明含数值、搜索结果无数值 → 默认存疑（WM-FC-01, audit-2026-07-05-001）。
+    # 旧实现 `return len(result_nums) == 0` 让 DATA 声明在结果纯散文时默认通过，
+    # 数值层校验形同虚设，叠加 _check_corroboration 文本命中即 VERIFIED。
+    # 改为返回 False → 交由上游判 FALSIFIED 或 needs_claude_review，避免无数值佐证的数据声明误过门禁。
+    return False
 
 
 # =========================================================================
