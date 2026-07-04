@@ -3,9 +3,14 @@
 
 镜像 /opt/wanxia/scripts/push-to-qq.py 的鉴权方式（JSON body 取 token），
 增加文件上传（/v2/{type}s/{id}/files，file_type=4）+ msg_type=7 媒体消息发送。
-凭证默认从 /opt/wanxia/.env 读（晚霞项目已验证可用的 bot），也可用 env 覆盖。
 
-环境变量（或 --env-file，默认 /opt/wanxia/.env）：
+凭证默认从 wechat 本地 `.wechat-env` 读（与 mail_push 同约定，chmod 600 不入库），
+解耦对 /opt/wanxia/.env 的跨项目凭证依赖（audit-2026-07-05-001 WM-QQ-02）：
+旧默认 /opt/wanxia/.env 读取另一个项目（wanxia）的凭证文件，致部署耦合——
+wanxia 未装则 qq_push 默认不可用，且 wanxia 侧 .env 变更会波及 wechat 推送。
+如需复用 wanxia 已验证 bot，显式 `--env-file /opt/wanxia/.env`。
+
+环境变量（或 --env-file，默认 <项目根>/.wechat-env）：
   QQ_APP_ID         — QQ Bot AppID
   QQ_CLIENT_SECRET  — QQ Bot ClientSecret
   QQ_TARGET_TYPE    — group | user（默认 user）
@@ -32,7 +37,12 @@ from pathlib import Path
 
 _TOKEN_URL = "https://bots.qq.com/app/getAppAccessToken"
 _API_BASE = "https://api.sgroup.qq.com"
-_DEFAULT_ENV = "/opt/wanxia/.env"
+# 默认读 wechat 本地 .wechat-env（项目根，与 mail_push 同约定，chmod 600 不入库）。
+# 不再默认读 /opt/wanxia/.env——那是另一项目（wanxia）的凭证文件，跨项目耦合
+# 致部署脆弱（wanxia 未装则默认不可用、wanxia .env 变更波及 wechat）。
+# 复用 wanxia bot 请显式 --env-file /opt/wanxia/.env（audit-2026-07-05-001 WM-QQ-02）。
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_DEFAULT_ENV = str(_PROJECT_ROOT / ".wechat-env")
 
 
 def _load_env(path: str | None) -> dict:
@@ -49,6 +59,14 @@ def _load_env(path: str | None) -> dict:
                 if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
                     v = v[1:-1]
                 env.setdefault(k.strip(), v)
+    elif path is None:
+        # 默认 .wechat-env 缺失：明确提示，不静默 fallback 到跨项目 /opt/wanxia/.env
+        # （WM-QQ-02 解耦意图：让部署方显式选择本地凭证或 --env-file 复用 wanxia bot）。
+        print(
+            f"⚠️ 默认 env 文件 {p} 不存在。请创建本地 .wechat-env（与 mail_push 同约定，"
+            f"chmod 600 不入库）或显式 --env-file /opt/wanxia/.env 复用 wanxia bot。",
+            file=sys.stderr,
+        )
     return env
 
 
@@ -163,7 +181,7 @@ def run(args) -> int:
 def main() -> int:
     p = argparse.ArgumentParser(description="QQ Bot 推送日报 HTML 文件")
     p.add_argument("html_path")
-    p.add_argument("--env-file", default=None, help=f"凭证 .env（默认 {_DEFAULT_ENV}）")
+    p.add_argument("--env-file", default=None, help=f"凭证 .env（默认 {_DEFAULT_ENV}；复用 wanxia bot 传 /opt/wanxia/.env）")
     p.add_argument("--target")
     p.add_argument("--type", choices=["group", "user"], default=None)
     p.add_argument("--app-id")
