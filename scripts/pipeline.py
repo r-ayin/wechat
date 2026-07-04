@@ -348,7 +348,10 @@ _ALLOWED_TOOLS = frozenset({
 def cmd_tool(args) -> None:
     """运行 scripts/ 下的独立工具（metrics_panel/feedback_collector/style_evolution/...）。
     用法: python scripts/pipeline.py tool <name> [args...]，等价于 python scripts/<name>.py [args...]
-    安全：name 走白名单校验（拒 .. / 路径分隔符），rest 过滤 shell 元字符参数。
+    安全：name 走白名单校验（拒 .. / 路径分隔符），rest 原样透传——subprocess.run 用
+    list 形式（无 shell=True），参数中即使含 `;` `|` `&` 等也只作为字面量传给子进程，
+    不被任何 shell 解释，故无需（也不应）过滤 shell 元字符（旧版 dangerous-token 过滤
+    属冗余 defense-in-depth，且会误伤合法参数，已移除）。
     """
     name = args.name
     if ".." in name or "/" in name or "\\" in name:
@@ -359,15 +362,7 @@ def cmd_tool(args) -> None:
     script = _ROOT / "scripts" / f"{name}.py"
     if not script.exists():
         raise SystemExit(f"❌ 工具脚本缺失: {script}")
-    # 过滤 rest 中可能的 shell 注入片段（`;` `|` `&` `$()` `` ` ``）
-    dangerous = {";", "|", "&", "$(", "`", "&&", "||"}
-    safe_rest = []
-    for tok in args.rest:
-        if any(d in tok for d in dangerous):
-            print(f"⚠️  已过滤可疑参数: {tok!r}", file=sys.stderr)
-            continue
-        safe_rest.append(tok)
-    cmd = ["python3", str(script)] + safe_rest
+    cmd = ["python3", str(script)] + args.rest
     r = subprocess.run(cmd, cwd=str(_ROOT))
     sys.exit(r.returncode)
 
