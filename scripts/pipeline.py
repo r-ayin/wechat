@@ -78,7 +78,15 @@ def _load(slug: str, date: str | None = None) -> dict:
 def _save(state: dict) -> None:
     state["updated_at"] = _now()
     p = _state_path(state["slug"], state["date"])
-    p.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    data = json.dumps(state, ensure_ascii=False, indent=2)
+    # 原子写：tmp + fsync + os.replace，防崩溃半写致 state JSON 残缺、next/status
+    # json.loads 抛错、管线恢复断链（audit-2026-07-05-001 WM-PIP-02）。init 有 .bak 但
+    # _save 每 step 都调，半写窗口远大于 init；tmp 与 p 同目录保证 os.replace 原子。
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp.write_text(data, encoding="utf-8")
+    with open(tmp, "rb") as _fh:
+        os.fsync(_fh.fileno())
+    os.replace(tmp, p)
 
 
 def _phase_idx(phase: str) -> int:
