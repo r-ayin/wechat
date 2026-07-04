@@ -145,18 +145,27 @@ def _cmd_add(args: argparse.Namespace) -> None:
 # ---------------------------------------------------------------------------
 
 def _load_kb() -> list[dict]:
-    """Load all knowledge base entries from JSONL."""
+    """Load all knowledge base entries from JSONL.
+
+    Acquires LOCK_SH (shared lock) so concurrent readers proceed in parallel
+    while a writer holding LOCK_EX blocks us until its append completes.
+    Mirrors the locking protocol in _cmd_add to prevent torn-line reads.
+    """
     if not _KB_PATH.exists():
         return []
     entries: list[dict] = []
     with open(_KB_PATH, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            if line:
-                try:
-                    entries.append(json.loads(line))
-                except json.JSONDecodeError:
-                    continue
+        try:
+            fcntl.flock(f.fileno(), fcntl.LOCK_SH)
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        entries.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        continue
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     return entries
 
 
