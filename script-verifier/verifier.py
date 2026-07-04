@@ -301,40 +301,38 @@ def build_remediation_prompt(report: dict) -> str:
 
 
 # =========================================================================
-# 修复结果合并
+# 修复结果终态收尾
 # =========================================================================
+# 历史名 merge_retry_report 误导：retry 流程每次把当前 report 覆盖写回同一文件，
+# 前序尝试的完整 claim 报告无法保留——只有调用方在 `_retry_history` 里累积的
+# 摘要（overall/计数）能跨尝试存活。故此函数不对"多次完整报告"做合并，只对
+# 最近一次尝试的报告打终态标签；多尝试摘要历史由 retry 命令在调用后写回
+# `_retry_history` 字段。重命名以名副其实（audit WM-VER-03）。
 
-def merge_retry_report(attempts: list[dict]) -> dict:
-    """合并多次修复尝试的报告
+def finalize_retry_report(report: dict) -> dict:
+    """对单次尝试的报告做终态收尾：标注 status / recommendation。
 
     Args:
-        attempts: 每次尝试的 report dict 列表
+        report: 最近一次尝试的 report dict（非空）
 
     Returns:
-        合并后的最终报告
+        打好终态标签的报告副本；调用方负责随后写入 retries 与 _retry_history。
     """
-    if not attempts:
+    if not report:
         return {"overall": "ERROR", "error": "无验证尝试"}
 
-    final = attempts[-1].copy()
-    final["retries"] = len(attempts) - 1
-    final["attempts"] = []
-    final["retry_history"] = []
+    final = report.copy()
+    # retries 与 _retry_history 由调用方按真实重试历史覆写，此处不臆造。
+    final.pop("retries", None)
+    final.pop("retry_history", None)
+    final.pop("_retry_history", None)
 
-    for i, report in enumerate(attempts):
-        final["retry_history"].append({
-            "attempt": i + 1,
-            "overall": report["overall"],
-            "falsified_count": report["summary"]["falsified"],
-            "unverifiable_count": report["summary"]["unverifiable"],
-        })
-
-    if final["overall"] == "PASS":
-        final["status"] = "PASSED" if len(attempts) == 1 else f"PASSED_AFTER_{len(attempts)-1}_RETRIES"
+    if final.get("overall") == "PASS":
+        final["status"] = "PASSED"
     else:
-        final["status"] = f"FAILED_AFTER_{len(attempts)}_ATTEMPTS"
+        final["status"] = "FAILED_AFTER_RETRIES"
         final["recommendation"] = (
-            f"选题事实无法验证，建议放弃或降级为观点类内容（明确标注'个人观点，非事实陈述'）。"
+            "选题事实无法验证，建议放弃或降级为观点类内容（明确标注'个人观点，非事实陈述'）。"
         )
 
     return final
@@ -484,7 +482,7 @@ def main():
         max_retries = args.max_retries
 
         # AHV-008/AHV-009：维护尝试历史，自增计数器并写回报告文件，
-        # 达上限时用 merge_retry_report 合并所有尝试产出最终报告。
+        # 达上限时用 finalize_retry_report 对当前报告做终态收尾。
         history = report.get("_retry_history", [])
         # 把当前报告作为一次尝试记入历史
         history.append({
@@ -496,8 +494,8 @@ def main():
         retries_so_far = len(history) - 1
 
         if retries_so_far >= max_retries:
-            # 合并所有尝试，写回最终报告
-            merged = merge_retry_report([report])  # 单次合并以补全 retry_history/status
+            # 对最近一次尝试的报告做终态收尾，再补回真实重试历史
+            merged = finalize_retry_report(report)
             merged["retries"] = retries_so_far
             merged["_retry_history"] = history
             _atomic_write_text(
