@@ -502,9 +502,9 @@ def _check_corroboration(claim_text: str, search_result: str) -> bool:
     ]
 
     if not key_entities:
-        # 没提取到关键实体，检查语义重叠
-        words = claim_text[:30]
-        return words.lower() in search_result.lower()
+        # 无关键实体可匹配——前 30 字纯子串匹配易因通用开头命中而假 VERIFIED（WM-FC-03）。
+        # 交 needs_claude_review，不再兜圈子串。
+        return False
 
     # 至少半数关键实体在结果中出现
     matches = sum(1 for e in key_entities if e in search_result)
@@ -559,8 +559,9 @@ def _estimate_source_count(search_result: str) -> int:
         if match:
             domains.add(match.group(1))
 
-    # 至少 1 个（有搜索结果）
-    return max(1, len(domains))
+    # 自然数：0 个 URL 返回 0，让上游按"信源不足"处理
+    # （WM-FC-02：原 max(1,...) 把空结果当单信源，_compute_confidence 误加 +0.2 置信度虚高）
+    return len(domains)
 
 
 def _extract_numeric_values(text: str) -> list[float]:
