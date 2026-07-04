@@ -24,6 +24,7 @@ import hashlib
 import subprocess
 import sys
 import re
+import shlex
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -217,7 +218,13 @@ def cmd_next(args) -> None:
         cmd = step["cmd"]
         if "__ARTICLE__" in cmd:
             art = _resolve_article(state["slug"], state["date"])
-            cmd = cmd.replace("__ARTICLE__", art) if art else cmd + "  # ⚠ 文章未找到"
+            if not art:
+                # WM-PIP-01：文章未解析到时阻断，不让 __ARTICLE__ 裸字面进 bash
+                #（否则 argparse 读不到文件 / 残留占位符被 shell 当普通 token 执行）。
+                raise SystemExit(f"❌ Phase 3 文章未找到，无法解析 __ARTICLE__：slug={state['slug']} date={state['date']}")
+            # WM-PIP-01：art 来自 LLM 命名的文件名（含中文标题），可能含空格/;/$() 等元字符。
+            # 裸 replace 进 bash STEP.cmd 会导致参数断裂或命令注入，必须 shell-quote。
+            cmd = cmd.replace("__ARTICLE__", shlex.quote(art))
         # PIPE-02：把 state.min_bytes 注入 gate 子进程 env（draft 档对 phase 2/3 生效）
         cmd = f"WECHAT_MIN_BYTES={state['min_bytes']} {cmd}"
         out["cmd"] = cmd
