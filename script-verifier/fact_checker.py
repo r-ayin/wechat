@@ -246,9 +246,10 @@ def cross_validate_claims(claims: list[dict]) -> dict:
             vb = _extract_numeric_values(b.get("text", ""))
             if not vb:
                 continue
-            # 比较最大数值
+            # 比较最大数值；任一侧为 0 则比值无意义（WC-H05: 原仅守 mb==0，
+            # va=[0.0], vb=[5.0] 会得 ratio=0<0.5 误报不一致）
             ma, mb = max(va), max(vb)
-            if mb == 0:
+            if ma == 0 or mb == 0:
                 continue
             ratio = ma / mb
             if ratio > 2.0 or ratio < 0.5:
