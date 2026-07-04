@@ -190,7 +190,11 @@ def verify_claims(
     """
     verified_claims = []
 
-    for claim in claims:
+    for claim_in in claims:
+        # WC-H03 fix: avoid mutating the caller's claims list in-place.
+        # Shallow copy is sufficient — we only add top-level keys, no nested mutation.
+        claim = claim_in.copy()
+
         result_text = search_results.get(claim["id"], "")
 
         verdict = _judge_claim(claim, result_text, strictness)
