@@ -24,7 +24,10 @@ def main():
     elif args.op == "yoy_change":
         result = [round((d[i]-d[i-args.period])/abs(d[i-args.period])*100, 4) if i >= args.period and d[i-args.period] else None for i in range(len(d))]
     elif args.op == "cagr":
-        if len(d) >= 2 and d[0] > 0:
+        # GD-L-003 (audit-2026-07-05-009): d[-1]<0 时 (d[-1]/d[0])**(1/years) 对负底数取分数次幂
+        # 返回 complex（如 (-2.0)**0.5），随后 round(complex) 抛 TypeError 使脚本崩，CAGR 无结果。
+        # 守卫 d[-1]>0；负终值（如营收转亏）CAGR 数学上无实数解，返回 None 优于崩。
+        if len(d) >= 2 and d[0] > 0 and d[-1] > 0:
             years = len(d) - 1
             result = round(((d[-1]/d[0])**(1/years) - 1) * 100, 4)
         else:
