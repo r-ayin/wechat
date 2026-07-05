@@ -56,15 +56,50 @@ def check_source_diversity(urls):
     }
 
 
+# 前瞻语境词：被这些词修饰的年份视为合法预测引用，不报"未来年份" issue
+FORWARD_LOOKING_TERMS = (
+    "预计", "预测", "预期", "规划", "计划", "有望", "展望", "目标", "预算",
+    "forecast", "projected", "expected", "estimat",
+)
+# 常见预测窗（年）：权益研究通常给 3 年前瞻预测
+FORECAST_WINDOW_YEARS = 3
+# 前瞻语境窗口（字符）：年份前多少字符内出现前瞻词视为修饰
+FORECAST_CONTEXT_CHARS = 25
+
+
 def check_temporal_consistency(text):
-    """检查时间一致性 - 没有未来日期引用"""
+    """检查时间一致性 - 标记未被前瞻语境修饰的未来年份
+
+    权益研究合法引用前瞻预测（"预计 2027 年营收..."、"2028 年产能规划"），
+    直接判 `y > current_year+1` 会 false-fail 阻塞 phase4。规则：
+      1. y <= current_year+1：放行（含本年与次年，常见财年口径）
+      2. y 在 current_year+1..current_year+FORECAST_WINDOW_YEARS 且年份前
+         FORECAST_CONTEXT_CHARS 字符内出现前瞻词：放行（合法预测）
+      3. 其余未来年份：报 issue
+    """
     year_pattern = r'20[2-3]\d'
-    years = [int(y) for y in re.findall(year_pattern, text)]
     current_year = datetime.now(timezone.utc).year
     issues = []
-    for y in years:
-        if y > current_year + 1:
-            issues.append({"year": y, "issue": f"引用了未来年份（当前{current_year}）"})
+    for m in re.finditer(year_pattern, text):
+        y = int(m.group())
+        if y <= current_year + 1:
+            continue
+        # 前瞻语境豁免：年份前窗口内出现前瞻词视为合法预测引用
+        ctx_start = max(0, m.start() - FORECAST_CONTEXT_CHARS)
+        window = text[ctx_start:m.start()]
+        has_forward_context = any(term in window for term in FORWARD_LOOKING_TERMS)
+        if has_forward_context and y <= current_year + FORECAST_WINDOW_YEARS:
+            continue
+        if has_forward_context:
+            issues.append({
+                "year": y,
+                "issue": f"引用了远期年份（当前{current_year}，超 {FORECAST_WINDOW_YEARS} 年预测窗）",
+            })
+        else:
+            issues.append({
+                "year": y,
+                "issue": f"引用了未来年份（当前{current_year}）但无前瞻语境修饰",
+            })
     return issues
 
 
