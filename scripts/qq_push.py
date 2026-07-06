@@ -145,6 +145,19 @@ def _api(url: str, token: str, data: dict | None = None,
 def _upload_file(token: str, target_type: str, target_id: str,
                  file_path: Path) -> str:
     """上传文件到 /v2/{type}s/{id}/files，file_type=4=file，返回 file_uuid。"""
+    # M-002 fix (audit-2026-07-06-022): cap upload size at 20MB to prevent OOM from
+    # unbounded read_bytes + multipart body assembled entirely in memory. QQ Bot API
+    # itself rejects oversized attachments; failing early gives a clear error instead
+    # of SIGKILL / silent truncation.
+    MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+    try:
+        size = file_path.stat().st_size
+    except OSError as e:
+        raise RuntimeError(f"无法 stat 上传文件: {e}") from None
+    if size > MAX_UPLOAD_BYTES:
+        raise RuntimeError(
+            f"上传文件过大: {size} bytes (上限 {MAX_UPLOAD_BYTES} bytes / 20MB)"
+        )
     boundary = "----qqpush" + uuid.uuid4().hex
     filename = file_path.name
     mime = mimetypes.guess_type(filename)[0] or "text/html"
