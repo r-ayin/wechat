@@ -88,8 +88,32 @@ def _brave_search(query: str, key: str, count: int,
             "Accept-Encoding": "identity",
         },
     )
+    # M-006 (audit-2026-07-06-022): cap response at 5MB to prevent OOM from
+    # malicious/misconfigured server returning unbounded payload.
+    _MAX_RESPONSE_BYTES = 5 * 1024 * 1024
     with urllib.request.urlopen(req, timeout=20) as resp:  # noqa: S310
-        data = json.loads(resp.read().decode("utf-8"))
+        # Pre-check Content-Length when available (cheap reject before read)
+        try:
+            cl = resp.headers.get("Content-Length")
+            if cl is not None and int(cl) > _MAX_RESPONSE_BYTES:
+                raise RuntimeError(
+                    f"Brave response too large: Content-Length={cl} > {_MAX_RESPONSE_BYTES}"
+                )
+        except (TypeError, ValueError):
+            pass
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            chunk = resp.read(65536)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > _MAX_RESPONSE_BYTES:
+                raise RuntimeError(
+                    f"Brave response exceeded {_MAX_RESPONSE_BYTES} bytes mid-stream"
+                )
+            chunks.append(chunk)
+        data = json.loads(b"".join(chunks).decode("utf-8"))
 
     # web.results 为主；news 数组（热点新闻）补充，name 字段对应标题
     results = list((data.get("web") or {}).get("results") or [])
