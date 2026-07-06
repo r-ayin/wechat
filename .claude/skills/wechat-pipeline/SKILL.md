@@ -37,7 +37,9 @@ triggers:
      否则 → 管线完成，结束
 
    若 STEP.kind == "gate_check" 或 "gate_verify" 或 "code"：
-     bash "$STEP.cmd"        # 主 agent 直接跑（cmd 已含 WECHAT_MIN_BYTES 前缀，draft 档自动生效）
+     # H-002 fix：WECHAT_MIN_BYTES 通过 env dict 传递，不再拼到 cmd 前缀（防 state JSON
+     # 被污染时触发 shell 注入）。用 STEP.env 设置子进程环境：
+     WECHAT_MIN_BYTES="$STEP.env.WECHAT_MIN_BYTES" bash "$STEP.cmd"
      按退出码判定（CONTRACT-01：verifier.py judge 在 PASS_WITH_CAVEATS 时 exit 2，非失败）：
        exit 0 或 2 → completed（exit 2 时 --note "PASS_WITH_CAVEATS"）
        exit 1（或其它非 0/2）→ failed
@@ -55,7 +57,7 @@ triggers:
 - 从中途恢复（`从Phase 3继续`）→ `init <topic> --from 3`（自动跳过已通过门禁的阶段）
 
 ### draft 档
-- `--draft`：min_bytes 降至 12000（≈4000 字），供草稿流通。pipeline.py 会把 `WECHAT_MIN_BYTES` 自动注入到每个 gate/code 步骤的 cmd 前缀，无需手动设 env。
+- `--draft`：min_bytes 降至 12000（≈4000 字），供草稿流通。pipeline.py next 输出 `STEP.env.WECHAT_MIN_BYTES`，agent-loop 用该值设置子进程 env（H-002 fix：不再拼到 cmd 前缀，避免 state JSON 污染触发 shell 注入）。
 - 默认严格 45000 bytes（≈15000 汉字，CLAUDE.md 标准）。`--from N` 会传递式校验前置 phase 已通过 verify（draft 档对短文前置也放宽）。
 
 ### 优化工具（统一入口）

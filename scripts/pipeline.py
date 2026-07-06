@@ -233,9 +233,15 @@ def cmd_next(args) -> None:
             # WM-PIP-01：art 来自 LLM 命名的文件名（含中文标题），可能含空格/;/$() 等元字符。
             # 裸 replace 进 bash STEP.cmd 会导致参数断裂或命令注入，必须 shell-quote。
             cmd = cmd.replace("__ARTICLE__", shlex.quote(art))
-        # PIPE-02：把 state.min_bytes 注入 gate 子进程 env（draft 档对 phase 2/3 生效）
-        cmd = f"WECHAT_MIN_BYTES={state['min_bytes']} {cmd}"
         out["cmd"] = cmd
+        # PIPE-02 / H-002 fix：WECHAT_MIN_BYTES 通过 env dict 传递，不再 f-string 拼到
+        # shell cmd 前缀（避免 state JSON 被污染时触发命令替换注入）。调用方（agent-loop）
+        # 需用 STEP.env 设置子进程环境变量；pipeline-gate.sh 仍读 ${WECHAT_MIN_BYTES:-45000}。
+        try:
+            mb = int(state.get("min_bytes", 45000))
+        except (TypeError, ValueError):
+            mb = 45000
+        out["env"] = {"WECHAT_MIN_BYTES": str(mb)}
     elif step["kind"] == "subagent":
         out["task_file"] = step["task_file"]
     print(json.dumps(out, ensure_ascii=False))
