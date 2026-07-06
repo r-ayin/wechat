@@ -30,6 +30,20 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parent.parent
 _CACHE_DIR = _ROOT / "output" / "state" / "research_cache"
 
+# slug 安全校验：仅允许小写字母、数字、下划线、连字符，防止路径穿越
+_SLUG_RE = re.compile(r"^[a-z0-9_-]+$")
+
+
+def _validate_slug(slug: str) -> str:
+    """校验 slug 合法性，非法则打印错误并 exit 0（工具脚本约定）。"""
+    if not _SLUG_RE.match(slug):
+        print(
+            f"错误：slug 仅允许 [a-z0-9_-]，收到 {slug!r}",
+            file=sys.stderr,
+        )
+        sys.exit(0)
+    return slug
+
 
 # ---------------------------------------------------------------------------
 # 工具函数
@@ -112,6 +126,7 @@ def _load_sources(path: Path) -> list[str] | None:
 
 def cmd_get(slug: str) -> None:
     """查询缓存：输出缓存状态。"""
+    _validate_slug(slug)
     cache_path = _CACHE_DIR / f"{slug}.json"
     if not cache_path.exists():
         result = {"cached": False}
@@ -134,6 +149,7 @@ def cmd_get(slug: str) -> None:
 
 def cmd_put(slug: str, analysis_path: str, sources_path: str) -> None:
     """写入缓存：摘要取前 2000 字 + 全部 URL 信源。"""
+    _validate_slug(slug)
     # 读分析摘要
     analysis_file = Path(analysis_path)
     analysis_text = _read_text_file(analysis_file)
@@ -180,6 +196,7 @@ def cmd_put(slug: str, analysis_path: str, sources_path: str) -> None:
 
 def cmd_diff(slug: str, new_sources_path: str) -> None:
     """增量对比：比较缓存信源与新信源，输出新增列表。"""
+    _validate_slug(slug)
     # 读缓存
     cache_path = _CACHE_DIR / f"{slug}.json"
     if not cache_path.exists():
