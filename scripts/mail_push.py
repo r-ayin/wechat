@@ -94,7 +94,21 @@ def run(args) -> int:
         f"({html_path.stat().st_size:,} 字节)\n生成时间: {time.strftime('%Y-%m-%d %H:%M')}\n"
         f"\n(完整报告可本地浏览器打开 HTML 附件查看)")
 
-    # HTML 作为附件
+    # HTML 作为附件（M-001 audit-2026-07-06-022：cap 10MB 防 unbounded read）
+    _MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024  # 10 MB
+    file_size = html_path.stat().st_size
+    if file_size > _MAX_ATTACHMENT_BYTES:
+        print(
+            f"⚠️ HTML 附件过大: {file_size:,} 字节 > {_MAX_ATTACHMENT_BYTES:,} 上限，跳过邮件推送",
+            file=sys.stderr,
+        )
+        _audit_log(
+            "external_call",
+            {"type": "smtp", "identifier": f"{user}@{host}:{port}", "recipient": to},
+            "denied",
+            {"reason": f"attachment_too_large size={file_size}"},
+        )
+        return 1
     msg.add_attachment(
         html_path.read_bytes(),
         maintype="text", subtype="html",
