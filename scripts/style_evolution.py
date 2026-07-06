@@ -18,10 +18,12 @@ PD-01 CLI 子命令：
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import os
 import re
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import median
@@ -70,9 +72,14 @@ def cmd_record(args: argparse.Namespace) -> int:
                          ensure_ascii=False, indent=2))
         return 1
 
-    # 追加写入 JSONL
+    # 追加写入 JSONL（flock 防并发 append 交错，M-014 audit-2026-07-06-022）
     with open(_FEEDBACK_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(feedback, ensure_ascii=False) + "\n")
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+            f.write(json.dumps(feedback, ensure_ascii=False) + "\n")
+            f.flush()
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
     print(json.dumps({
         "status": "recorded",
@@ -368,9 +375,25 @@ def cmd_evolve(args: argparse.Namespace) -> int:
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    # 写入 evolve_suggestion.json
-    with open(_SUGGESTION_FILE, "w", encoding="utf-8") as f:
-        f.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+    # 写入 evolve_suggestion.json（原子写防并发截断，M-015 audit-2026-07-06-022）
+    _suggestion_path = Path(_SUGGESTION_FILE)
+    fd, tmp_path = tempfile.mkstemp(
+        dir=_suggestion_path.parent,
+        prefix=".evolve_suggestion.",
+        suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, _SUGGESTION_FILE)
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
     # 同时输出到 stdout
     print(json.dumps(result, ensure_ascii=False, indent=2))
