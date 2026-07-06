@@ -71,6 +71,24 @@ def _atomic_write_text(path: str, text: str) -> None:
     os.replace(tmp, p)
 
 
+def _safe_output_path(raw: str) -> str:
+    """Validate --output path resolves under CWD to prevent arbitrary file write (M-012).
+
+    Raises ValueError if the resolved path escapes the working directory.
+    Returns the validated raw string (callers pass it to _atomic_write_text).
+    """
+    target = Path(raw).resolve()
+    cwd = Path.cwd().resolve()
+    try:
+        target.relative_to(cwd)
+    except ValueError:
+        raise ValueError(
+            f"--output path '{raw}' resolves outside working directory "
+            f"({target} not under {cwd}). Refusing to write."
+        )
+    return raw
+
+
 # =========================================================================
 # 提取 + 搜索计划
 # =========================================================================
@@ -399,7 +417,7 @@ def main():
         result = extract_and_plan(args.script)
         output = json.dumps(result, ensure_ascii=False, indent=2)
         if args.output:
-            _atomic_write_text(args.output, output)
+            _atomic_write_text(_safe_output_path(args.output), output)
             print(f"[OK] 计划已写入 {args.output}")
             print(f"   声明数: {result['extraction_summary']['total']}")
             print(f"   搜索查询: {result['search_plan']['total_queries']}")
@@ -421,7 +439,7 @@ def main():
         )
         output = json.dumps(report, ensure_ascii=False, indent=2)
         if args.output:
-            _atomic_write_text(args.output, output)
+            _atomic_write_text(_safe_output_path(args.output), output)
             status_map = {"PASS": "[OK] PASS", "PASS_WITH_CAVEATS": "[WARN] PASS_WITH_CAVEATS", "FAIL": "[FAIL] FAIL"}
             status = status_map.get(report["overall"], f"[?] {report['overall']}")
             print(f"{status}  验证: {report['summary']['verified']} / "
@@ -458,7 +476,7 @@ def main():
 
         output = json.dumps(report, ensure_ascii=False, indent=2)
         if args.output:
-            _atomic_write_text(args.output, output)
+            _atomic_write_text(_safe_output_path(args.output), output)
             status_map = {"PASS": "[OK] PASS", "PASS_WITH_CAVEATS": "[WARN] PASS_WITH_CAVEATS", "FAIL": "[FAIL] FAIL"}
             status = status_map.get(report["overall"], f"[?] {report['overall']}")
             print(f"{status} | 总数:{report['summary']['total']} "
