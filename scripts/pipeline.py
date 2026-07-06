@@ -24,6 +24,7 @@ import hashlib
 import subprocess
 import sys
 import re
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -61,23 +62,63 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+def _validate_state(state: dict, source: str) -> None:
+    """Minimal schema check for pipeline state (M-010 audit finding).
+
+    Corrupt/tampered state files previously caused silent KeyError downstream
+    or wrong phase routing. Fail fast with a clear message so operators can
+    re-init rather than chase phantom bugs.
+    """
+    required_str = ("slug", "date", "mode")
+    for k in required_str:
+        if k not in state or not isinstance(state[k], str):
+            raise SystemExit(f"❌ state 校验失败 ({source}): 缺字段或类型错 '{k}'（期望 str）；请重新 init")
+    if "steps" not in state or not isinstance(state["steps"], list):
+        raise SystemExit(f"❌ state 校验失败 ({source}): 'steps' 缺失或非 list；请重新 init")
+    for i, s in enumerate(state["steps"]):
+        if not isinstance(s, dict):
+            raise SystemExit(f"❌ state 校验失败 ({source}): steps[{i}] 非 dict；请重新 init")
+        for sk in ("id", "status", "phase"):
+            if sk not in s or not isinstance(s[sk], str):
+                raise SystemExit(
+                    f"❌ state 校验失败 ({source}): steps[{i}].{sk} 缺失或非 str；请重新 init"
+                )
+
+
 def _load(slug: str, date: str | None = None) -> dict:
     if date:
         p = _state_path(slug, date)
         if not p.exists():
             raise SystemExit(f"❌ 找不到 state: {p}（先 init）")
-        return json.loads(p.read_text(encoding="utf-8"))
+        state = json.loads(p.read_text(encoding="utf-8"))
+        _validate_state(state, str(p))
+        return state
     # 未指定 date：取该 slug 最新 state
     matches = sorted(_STATE_DIR.glob(f"{slug}_*.json"), reverse=True)
     if not matches:
         raise SystemExit(f"❌ 找不到 {slug} 的 state（先 init）")
-    return json.loads(matches[0].read_text(encoding="utf-8"))
+    state = json.loads(matches[0].read_text(encoding="utf-8"))
+    _validate_state(state, str(matches[0]))
+    return state
 
 
 def _save(state: dict) -> None:
+    """Atomic write via tempfile + os.replace (M-010 companion; mirrors M-009 fix pattern)."""
     state["updated_at"] = _now()
     p = _state_path(state["slug"], state["date"])
-    p.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    payload = json.dumps(state, ensure_ascii=False, indent=2)
+    fd, tmp = tempfile.mkstemp(prefix=".pipeline-state-", suffix=".tmp", dir=str(p.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(payload)
+        os.replace(tmp, str(p))
+    except BaseException:
+        # Cleanup on any failure (including KeyboardInterrupt) to avoid stale tmp files
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def _phase_idx(phase: str) -> int:
