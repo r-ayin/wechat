@@ -39,16 +39,30 @@ def _load_env(path: str | None) -> dict:
     env = dict(os.environ)
     p = Path(path) if path else Path(_DEFAULT_ENV)
     if p.exists():
-        for line in p.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, _, v = line.partition("=")
-                v = v.strip()
-                # .env 惯例允许 KEY="value" / KEY='value'；strip 仅去空白会保留引号，
-                # 致 token/secret 字面含 " 鉴权失败。成对引号才剥，避免误伤值内含引号。
-                if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
-                    v = v[1:-1]
-                env.setdefault(k.strip(), v)
+        # H-005 (audit-2026-07-06-022): .env 含凭证，须校验仅 owner 可读写。
+        # 若被放宽到 group/world-readable，静默读取会泄露 token；拒绝并提示修复。
+        try:
+            mode = p.stat().st_mode & 0o777
+        except OSError as e:
+            print(f"⚠️ 无法 stat .env {p}: {e}，跳过文件加载", file=sys.stderr)
+        else:
+            if mode & 0o077:
+                print(
+                    f"⚠️ .env {p} 权限过宽 (0o{mode:03o})，拒绝读取凭证；"
+                    f"请 chmod 600 {p}",
+                    file=sys.stderr,
+                )
+            else:
+                for line in p.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, _, v = line.partition("=")
+                        v = v.strip()
+                        # .env 惯例允许 KEY="value" / KEY='value'；strip 仅去空白会保留引号，
+                        # 致 token/secret 字面含 " 鉴权失败。成对引号才剥，避免误伤值内含引号。
+                        if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
+                            v = v[1:-1]
+                        env.setdefault(k.strip(), v)
     return env
 
 
