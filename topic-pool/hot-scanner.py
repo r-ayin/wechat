@@ -26,6 +26,8 @@ import json
 import sys
 import io
 import re
+import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -736,17 +738,62 @@ def main():
 
         if args.output:
             output_path = Path(args.output)
+            # M-017: atomic merge + schema validation.
+            # 旧实现 TOCTOU（exists→read→write 非原子）+ 直接 json.loads 不校验结构 →
+            # 并发调用丢数据、损坏/恶意 JSON 静默污染 merge。改为：
+            #   ① LOCK_EX 持锁覆盖 read+merge+write 全程（同进程/跨进程互斥）
+            #   ② 读后校验 list[dict] + 必要字段 title，非法则拒绝 merge 防污染
+            #   ③ tempfile + os.replace 原子写，崩溃时文件不会半写
             existing = []
-            if output_path.exists():
-                existing = json.loads(output_path.read_text(encoding='utf-8'))
-            existing_queries = {t.get("title") for t in existing if isinstance(t, dict)}
-            new_topics = [r for r in top if r["title"] not in existing_queries]
-            merged = existing + new_topics
-            output_path.write_text(
-                json.dumps(merged, ensure_ascii=False, indent=2, default=str),
-                encoding='utf-8'
-            )
-            print(f"[OK] {len(new_topics)} 个新选题已写入 {args.output}")
+            fd = None
+            try:
+                # O_CREAT 保证文件不存在也能拿锁；O_RDWR 兼容 flock
+                fd = os.open(str(output_path), os.O_RDWR | os.O_CREAT, 0o644)
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX)
+                raw = os.read(fd, 1024 * 1024 * 50).decode('utf-8')  # cap 50MB
+                if raw.strip():
+                    parsed = json.loads(raw)
+                    if not isinstance(parsed, list):
+                        print(f"[WARN] {args.output} 顶层非数组（{type(parsed).__name__}），跳过 merge 防污染", file=sys.stderr)
+                        parsed = []
+                    else:
+                        valid = []
+                        for item in parsed:
+                            if not isinstance(item, dict):
+                                continue
+                            if "title" not in item or not isinstance(item["title"], str):
+                                continue
+                            valid.append(item)
+                        if len(valid) != len(parsed):
+                            print(f"[WARN] {args.output} {len(parsed)-len(valid)} 条记录缺 title 或非 dict，已过滤", file=sys.stderr)
+                        existing = valid
+                existing_queries = {t["title"] for t in existing}
+                new_topics = [r for r in top if r["title"] not in existing_queries]
+                merged = existing + new_topics
+                payload = json.dumps(merged, ensure_ascii=False, indent=2, default=str).encode('utf-8')
+                dir_name = str(output_path.parent) if str(output_path.parent) else '.'
+                tmp_fd, tmp_path = tempfile.mkstemp(prefix='.hot-scanner-', suffix='.tmp', dir=dir_name)
+                try:
+                    os.write(tmp_fd, payload)
+                    os.fsync(tmp_fd)
+                finally:
+                    os.close(tmp_fd)
+                try:
+                    os.replace(tmp_path, str(output_path))
+                except BaseException:
+                    if os.path.exists(tmp_path):
+                        os.unlink(tmp_path)
+                    raise
+                print(f"[OK] {len(new_topics)} 个新选题已写入 {args.output}")
+            finally:
+                if fd is not None:
+                    try:
+                        import fcntl
+                        fcntl.flock(fd, fcntl.LOCK_UN)
+                    except Exception:
+                        pass
+                    os.close(fd)
 
     # ================================================================
     # COMMAND: consume
