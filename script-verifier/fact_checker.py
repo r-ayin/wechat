@@ -326,11 +326,16 @@ def _judge_claim(claim: dict, search_result: str, strictness: str) -> dict:
                 "verdict": "UNVERIFIABLE",
                 "reason": "化名人物，无法直接验证。身份背景需交叉验证行业常态数据。"
             }
-        # 精确数字无来源 → FALSIFIED 风险
+        # 精确数字无来源 → UNVERIFIABLE + 人工复核（H-004, audit-2026-07-06-022）。
+        # 旧实现直接判 FALSIFIED，攻击者可构造"搜索必空"的声明触发自动虚假标记，
+        # 形成 search-poisoning DoS：批量注入高风险 claim → 全部 auto-FALSIFIED →
+        # 报告可信度被人为拉低。改为 UNVERIFIABLE + needs_claude_review，与 ERROR: 分支对齐。
         if claim.get("risk") == "high":
             return {
-                "verdict": "FALSIFIED",
-                "reason": f"精确数据「{text}」无搜索结果支持，标记为虚假。"
+                "verdict": "UNVERIFIABLE",
+                "reason": f"精确数据「{text}」无搜索结果支持，需人工交叉验证。",
+                "confidence": 0.0,
+                "needs_claude_review": True,
             }
         return {
             "verdict": "UNVERIFIABLE",
