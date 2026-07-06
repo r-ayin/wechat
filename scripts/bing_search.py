@@ -22,8 +22,10 @@ from __future__ import annotations
 
 import argparse
 import html as _html
+import ipaddress
 import json
 import re
+import socket
 import sys
 import time
 import urllib.error
@@ -137,6 +139,70 @@ def _load_queries(pillar: str | None, mode: str) -> list[dict]:
     return mod.build_search_queries(pillar=pillar, mode=mode)
 
 
+_ALLOWED_SCHEMES = {"http", "https"}
+# RFC1918 + link-local + loopback + metadata + IPv6 private ranges
+_PRIVATE_PREFIXES = (
+    "10.", "172.16.", "172.17.", "172.18.", "172.19.",
+    "172.20.", "172.21.", "172.22.", "172.23.", "172.24.",
+    "172.25.", "172.26.", "172.27.", "172.28.", "172.29.",
+    "172.30.", "172.31.",
+    "192.168.", "127.", "169.254.", "0.",
+)
+
+
+def _validate_fetch_url(url: str) -> bool:
+    """Reject SSRF vectors: non-http(s) schemes, private IPs, metadata endpoints.
+
+    Returns True only if the URL is safe to fetch from an untrusted source.
+    Does NOT follow redirects — that is handled by _NoPrivateRedirectHandler.
+    """
+    try:
+        parsed = urllib.parse.urlparse(url)
+    except ValueError:
+        return False
+    if parsed.scheme.lower() not in _ALLOWED_SCHEMES:
+        return False
+    hostname = parsed.hostname or ""
+    if not hostname:
+        return False
+    # Block obvious metadata / internal hostnames
+    low = hostname.lower()
+    if low in ("metadata.google.internal", "metadata.internal",
+               "instance-data", "ecs-metadata"):
+        return False
+    # Resolve and check IP
+    try:
+        infos = socket.getaddrinfo(hostname, None, proto=socket.IPPROTO_TCP)
+    except socket.gaierror:
+        return False
+    for family, _type, _proto, _canon, sockaddr in infos:
+        ip_str = sockaddr[0]
+        try:
+            addr = ipaddress.ip_address(ip_str)
+        except ValueError:
+            return False
+        if addr.is_private or addr.is_loopback or addr.is_link_local or \
+           addr.is_reserved or addr.is_multicast:
+            return False
+        # Extra string-prefix guard for v4 ranges getaddrinfo may miss
+        if family == socket.AF_INET and ip_str.startswith(_PRIVATE_PREFIXES):
+            return False
+    return True
+
+
+class _NoPrivateRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Block redirects to private/internal URLs (post-redirect SSRF check)."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: D401
+        if not _validate_fetch_url(newurl):
+            raise urllib.error.URLError(
+                f"redirect to disallowed URL blocked: {newurl}")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_opener = urllib.request.build_opener(_NoPrivateRedirectHandler)
+
+
 def _is_skip_url(url: str) -> bool:
     u = url.lower()
     return any(d in u for d in _SKIP_DOMAINS)
@@ -189,12 +255,18 @@ def _bing_fetch(query: str, count: int) -> list[dict]:
 
 
 def _fetch_page_text(url: str, timeout: int, max_chars: int) -> str:
-    """抓单个 URL 的页面主文文本。失败返回空串。"""
+    """抓单个 URL 的页面主文文本。失败返回空串。
+
+    H-003 (audit-2026-07-06-022): SSRF hardening — validate scheme/IP before
+    fetch, block redirects to private/internal URLs via custom handler.
+    """
+    if not _validate_fetch_url(url):
+        return ""
     try:
         req = urllib.request.Request(url, headers={
             "User-Agent": _UA, "Accept-Language": "zh-CN,zh;q=0.9",
             "Accept-Encoding": "identity"})
-        with urllib.request.urlopen(req, timeout=timeout) as resp:  # noqa: S310
+        with _opener.open(req, timeout=timeout) as resp:
             ctype = (resp.headers.get("Content-Type") or "").lower()
             if "pdf" in ctype or "image" in ctype or "video" in ctype:
                 return ""
