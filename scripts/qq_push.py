@@ -79,8 +79,9 @@ def _get_token(app_id: str, client_secret: str) -> str:
         raise RuntimeError(f"取 token HTTP {e.code}") from None
     tok = d.get("access_token")
     if not tok:
-        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
-        raise RuntimeError(f"无 access_token: {d}")
+        # M-003 (audit-2026-07-06-022): token 响应可能含 secret/appsecret 等敏感字段，
+        # 异常消息仅暴露 top-level keys 便于排查字段缺失，绝不泄露值。
+        raise RuntimeError(f"无 access_token: keys={list(d.keys())}") from None
     return tok
 
 
@@ -129,8 +130,9 @@ def _upload_file(token: str, target_type: str, target_id: str,
         raise RuntimeError(f"上传 HTTP {e.code}") from None
     fu = (d.get("file_info") or {}).get("file_uuid") or d.get("file_uuid")
     if not fu:
-        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
-        raise RuntimeError(f"上传无 file_uuid: {d}")
+        # M-004 (audit-2026-07-06-022): 上传响应可能含用户 openid/token 等敏感字段，
+        # 异常消息仅暴露 top-level keys 便于排查字段缺失，绝不泄露值。
+        raise RuntimeError(f"上传无 file_uuid: keys={list(d.keys())}") from None
     return fu
 
 
