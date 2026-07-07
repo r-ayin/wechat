@@ -131,7 +131,14 @@ def _resolve_article(slug: str, date: str) -> str:
 
 def cmd_init(args) -> None:
     topic = args.topic
-    slug = args.slug or _slugify(topic)
+    # WC-EXT-M-001 + WC-EXT-M-002 (audit-2026-07-08-041): --slug CLI override 必须过 _slugify
+    # 再入 steps.build_steps，否则原始用户输入含 ;/$()/空格等元字符时，被 f-string 拼进
+    # bash STEP.cmd（steps.py:250/256/263 等）触发命令注入或路径遍历。_slugify 已保证
+    # 输出仅 [a-z0-9\-]，是单一可信 sink；此处强制重跑而非信任调用方传入。
+    raw_slug = args.slug
+    slug = _slugify(raw_slug) if raw_slug else _slugify(topic)
+    if raw_slug and slug != raw_slug:
+        print(f"[init] ⚠ --slug '{raw_slug}' sanitized → '{slug}' (only [a-z0-9-] allowed)")
     date = args.date or datetime.now().strftime("%Y-%m-%d")
     min_bytes = 12000 if args.draft else int(os.environ.get("WECHAT_MIN_BYTES", "45000"))
 
