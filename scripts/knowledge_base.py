@@ -72,6 +72,21 @@ def _cmd_add(args: argparse.Namespace) -> None:
         print(json.dumps({"error": "file not found: " + args.article}, ensure_ascii=False, indent=2))
         return
 
+    # size guard: reject articles > 10 MB to prevent OOM / unbounded read on
+    # CLI-supplied path (WC-EXT-M-003, audit-2026-07-08-041)
+    _MAX_ARTICLE_BYTES = 10 * 1024 * 1024
+    try:
+        file_size = article_path.stat().st_size
+    except OSError as exc:
+        print(json.dumps({"error": f"cannot stat {args.article}: {exc}"}, ensure_ascii=False, indent=2))
+        return
+    if file_size > _MAX_ARTICLE_BYTES:
+        print(json.dumps({
+            "error": f"article too large ({file_size} bytes, max {_MAX_ARTICLE_BYTES})",
+            "path": args.article,
+        }, ensure_ascii=False, indent=2))
+        return
+
     text = article_path.read_text(encoding="utf-8")
 
     # extract four entity types
