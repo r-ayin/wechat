@@ -85,8 +85,21 @@ _METRIC_LABELS = {
 # 单篇文章风格向量提取
 # =========================================================================
 
+# 单文件读取上限，防止 CLI 传入大文件导致 OOM（WC-EXT-L-002, audit-2026-07-08-041）
+_MAX_ARTICLE_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
 def extract_style_vector(file_path: Path) -> dict[str, float]:
     """从单篇 Markdown 文章提取 6 维风格向量。"""
+    # size guard: stat first, reject > 10 MB before read_text to prevent OOM
+    try:
+        file_size = file_path.stat().st_size
+    except OSError as exc:
+        raise RuntimeError(f"cannot stat {file_path}: {exc}") from exc
+    if file_size > _MAX_ARTICLE_BYTES:
+        raise RuntimeError(
+            f"article too large ({file_size} bytes, max {_MAX_ARTICLE_BYTES}): {file_path}"
+        )
     raw_text = file_path.read_text(encoding="utf-8")
     text = _strip_frontmatter(raw_text)
 
