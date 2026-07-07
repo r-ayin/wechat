@@ -59,10 +59,26 @@ def _compute_reward(read_through: float, shares: int, reads: int,
     return round(reward, 4)
 
 
+def _sanitize_slug(raw: str) -> str:
+    """清洗 CLI 传入的 slug，防止 JSONL log injection / 下游解析破坏。
+
+    - 剥离换行/回车/tab（JSONL 一行一记录，嵌入换行会伪造新记录）
+    - 剥离其他 C0/C1 控制字符（U+0000-U+001F, U+007F-U+009F）
+    - 截断到 200 字符，避免单条 record 撑爆下游 buffer
+    - 空串兜底为 'unknown'
+    """
+    import re
+    # 一步剥掉所有控制字符（含 \n\r\t），保留可打印 Unicode
+    cleaned = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", raw or "")
+    cleaned = cleaned.strip()[:200]
+    return cleaned or "unknown"
+
+
 def _append_reward(slug: str, reward: float, detail: dict) -> None:
     """追加一条 reward 记录到 topic_reward.jsonl"""
+    safe_slug = _sanitize_slug(slug)
     record = {
-        "slug": slug,
+        "slug": safe_slug,
         "reward": reward,
         "detail": detail,
         "recorded_at": datetime.now(timezone.utc).isoformat(),
