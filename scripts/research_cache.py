@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -163,10 +164,14 @@ def cmd_put(slug: str, analysis_path: str, sources_path: str) -> None:
     }
 
     cache_path = _CACHE_DIR / f"{slug}.json"
-    cache_path.write_text(
+    # Atomic write: write to temp file then os.replace to prevent
+    # crash-mid-write corruption (WC-EXT-L-001 audit-2026-07-08-041)
+    tmp_path = cache_path.with_suffix(".json.tmp")
+    tmp_path.write_text(
         json.dumps(cache_data, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+    os.replace(tmp_path, cache_path)
 
     result = {
         "ok": True,
