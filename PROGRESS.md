@@ -1,6 +1,6 @@
 # wechat — 进度追踪
 
-> 最后更新：2026-06-30
+> 最后更新：2026-07-08
 
 ## 状态
 🟢 活跃生产 — 管线运行中；每日热点日报链路就位（待部署 ECS）
@@ -30,6 +30,7 @@
 - [x] 2026-06-28: hot-034 最低工资2740元：这条线下面，是谁在替整个系统兜底 (hot)
 - [x] 2026-06-28: hot-035 AI富士康里的标注工：4分钱一个框，教会徒弟饿死师傅 (hot)
 - [x] 2026-06-28: hot-038 2亿灵活就业者的法律真空——新就业形态立法能改变什么 (hot)
+- [x] 2026-07-08: labor-alienation 长文产出
 - [x] 2026-06-30: 每日热点日报链路 — 新增 scripts/daily_report.py（确定性 HTML 渲染器，纯 stdlib，复刻 06-29 模板）+ scripts/brave_search.py（Brave Search 取数器，复用 hot-scanner 查询，输出 {query:summary} 喂 consume）+ scripts/cron/daily-hotspot.sh（每日编排：Brave→consume→render，graceful fallback，当天选题独立日期戳文件不污染共享池）+ DEPLOY-ECS.md + .gitignore(output/cron/,.wechat-env)。本机已验证渲染器与 fallback；真实 Brave 调用待 ECS 公网验证（本机容器不通 brave.com）。
 
 ## 当前任务
