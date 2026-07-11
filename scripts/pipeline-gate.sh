@@ -41,6 +41,17 @@ resolve_checkpoint() {
     local mode="${2:-strict}"
     local list=""
 
+    # M-011: TOPIC 直接插进 find -name glob，含 *?[] 等 metachar 时会通配展开或 find 报错。
+    # 限定 slug 字符集 [a-zA-Z0-9_-]，非法即拒（门禁是安全边界，宁可误拒不可误放）。
+    if [ -n "$TOPIC" ]; then
+        case "$TOPIC" in
+            *[!a-zA-Z0-9_-]*)
+                echo "❌ TOPIC 含非法字符(仅允许 [a-zA-Z0-9_-]): '$TOPIC'" >&2
+                exit 4
+                ;;
+        esac
+    fi
+
     case "$key" in
         "0-competitor")
             list=$(find "$WECHAT_ROOT/$RESEARCH_DIR" -maxdepth 1 -name "${TOPIC}_competitor-style_*.md" 2>/dev/null)

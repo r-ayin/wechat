@@ -1,0 +1,3 @@
+# 引擎常设工作分支（2026-07-08 全项目配）。stack 子命令按 layer→branch 路由。
+# 单层 dev：引擎所有改动 stack 到此分支，用户审后合 main。分支领跑主枝求稳。
+dev:wechat-dev
