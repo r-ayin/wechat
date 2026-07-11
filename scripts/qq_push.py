@@ -49,16 +49,29 @@ def _load_env(path: str | None) -> dict:
     env = dict(os.environ)
     p = Path(path) if path else Path(_DEFAULT_ENV)
     if p.exists():
-        for line in p.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, _, v = line.partition("=")
-                v = v.strip()
-                # .env 惯例允许 KEY="value" / KEY='value'；strip 仅去空白会保留引号，
-                # 致 token/secret 字面含 " 鉴权失败。成对引号才剥，避免误伤值内含引号。
-                if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
-                    v = v[1:-1]
-                env.setdefault(k.strip(), v)
+        # H-005 (audit-2026-07-06-022): .env 含凭证，须校验仅 owner 可读写。
+        try:
+            mode = p.stat().st_mode & 0o777
+        except OSError as e:
+            print(f"⚠️ 无法 stat .env {p}: {e}，跳过文件加载", file=sys.stderr)
+        else:
+            if mode & 0o077:
+                print(
+                    f"⚠️ .env {p} 权限过宽 (0o{mode:03o})，拒绝读取凭证；"
+                    f"请 chmod 600 {p}",
+                    file=sys.stderr,
+                )
+            else:
+                for line in p.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, _, v = line.partition("=")
+                        v = v.strip()
+                        # .env 惯例允许 KEY="value" / KEY='value'；strip 仅去空白会保留引号，
+                        # 致 token/secret 字面含 " 鉴权失败。成对引号才剥，避免误伤值内含引号。
+                        if len(v) >= 2 and ((v[0] == '"' and v[-1] == '"') or (v[0] == "'" and v[-1] == "'")):
+                            v = v[1:-1]
+                        env.setdefault(k.strip(), v)
     elif path is None:
         # 默认 .wechat-env 缺失：明确提示，不静默 fallback 到跨项目 /opt/wanxia/.env
         # （WM-QQ-02 解耦意图：让部署方显式选择本地凭证或 --env-file 复用 wanxia bot）。
@@ -83,8 +96,9 @@ def _get_token(app_id: str, client_secret: str) -> str:
         raise RuntimeError(f"取 token HTTP {e.code}") from None
     tok = d.get("access_token")
     if not tok:
-        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
-        raise RuntimeError(f"无 access_token: {d}")
+        # M-003 (audit-2026-07-06-022): token 响应可能含 secret/appsecret 等敏感字段，
+        # 异常消息仅暴露 top-level keys 便于排查字段缺失，绝不泄露值。
+        raise RuntimeError(f"无 access_token: keys={list(d.keys())}") from None
     return tok
 
 
@@ -133,8 +147,9 @@ def _upload_file(token: str, target_type: str, target_id: str,
         raise RuntimeError(f"上传 HTTP {e.code}") from None
     fu = (d.get("file_info") or {}).get("file_uuid") or d.get("file_uuid")
     if not fu:
-        # 本地 JSON 解析结果（非外部响应体），保留便于排查字段缺失
-        raise RuntimeError(f"上传无 file_uuid: {d}")
+        # M-004 (audit-2026-07-06-022): 上传响应可能含用户 openid/token 等敏感字段，
+        # 异常消息仅暴露 top-level keys 便于排查字段缺失，绝不泄露值。
+        raise RuntimeError(f"上传无 file_uuid: keys={list(d.keys())}") from None
     return fu
 
 
