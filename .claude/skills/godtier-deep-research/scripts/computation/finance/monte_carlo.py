@@ -34,7 +34,7 @@ def main():
     result = {
         "mean": round(statistics.mean(results), 2),
         "median": round(statistics.median(results), 2),
-        "stdev": round(statistics.stdev(results), 2),
+        "stdev": round(statistics.stdev(results), 2) if len(results) > 1 else 0,
         "p5": round(results[int(0.05 * len(results))], 2),
         "p25": round(results[int(0.25 * len(results))], 2),
         "p75": round(results[int(0.75 * len(results))], 2),

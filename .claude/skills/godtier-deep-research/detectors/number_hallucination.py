@@ -102,6 +102,54 @@ def check_source_urls(numbers, text):
     return numbers
 
 
+def _classify_and_normalize(num):
+    """根据数字文本与上下文，返回 (rule_key, value)。
+
+    保守分类：只对能明确归类的数字套规则，无法归类时返回 (None, val)，
+    避免误杀合法数字（误杀会阻塞 phase4 门禁，等价 false-fail）。
+    市值类数字统一换算到「十亿(B)」以便与 market_cap_B 规则对齐。
+    """
+    text = num["text"]
+    ctx = num.get("context", "")
+    raw = re.sub(r'[^\d.\-]', '', text.replace(",", ""))
+    try:
+        val = float(raw)
+    except ValueError:
+        return None, None
+
+    # 百分比：含 % → percentage
+    if "%" in text:
+        return "percentage", val
+
+    # 货币/规模后缀 → market_cap_B（换算到十亿）
+    if re.search(r'[\$¥€£]', text) or re.search(r'[BMK万亿]', text):
+        if "万亿" in text:
+            bval = val * 1000.0          # 1万亿 = 1000B
+        elif "亿" in text:
+            bval = val / 10.0            # 1B = 10亿
+        elif "万" in text:
+            bval = val / 100000.0        # 1B = 100000万
+        elif re.search(r'[Bb]', text):
+            bval = val                   # 已是十亿
+        elif re.search(r'[Mm]', text):
+            bval = val / 1000.0          # 1B = 1000M
+        elif re.search(r'[Kk]', text):
+            bval = val / 1000000.0       # 1B = 1000000K
+        else:
+            bval = val                   # 仅有货币符号，单位不明，按原值保守比较
+        return "market_cap_B", bval
+
+    # PE / 市盈率（单位元，无需换算）
+    if re.search(r'PE\b|市盈|P/E', ctx, re.IGNORECASE):
+        return "pe_ratio", val
+
+    # 营收/增长率
+    if re.search(r'增长|营收|growth|同比', ctx, re.IGNORECASE):
+        return "revenue_growth_pct", val
+
+    return None, val
+
+
 def check_reasonableness(numbers, rules=None, mode="finance"):
     """检查数字是否在合理范围内
 
@@ -109,19 +157,26 @@ def check_reasonableness(numbers, rules=None, mode="finance"):
         numbers: 提取的数字列表
         rules: 可选的自定义规则字典（覆盖默认规则）
         mode: 模式 ("finance" / "general")，仅在 rules 为 None 时生效
+
+    每个数字按上下文分类选规则，越界则向 num 追加 range_issue；
+    detect() 会把含 range_issue 的数字计入 critical，堵住越界幻觉数字静默过 phase4 门禁。
     """
     if rules is None:
         rules = load_rules(mode)
 
     for num in numbers:
-        # Extract numeric value
-        raw = re.sub(r'[^\d.\-]', '', num["text"].replace(",", ""))
-        try:
-            val = float(raw)
-            num["numeric_value"] = val
-        except ValueError:
-            num["numeric_value"] = None
+        rule_key, val = _classify_and_normalize(num)
+        num["numeric_value"] = val
+        num["rule_key"] = rule_key
+        if val is None or rule_key is None:
             continue
+        rule = rules.get(rule_key)
+        if not rule:
+            # 当前 mode 下无此规则（如 general 模式只有 percentage）→ 不套规则，避免误杀
+            continue
+        lo, hi = rule["min"], rule["max"]
+        if val < lo or val > hi:
+            num["range_issue"] = f"{rule_key}={val} 越出合理范围 [{lo}, {hi}]"
 
     return numbers
 
@@ -157,6 +212,15 @@ def detect(article_text, audit_log_path=None, mode="finance"):
                 "number": n["text"],
                 "context": n["context"],
                 "issue": "精确数字无来源URL",
+            })
+
+    # 越界数字：即便有来源也要拦（事实性幻觉，GD-M-001）
+    for n in numbers:
+        if n.get("range_issue"):
+            critical.append({
+                "number": n["text"],
+                "context": n.get("context", ""),
+                "issue": n["range_issue"],
             })
 
     passed = len(critical) == 0
