@@ -30,6 +30,15 @@ RESEARCH_DIR="output/research"
 ARTICLE_DIR="output/wechat_articles"
 WECHAT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+# GATE-10 (WM-GATE-02): TOPIC 直接插值进 find -name 的 glob（resolve_checkpoint 各 case）。
+# TOPIC 来自 agent/用户输入；含 glob 元字符 * ? [ ] 时会拓宽匹配（strict 模式下
+# ${TOPIC}_*.md 变 *_*.md 全匹配），导致跨 topic 误判/checkpoint 串读。
+# 空 TOPIC 是合法值（status/loose 模式），仅在非空时校验为 slug 字符集。
+if [ -n "$TOPIC" ] && [[ "$TOPIC" =~ [^a-zA-Z0-9_-] ]]; then
+    echo "❌ GATE-10: 非法 TOPIC 字符（仅允许 [a-zA-Z0-9_-]）：拒绝 glob 注入到 find -name" >&2
+    exit 1
+fi
+
 # 确保输出目录存在
 mkdir -p "$WECHAT_ROOT/$RESEARCH_DIR" "$WECHAT_ROOT/$ARTICLE_DIR/hot" "$WECHAT_ROOT/$ARTICLE_DIR/evergreen"
 
@@ -221,7 +230,11 @@ gate_verify() {
             [ "$title_len" -gt 35 ] && echo "⚠️  标题过长(>35字, 公众号推送中被截断)"
             grep -qE "你只需要|只要我们还" "$f" && echo "⚠️  检测到可能反模式结尾"
             # W-02/W-06/QAH-03：确定性风格/结尾/逻辑一致性 advisory 检查（只告警不阻断）
-            local full="$WECHAT_ROOT/$f"
+            # WM-GATE-01 (audit-2026-07-05-001)：f 来自 resolve_checkpoint 的 find，
+            # find 根是绝对路径 "$WECHAT_ROOT/$ARTICLE_DIR" → 输出已是绝对路径，
+            # 旧 `"$WECHAT_ROOT/$f"` 双前缀得到不存在的路径，python FileNotFoundError，
+            # 三个 checker 静默不告警即放行。改用 $f 本身（已绝对）。
+            local full="$f"
             for checker in style_fingerprint ending_detector structural_consistency_checker; do
                 local script="$WECHAT_ROOT/scripts/$checker.py"
                 if [ -f "$script" ]; then
@@ -234,6 +247,9 @@ gate_verify() {
                         echo "⚠️  $checker: BLOCK（详见 --tool $checker）"
                     elif [ $rc -eq 2 ]; then
                         echo "⚠️  $checker: WARN"
+                    elif [ $rc -ne 0 ]; then
+                        # 兜底：rc 不在 {0,1,2}（如路径不存在/异常退出）必须告警，禁止静默放行
+                        echo "⚠️  $checker: 异常退出(rc=$rc)，请人工复核：${out:+${out:0:120}}"
                     fi
                 fi
             done

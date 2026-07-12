@@ -24,7 +24,7 @@ import hashlib
 import subprocess
 import sys
 import re
-import tempfile
+import shlex
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -62,63 +62,31 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _validate_state(state: dict, source: str) -> None:
-    """Minimal schema check for pipeline state (M-010 audit finding).
-
-    Corrupt/tampered state files previously caused silent KeyError downstream
-    or wrong phase routing. Fail fast with a clear message so operators can
-    re-init rather than chase phantom bugs.
-    """
-    required_str = ("slug", "date", "mode")
-    for k in required_str:
-        if k not in state or not isinstance(state[k], str):
-            raise SystemExit(f"❌ state 校验失败 ({source}): 缺字段或类型错 '{k}'（期望 str）；请重新 init")
-    if "steps" not in state or not isinstance(state["steps"], list):
-        raise SystemExit(f"❌ state 校验失败 ({source}): 'steps' 缺失或非 list；请重新 init")
-    for i, s in enumerate(state["steps"]):
-        if not isinstance(s, dict):
-            raise SystemExit(f"❌ state 校验失败 ({source}): steps[{i}] 非 dict；请重新 init")
-        for sk in ("id", "status", "phase"):
-            if sk not in s or not isinstance(s[sk], str):
-                raise SystemExit(
-                    f"❌ state 校验失败 ({source}): steps[{i}].{sk} 缺失或非 str；请重新 init"
-                )
-
-
 def _load(slug: str, date: str | None = None) -> dict:
     if date:
         p = _state_path(slug, date)
         if not p.exists():
             raise SystemExit(f"❌ 找不到 state: {p}（先 init）")
-        state = json.loads(p.read_text(encoding="utf-8"))
-        _validate_state(state, str(p))
-        return state
+        return json.loads(p.read_text(encoding="utf-8"))
     # 未指定 date：取该 slug 最新 state
     matches = sorted(_STATE_DIR.glob(f"{slug}_*.json"), reverse=True)
     if not matches:
         raise SystemExit(f"❌ 找不到 {slug} 的 state（先 init）")
-    state = json.loads(matches[0].read_text(encoding="utf-8"))
-    _validate_state(state, str(matches[0]))
-    return state
+    return json.loads(matches[0].read_text(encoding="utf-8"))
 
 
 def _save(state: dict) -> None:
-    """Atomic write via tempfile + os.replace (M-010 companion; mirrors M-009 fix pattern)."""
     state["updated_at"] = _now()
     p = _state_path(state["slug"], state["date"])
-    payload = json.dumps(state, ensure_ascii=False, indent=2)
-    fd, tmp = tempfile.mkstemp(prefix=".pipeline-state-", suffix=".tmp", dir=str(p.parent))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(payload)
-        os.replace(tmp, str(p))
-    except BaseException:
-        # Cleanup on any failure (including KeyboardInterrupt) to avoid stale tmp files
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        raise
+    data = json.dumps(state, ensure_ascii=False, indent=2)
+    # 原子写：tmp + fsync + os.replace，防崩溃半写致 state JSON 残缺、next/status
+    # json.loads 抛错、管线恢复断链（audit-2026-07-05-001 WM-PIP-02）。init 有 .bak 但
+    # _save 每 step 都调，半写窗口远大于 init；tmp 与 p 同目录保证 os.replace 原子。
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    tmp.write_text(data, encoding="utf-8")
+    with open(tmp, "rb") as _fh:
+        os.fsync(_fh.fileno())
+    os.replace(tmp, p)
 
 
 def _phase_idx(phase: str) -> int:
@@ -163,7 +131,14 @@ def _resolve_article(slug: str, date: str) -> str:
 
 def cmd_init(args) -> None:
     topic = args.topic
-    slug = args.slug or _slugify(topic)
+    # WC-EXT-M-001 + WC-EXT-M-002 (audit-2026-07-08-041): --slug CLI override 必须过 _slugify
+    # 再入 steps.build_steps，否则原始用户输入含 ;/$()/空格等元字符时，被 f-string 拼进
+    # bash STEP.cmd（steps.py:250/256/263 等）触发命令注入或路径遍历。_slugify 已保证
+    # 输出仅 [a-z0-9\-]，是单一可信 sink；此处强制重跑而非信任调用方传入。
+    raw_slug = args.slug
+    slug = _slugify(raw_slug) if raw_slug else _slugify(topic)
+    if raw_slug and slug != raw_slug:
+        print(f"[init] ⚠ --slug '{raw_slug}' sanitized → '{slug}' (only [a-z0-9-] allowed)")
     date = args.date or datetime.now().strftime("%Y-%m-%d")
     min_bytes = 12000 if args.draft else int(os.environ.get("WECHAT_MIN_BYTES", "45000"))
 
@@ -258,10 +233,22 @@ def cmd_next(args) -> None:
         cmd = step["cmd"]
         if "__ARTICLE__" in cmd:
             art = _resolve_article(state["slug"], state["date"])
-            cmd = cmd.replace("__ARTICLE__", art) if art else cmd + "  # ⚠ 文章未找到"
-        # PIPE-02：把 state.min_bytes 注入 gate 子进程 env（draft 档对 phase 2/3 生效）
-        cmd = f"WECHAT_MIN_BYTES={state['min_bytes']} {cmd}"
+            if not art:
+                # WM-PIP-01：文章未解析到时阻断，不让 __ARTICLE__ 裸字面进 bash
+                #（否则 argparse 读不到文件 / 残留占位符被 shell 当普通 token 执行）。
+                raise SystemExit(f"❌ Phase 3 文章未找到，无法解析 __ARTICLE__：slug={state['slug']} date={state['date']}")
+            # WM-PIP-01：art 来自 LLM 命名的文件名（含中文标题），可能含空格/;/$() 等元字符。
+            # 裸 replace 进 bash STEP.cmd 会导致参数断裂或命令注入，必须 shell-quote。
+            cmd = cmd.replace("__ARTICLE__", shlex.quote(art))
         out["cmd"] = cmd
+        # PIPE-02 / H-002 fix：WECHAT_MIN_BYTES 通过 env dict 传递，不再 f-string 拼到
+        # shell cmd 前缀（避免 state JSON 被污染时触发命令替换注入）。调用方（agent-loop）
+        # 需用 STEP.env 设置子进程环境变量；pipeline-gate.sh 仍读 ${WECHAT_MIN_BYTES:-45000}。
+        try:
+            mb = int(state.get("min_bytes", 45000))
+        except (TypeError, ValueError):
+            mb = 45000
+        out["env"] = {"WECHAT_MIN_BYTES": str(mb)}
     elif step["kind"] == "subagent":
         out["task_file"] = step["task_file"]
     print(json.dumps(out, ensure_ascii=False))
@@ -374,7 +361,10 @@ _ALLOWED_TOOLS = frozenset({
 def cmd_tool(args) -> None:
     """运行 scripts/ 下的独立工具（metrics_panel/feedback_collector/style_evolution/...）。
     用法: python scripts/pipeline.py tool <name> [args...]，等价于 python scripts/<name>.py [args...]
-    安全：name 走白名单校验（拒 .. / 路径分隔符），rest 过滤 shell 元字符参数。
+    安全：name 走白名单校验（拒 .. / 路径分隔符），rest 原样透传——subprocess.run 用
+    list 形式（无 shell=True），参数中即使含 `;` `|` `&` 等也只作为字面量传给子进程，
+    不被任何 shell 解释，故无需（也不应）过滤 shell 元字符（旧版 dangerous-token 过滤
+    属冗余 defense-in-depth，且会误伤合法参数，已移除）。
     """
     name = args.name
     if ".." in name or "/" in name or "\\" in name:
@@ -385,15 +375,7 @@ def cmd_tool(args) -> None:
     script = _ROOT / "scripts" / f"{name}.py"
     if not script.exists():
         raise SystemExit(f"❌ 工具脚本缺失: {script}")
-    # 过滤 rest 中可能的 shell 注入片段（`;` `|` `&` `$()` `` ` ``）
-    dangerous = {";", "|", "&", "$(", "`", "&&", "||"}
-    safe_rest = []
-    for tok in args.rest:
-        if any(d in tok for d in dangerous):
-            print(f"⚠️  已过滤可疑参数: {tok!r}", file=sys.stderr)
-            continue
-        safe_rest.append(tok)
-    cmd = ["python3", str(script)] + safe_rest
+    cmd = ["python3", str(script)] + args.rest
     r = subprocess.run(cmd, cwd=str(_ROOT))
     sys.exit(r.returncode)
 

@@ -21,7 +21,9 @@ from __future__ import annotations
 import argparse
 import html as _html
 import json
+import os
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -283,6 +285,17 @@ def main() -> int:
 
     topics = _load_scan(Path(args.scan))
     topics.sort(key=lambda t: _num(t.get("total")), reverse=True)
+
+    # 过滤无 digest 的卡：DeepSeek 精炼失败（瞬时错误）或主动判定『(无明确热点)』
+    # 的条目都没有 digest —— 这些卡只有查询词当标题、没有真实内容，渲染出来就是
+    # "只有关键词没有内容"。默认丢弃，--keep-no-digest 可关掉过滤用于排查。
+    before = len(topics)
+    topics = [t for t in topics if (t.get("digest") or "").strip()]
+    dropped = before - len(topics)
+    if dropped:
+        print(f"  🗑️ 过滤 {dropped} 条无 digest 条目（DeepSeek 精炼失败/无热点）",
+              file=sys.stderr)
+
     if args.top and args.top > 0:
         topics = topics[:args.top]
 
@@ -294,11 +307,31 @@ def main() -> int:
         html = build_html(date_str, topics)
 
     if args.output:
-        out_path = Path(args.output)
+        out_path = Path(args.output).resolve()
+        # M-016 (audit-2026-07-06-022): --output 必须落在项目根内，防路径遍历写任意文件
+        try:
+            out_path.relative_to(_ROOT)
+        except ValueError:
+            print(f"❌ --output 路径必须在项目根 {_ROOT} 内: {out_path}", file=sys.stderr)
+            return 2
     else:
         out_path = _DEFAULT_OUT_DIR / f"hotspot-report-{date_str}.html"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(html, encoding="utf-8")
+    # M-016: atomic write — tempfile + os.replace 防中途崩溃留半截 HTML
+    fd, tmp_path = tempfile.mkstemp(
+        prefix=".hotspot-report-", suffix=".tmp",
+        dir=str(out_path.parent), text=True,
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(html)
+        os.replace(tmp_path, str(out_path))
+    except BaseException:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
 
     print(f"✅ 报告已生成: {out_path} "
           f"({len(topics)} 选题, {len(html):,} 字节)")

@@ -326,11 +326,16 @@ def _judge_claim(claim: dict, search_result: str, strictness: str) -> dict:
                 "verdict": "UNVERIFIABLE",
                 "reason": "化名人物，无法直接验证。身份背景需交叉验证行业常态数据。"
             }
-        # 精确数字无来源 → FALSIFIED 风险
+        # 精确数字无来源 → UNVERIFIABLE + 人工复核（H-004, audit-2026-07-06-022）。
+        # 旧实现直接判 FALSIFIED，攻击者可构造"搜索必空"的声明触发自动虚假标记，
+        # 形成 search-poisoning DoS：批量注入高风险 claim → 全部 auto-FALSIFIED →
+        # 报告可信度被人为拉低。改为 UNVERIFIABLE + needs_claude_review，与 ERROR: 分支对齐。
         if claim.get("risk") == "high":
             return {
-                "verdict": "FALSIFIED",
-                "reason": f"精确数据「{text}」无搜索结果支持，标记为虚假。"
+                "verdict": "UNVERIFIABLE",
+                "reason": f"精确数据「{text}」无搜索结果支持，需人工交叉验证。",
+                "confidence": 0.0,
+                "needs_claude_review": True,
             }
         return {
             "verdict": "UNVERIFIABLE",
@@ -502,9 +507,9 @@ def _check_corroboration(claim_text: str, search_result: str) -> bool:
     ]
 
     if not key_entities:
-        # 没提取到关键实体，检查语义重叠
-        words = claim_text[:30]
-        return words.lower() in search_result.lower()
+        # 无关键实体可匹配——前 30 字纯子串匹配易因通用开头命中而假 VERIFIED（WM-FC-03）。
+        # 交 needs_claude_review，不再兜圈子串。
+        return False
 
     # 至少半数关键实体在结果中出现
     matches = sum(1 for e in key_entities if e in search_result)
@@ -559,8 +564,9 @@ def _estimate_source_count(search_result: str) -> int:
         if match:
             domains.add(match.group(1))
 
-    # 至少 1 个（有搜索结果）
-    return max(1, len(domains))
+    # 自然数：0 个 URL 返回 0，让上游按"信源不足"处理
+    # （WM-FC-02：原 max(1,...) 把空结果当单信源，_compute_confidence 误加 +0.2 置信度虚高）
+    return len(domains)
 
 
 def _extract_numeric_values(text: str) -> list[float]:
@@ -617,7 +623,11 @@ def _check_value_range(claim_text: str, search_result: str) -> bool:
             if 0.5 <= ratio <= 2.0:
                 return True
 
-    return len(result_nums) == 0  # 搜索结果无数值 → 无法比较 → 默认通过
+    # 声明含数值、搜索结果无数值 → 默认存疑（WM-FC-01, audit-2026-07-05-001）。
+    # 旧实现 `return len(result_nums) == 0` 让 DATA 声明在结果纯散文时默认通过，
+    # 数值层校验形同虚设，叠加 _check_corroboration 文本命中即 VERIFIED。
+    # 改为返回 False → 交由上游判 FALSIFIED 或 needs_claude_review，避免无数值佐证的数据声明误过门禁。
+    return False
 
 
 # =========================================================================

@@ -18,6 +18,7 @@ post-publish 数据回传管线入口。CLI 子命令：
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import sys
 from datetime import datetime, timezone
@@ -83,8 +84,16 @@ def _append_reward(slug: str, reward: float, detail: dict) -> None:
         "detail": detail,
         "recorded_at": datetime.now(timezone.utc).isoformat(),
     }
+    # M-013 (audit-2026-07-06-022): LOCK_EX 防多进程并发 ingest 交叠写入致 JSONL 行损坏。
+    # open(..., "a") 在 POSIX 上单次 write < PIPE_BUF 原子，但 json.dumps + "\n" 可能超阈值，
+    # 且 Python 层 buffered writer 不保证跨进程原子；flock 是最小代价的串行化手段。
     with open(_REWARD_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+        try:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            f.flush()
+        finally:
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 
 def _load_rewards() -> list[dict]:

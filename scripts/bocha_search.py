@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures as cf
+import datetime
 import json
 import os
 import re
@@ -42,6 +43,11 @@ _DEFAULT_BASE = "https://api.bocha.cn/v1/ai-search"
 _DEFAULT_MODEL = "gpt-4o-mini"
 _MAX_TOKENS = 1500
 _TIMEOUT = 30
+# WM-BOCHA-02 (audit-2026-07-05-001)：响应体硬上限，防 Content-Length 无值/虚报时
+# resp.read() 全量读导致 OOM 或慢速耗尽。5MB 远超博查单 query summary 体积。
+_MAX_RESPONSE_BYTES = 5 * 1024 * 1024
+_AUDIT_DIR = _ROOT / ".audit"
+_AUDIT_SEQ = 0  # 进程内单调递增，配 pid 构成 id 后缀，避免同秒多写撞 id
 
 # 重试策略：仅重试瞬时错误（429 限流 / 5xx 服务端 / 网络抖动）。
 # 401/403 等客户端错误不重试（敏感词被拦 / 鉴权失败，重试也不会变）。
@@ -73,6 +79,79 @@ def _parse_content(content) -> dict | list | None:
     return content
 
 
+def _read_capped(resp) -> tuple[dict | list | None, str]:
+    """WM-BOCHA-02：从 resp 流式读取，硬上限 _MAX_RESPONSE_BYTES 防 OOM/慢速耗尽。
+    返回 (解析后 data, 错误信息)；出错时 data=None 且 err 非空（调用方据此不重试，
+    因响应体形状/大小不会因重试改变）。"""
+    cl = resp.headers.get("Content-Length")
+    if cl is not None:
+        try:
+            if int(cl) > _MAX_RESPONSE_BYTES:
+                return None, f"响应过大 Content-Length={cl} > {_MAX_RESPONSE_BYTES}"
+        except (TypeError, ValueError):
+            pass  # Content-Length 非整数，走流式兜底
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = resp.read(65536)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > _MAX_RESPONSE_BYTES:
+            return None, f"响应流超过 {_MAX_RESPONSE_BYTES} 字节上限，已截断"
+        chunks.append(chunk)
+    try:
+        return json.loads(b"".join(chunks).decode("utf-8", "replace")), ""
+    except json.JSONDecodeError as e:
+        return None, f"JSON 解析失败 {e}"
+
+
+def _audit_log(action: str, resource: dict, result: str,
+               details: dict | None = None) -> None:
+    """B 节 audit-log 埋点（audit-2026-07-05-001 WM-BOCHA-02）：博查 API 为外部 HTTP
+    出站敏感路径。append-only 写 JSONL，对齐 .claude/decisions/audit-log.schema.json。
+    任何自身异常吞掉——审计日志失败不得影响取数主流程。"""
+    try:
+        global _AUDIT_SEQ
+        _AUDIT_SEQ += 1
+        _AUDIT_DIR.mkdir(parents=True, exist_ok=True)
+        now = datetime.datetime.now(datetime.timezone.utc)
+        today = now.strftime("%Y-%m-%d")
+        ts = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        seq = f"{os.getpid() % 1000000:06d}{_AUDIT_SEQ:03d}"
+        rec = {
+            "id": f"audit-{now.strftime('%Y%m%d-%H%M%S')}-{seq}",
+            "timestamp": ts,
+            "userId": "autonomous-engine",
+            "userRole": "engine",
+            "action": action,
+            "resource": resource,
+            "result": result,
+            "ip": "local",
+            "sensitive": True,
+            "sensitiveLevel": "medium",
+            "details": details or {},
+        }
+        path = _AUDIT_DIR / f"audit-{today}.jsonl"
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except Exception:  # noqa: BLE001
+        pass
+
+
+def _atomic_write_text(path: Path, text: str) -> None:
+    """WM-BOCHA-01 (audit-2026-07-05-001)：原子写。tmp+os.replace+fsync，
+    崩溃半写不致留下残缺 JSON 让 hot-scanner consume 读到空/残 dict。
+    与 pipeline._save / verifier 报告写同模式（autonomous-studio audit-2026-07-03-017）。"""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        f.write(text)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp, path)
+
+
 def _bocha_fetch(api_key: str, base_url: str, query: str, top: int) -> str:
     """调博查 API，返回拼好的 summary 字符串。失败返回空串。
     瞬时错误（429/5xx/网络/超时）按指数退避重试 _MAX_RETRIES 次。"""
@@ -90,7 +169,12 @@ def _bocha_fetch(api_key: str, base_url: str, query: str, top: int) -> str:
             method="POST")
         try:
             with urllib.request.urlopen(req, timeout=_TIMEOUT) as resp:  # noqa: S310
-                data = json.loads(resp.read().decode("utf-8", "replace"))
+                data, read_err = _read_capped(resp)
+            if read_err:
+                # 响应体超限/形状异常——重试也不会变，按非重试处理
+                last_err = read_err
+                data = None
+                break
             break  # 成功，跳出重试
         except urllib.error.HTTPError as e:
             last_err = f"HTTP {e.code}"
@@ -98,9 +182,6 @@ def _bocha_fetch(api_key: str, base_url: str, query: str, top: int) -> str:
                 break  # 客户端错误（401/403 等），不重试
         except (urllib.error.URLError, TimeoutError) as e:
             last_err = f"网络错误 {e}"
-        except json.JSONDecodeError as e:
-            last_err = f"JSON 解析失败 {e}"
-            break  # 响应体形状异常，重试也不会变
         except Exception as e:  # noqa: BLE001
             last_err = f"异常 {e}"
             break  # 未知异常不重试
@@ -170,18 +251,26 @@ def _fetch_one(api_key: str, base_url: str, query: str, top: int) -> str:
 
 
 def run(args) -> int:
+    # WM-BOCHA-02：强制 https。http:// 下 Bearer token 明文上链，拒绝。
+    if not args.base_url.startswith("https://"):
+        print(f"❌ --base-url 必须是 https://（当前 {args.base_url!r}），"
+              f"拒绝明文传 Bearer token", file=sys.stderr)
+        _audit_log("external_call",
+                   {"type": "api", "identifier": "bocha-ai-search",
+                    "baseUrl": args.base_url},
+                   "denied",
+                   {"reason": "http base_url rejected (bearer token would leak in clear)"})
+        return 2
     api_key = os.environ.get("BOCHA_API_KEY", "").strip()
     if not api_key:
         print("❌ BOCHA_API_KEY 未设置", file=sys.stderr)
-        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        Path(args.output).write_text("{}", encoding="utf-8")
+        _atomic_write_text(Path(args.output), "{}")
         return 0
 
     queries = _load_queries(args.pillar, args.mode)
     if not queries:
         print("❌ 未能加载查询列表", file=sys.stderr)
-        Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        Path(args.output).write_text("{}", encoding="utf-8")
+        _atomic_write_text(Path(args.output), "{}")
         return 0
 
     if args.max_queries and args.max_queries > 0:
@@ -215,11 +304,17 @@ def run(args) -> int:
                 time.sleep(args.sleep)
 
     out = Path(args.output)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(results, ensure_ascii=False, indent=2),
-                   encoding="utf-8")
+    _atomic_write_text(out, json.dumps(results, ensure_ascii=False, indent=2))
     print(f"✅ 博查取数完成: {ok}/{len(work)} 条有效 → {out} "
           f"({len(results)} 条 summary)", file=sys.stderr)
+    # B 节：外部 HTTP 出站敏感路径——记录本轮 batch 结果（success 若有任一有效，
+    # failure 若全失败），便于审计追溯。baseUrl 含 host 仅作流向追溯，不含凭证。
+    _audit_log("external_call",
+               {"type": "api", "identifier": "bocha-ai-search",
+                "baseUrl": args.base_url},
+               "success" if ok > 0 else "failure",
+               {"queries": len(work), "ok": ok,
+                "failures": len(work) - ok})
     return 0
 
 
