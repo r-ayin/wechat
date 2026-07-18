@@ -567,6 +567,15 @@ def main():
                 finally:
                     os.close(tmp_fd)
                 try:
+                    if sys.platform == "win32":
+                        # Windows 不允许替换仍被打开（持锁 fd）的目标文件：
+                        # 先解锁关闭再 replace（finally 里 fd=None 不会重复关）
+                        try:
+                            fcntl.flock(fd, fcntl.LOCK_UN)
+                        except Exception:
+                            pass
+                        os.close(fd)
+                        fd = None
                     os.replace(tmp_path, str(output_path))
                 except BaseException:
                     if os.path.exists(tmp_path):
